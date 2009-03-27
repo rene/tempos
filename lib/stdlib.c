@@ -1,8 +1,9 @@
-/*
+/**
  * Copyright (C) 2009 Rene de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: stdlib.h
+ * File: stdlib.c
+ * Desc: Implement C functions from stdlib.h
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,16 +21,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef STDLIB_H
+#include <stdlib.h>
+#include <ctype.h>
 
-	#define STDLIB_H
+int atoi(const char *nptr)
+{
+	char *nstr = (char *)nptr;
+	char isneg = 0;
+	int sum    = 0;
+	int mult   = 1;
 
-	#include <unistd.h>
+	if(*nstr == '-') {
+		isneg = 1;
+		nstr++;
+	}
 
-	#define NULL 0
+	while(*nstr++) {
+		if(*nstr && !isdigit(*nstr))
+			return(0);
+	}
 
+	nstr--;
+	while(nstr-- != (nptr + isneg)) {
+		sum  += (*nstr - '0') * mult;
+		mult *= 10;
+	}
 
-	int atoi(const char *nptr);
-
-#endif /* STDLIB_H */
+	if(isneg)
+		return(sum * -1);
+	else
+		return(sum);
+}
 

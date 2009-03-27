@@ -1,8 +1,8 @@
-/*
+/**
  * Copyright (C) 2009 Rene de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: stdlib.h
+ * File: ctype.h
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,16 +20,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef STDLIB_H
+#ifndef CTYPE_H
 
-	#define STDLIB_H
+	#define CTYPE_H
 
-	#include <unistd.h>
+	int isalnum(int c);
+	int isalpha(int c);
+	int isascii(int c);
+	int isblank(int c);
+	int iscntrl(int c);
+	int isdigit(int c);
+	int isgraph(int c);
+	int islower(int c);
+	int isprint(int c);
+	int ispunct(int c);
+	int isspace(int c);
+	int isupper(int c);
+	int isxdigit(int c);
 
-	#define NULL 0
-
-
-	int atoi(const char *nptr);
-
-#endif /* STDLIB_H */
+#endif /* CTYPE_H */
 

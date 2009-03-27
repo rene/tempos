@@ -1,8 +1,9 @@
-/*
+/**
  * Copyright (C) 2009 Rene de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: stdlib.h
+ * File: kernel.c
+ * Desc: The TempOS kernel
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,16 +21,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef STDLIB_H
-
-	#define STDLIB_H
-
-	#include <unistd.h>
-
-	#define NULL 0
+#include <tempos/kernel.h>
 
 
-	int atoi(const char *nptr);
+/**
+ * tempos_main
+ *
+ * This is the function called when all dependent machine boot code was
+ * executed. See arch/$ARCH/boot/karch.c
+ */
+void tempos_main(void) {
 
-#endif /* STDLIB_H */
+	kprintf("We are in TempOS kernel!\n");
+
+	for(;;);
+}
+
 
