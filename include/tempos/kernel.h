@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 Rene de Souza Pinto
+ * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
  * File: kernel.h
@@ -25,19 +25,47 @@
 	#define KERNEL_H
 
 	#include <stdarg.h>
-	#include <stdlib.h>
 	#include <ctype.h>
+	#include <unistd.h>
+	#include <stdlib.h>
 
 	#include "../arch/x86/boot/video.h" /* temporary */
 
 	#define CHECK_BIT(a, b)		((a >> b) & 0x01)
 	#define SET_BIT(a, b)		a |= (0x01 << b)
 
+
+	/* kprintf messages */
+	#define KERN_CRIT			"!0!"
+	#define KERN_ERROR			"!1!"
+	#define KERN_WARNING		"!2!"
+	#define KERN_INFO			"!3!"
+	#define KERN_DEBUG			"!4!"
+
+
+	struct _mmap_tentry {
+  		u32 base_addr_low;
+  		u32 base_addr_high;
+  		u32 length_low;
+  		u32 length_high;
+  		u32 type;
+	};
+
+	struct _karch_t {
+		u8                  *cmdline;
+		u32                 mmap_size;
+		struct _mmap_tentry *mmap_table;
+	};
+
+	typedef struct _karch_t karch_t;
+	typedef struct _mmap_tentry mmap_tentry;
+
+
 	int vsprintf(char *str, const char *format, va_list ap);
 	int sprintf(char *str, const char *format, ...);
 	int kprintf(const char *format, ...);
 
-	void tempos_main(void);
+	void tempos_main(karch_t kinf);
 
 #endif /* KERNEL_H */
 

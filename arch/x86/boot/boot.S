@@ -1,9 +1,10 @@
 /**
- * Copyright (C) 2009 Rene de Souza Pinto
+ * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
  * File: boot.S
- * Desc: Boot code for multiboot specification
+ * Desc: Boot Stage: Follow multiboot specification. Call karch to start
+         the TempOS kernel.
  *
  *
  * This program is free software; you can redistribute it and/or modify

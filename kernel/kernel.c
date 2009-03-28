@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 Rene de Souza Pinto
+ * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
  * File: kernel.c
@@ -22,17 +22,25 @@
  */
 
 #include <tempos/kernel.h>
+#include <string.h>
+
+
+/* information passed from first stage */
+karch_t kinfo;
 
 
 /**
  * tempos_main
  *
- * This is the function called when all dependent machine boot code was
- * executed. See arch/$ARCH/boot/karch.c
+ * This is the function called when first stage is done, which means that
+ * all dependent machine boot code was executed. See arch/$ARCH/boot/karch.c
  */
-void tempos_main(void) {
+void tempos_main(karch_t kinf) {
+
+	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
 	kprintf("We are in TempOS kernel!\n");
+	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
 	for(;;);
 }

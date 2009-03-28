@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 Rene de Souza Pinto
+ * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
  * File: printf.c
@@ -22,6 +22,7 @@
  */
 
 #include <tempos/kernel.h>
+#include <stdlib.h>
 
 #define MAXDIG 20
 
@@ -31,41 +32,74 @@
 #define FLAG_SPACE	0x03
 #define FLAG_PLUS	0x04
 
+#define SIGNED         1
+#define UNSIGNED       0
 
-static void numtostr(char **dest, char flags, long int value, int base, int prec);
+
+static void numtostr(char **dest, char flags, long int value, int base, int prec, char sig);
 
 
-static void numtostr(char **dest, char flags, long int value, int base, int prec)
+static void numtostr(char **dest, char flags, long int value, int base, int prec, char sig)
 {
 	char *ndest = *dest;
-	long int pos, div, quo, rem;
+	long int pos, div, quo;
+	unsigned long int udiv, uquo, rem;
 	char temp, sch, fch;
 	int i, sh, len;
 
 	/* This is painful, there is a better way? */
 	pos = 0;
-	div = value < 0 ? (value * -1) : value;  /* Dividend  (absolute) */
-	quo = 1;	  /* Quotient  */
-	rem = 0;	  /* Remainder */
-	if(base != 16) {
-		while(quo != 0) {
-			quo        = (div / base);
-			rem        = (div % base);
-			div        = quo;
-			ndest[pos] = (rem + '0');
-			pos++;
+	if(sig) {
+		/* Signed conversion */
+		div = value < 0 ? (value * -1) : value;  /* Dividend  (absolute) */
+		quo = 1;	  /* Quotient  */
+		rem = 0;	  /* Remainder */
+		if(base != 16) {
+			while(quo != 0) {
+				quo        = (div / base);
+				rem        = (div % base);
+				div        = quo;
+				ndest[pos] = (rem + '0');
+				pos++;
+			}
+		} else {
+			while(quo != 0) {
+				quo       = (div / base);
+				rem       = (div % base);
+				div       = quo;
+				if(rem >= 10) {
+					ndest[pos] = (rem - 10 + 'A');
+				} else {
+					ndest[pos] = (rem + '0');
+				}
+				pos++;
+			}
 		}
 	} else {
-		while(quo != 0) {
-			quo       = (div / base);
-			rem       = (div % base);
-			div       = quo;
-			if(rem >= 10) {
-				ndest[pos] = (rem - 10 + 'A');
-			} else {
+		/* Unsigned conversion */
+		udiv = (unsigned)value; /* Dividend  (absolute) */
+		uquo = 1;	  			/* Quotient  */
+		rem  = 0;	  			/* Remainder */
+		if(base != 16) {
+			while(uquo != 0) {
+				uquo        = (udiv / base);
+				rem         = (udiv % base);
+				udiv        = uquo;
 				ndest[pos] = (rem + '0');
+				pos++;
 			}
-			pos++;
+		} else {
+			while(uquo != 0) {
+				uquo       = (udiv / base);
+				rem        = (udiv % base);
+				udiv       = uquo;
+				if(rem >= 10) {
+					ndest[pos] = (rem - 10 + 'A');
+				} else {
+					ndest[pos] = (rem + '0');
+				}
+				pos++;
+			}
 		}
 	}
 	pos--;
@@ -87,7 +121,8 @@ static void numtostr(char **dest, char flags, long int value, int base, int prec
 				sch = ' ';
 			}
 		} else {
-			sch = '-';
+			if(sig)
+				sch = '-';
 		}
 	}
 
@@ -189,17 +224,22 @@ int vsprintf(char *str, const char *format, va_list ap)
 				switch(*fmt) {
 					case 'i':
 					case 'd':
-						numtostr(&nstr, flags, (int)(va_arg(ap, int)), 10, atoi(num));
+						numtostr(&nstr, flags, (int)(va_arg(ap, int)), 10, atoi(num), SIGNED);
+						fmt++;
+						break;
+
+					case 'u':
+						numtostr(&nstr, flags, (unsigned int)(va_arg(ap, unsigned int)), 10, atoi(num), UNSIGNED);
 						fmt++;
 						break;
 
 					case 'o':
-						numtostr(&nstr, flags, (int)(va_arg(ap, int)), 8, atoi(num));
+						numtostr(&nstr, flags, (int)(va_arg(ap, int)), 8, atoi(num), SIGNED);
 						fmt++;
 						break;
 
 					case 'x':
-						numtostr(&nstr, flags, (int)(va_arg(ap, int)), 16, atoi(num));
+						numtostr(&nstr, flags, (int)(va_arg(ap, int)), 16, atoi(num), SIGNED);
 						fmt++;
 						break;
 

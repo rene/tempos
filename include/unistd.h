@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Rene de Souza Pinto
+ * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
  * File: unistd.h
@@ -25,15 +25,15 @@
 	#define UNISTD_H
 
 	typedef char           char8;
-	typedef unsigned char  uchar8;
+	typedef unsigned char  u8;
 	typedef short          int16;
 	typedef unsigned short uint16;
 	typedef int            int32;
 	typedef unsigned int   uint32;
 	typedef long           long32;
-	typedef unsigned long  ulong32;
+	typedef unsigned long  u32;
 
-	typedef ulong32 size_t;
+	typedef u32 size_t;
 	typedef long32  ssize_t;
 
 #endif /* UNISTD_H */

@@ -1,6 +1,9 @@
 /* multiboot.h - the header for Multiboot */
 /* Copyright (C) 1999, 2001  Free Software Foundation, Inc.
 
+   March, 2009: Change to use in TempOS operating system
+	Renê de Souza Pinto < rene@renesp.com.br >
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
@@ -21,12 +24,28 @@
 #define MULTIBOOT_HEADER_MAGIC          0x1BADB002
 
 /* The flags for the Multiboot header.
-   PS: This flags is for TempOS */
+   bits:
+   1 - Provide memory map */
 #ifdef __ELF__
-# define MULTIBOOT_HEADER_FLAGS         0x00000003 //0x00000265
+# define MULTIBOOT_HEADER_FLAGS         0x00000002
 #else
-# define MULTIBOOT_HEADER_FLAGS         0x00000255
+# define MULTIBOOT_HEADER_FLAGS         0x00010002
 #endif
+
+/* Masks for flags returned by bootloader */
+#define FLAG_MEM						0x0000
+#define FLAG_BDEV						0x0002
+#define FLAG_CMDLINE					0x0004
+#define FLAG_MODS						0x0008
+#define FLAG_AOUT						0x00F0
+#define FLAG_ELF						0x0020
+#define FLAG_MMAP						0x0040
+#define FLAG_DRIVES						0x0080
+#define FLAG_GETCONF					0x0100
+#define FLAG_BLNAME						0x0200
+#define FLAG_APM						0x0400
+#define FLAG_VIDEO						0x0800
+
 
 /* The magic number passed by a Multiboot-compliant boot loader. */
 #define MULTIBOOT_BOOTLOADER_MAGIC      0x2BADB002
