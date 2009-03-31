@@ -23,8 +23,9 @@
  */
 
 #include <tempos/kernel.h>
-#include "multiboot.h"
-#include "video.h"
+#include <x86/multiboot.h>
+#include <x86/gdt.h>
+#include "video.h" /* TODO: console */
 
 
 /**
@@ -36,6 +37,8 @@ void karch(unsigned long magic, unsigned long addr)
 {
 	karch_t kinf;
 	multiboot_info_t *mboot_info;
+	elf_section_header_table_t *elf_sec;
+
 
 	/* TODO: start console */
     clrscr();
@@ -49,22 +52,48 @@ void karch(unsigned long magic, unsigned long addr)
 	mboot_info = (multiboot_info_t *)addr;
 
 	if( !(mboot_info->flags & FLAG_ELF) ) {
-		kprintf(KERN_CRIT "TempOS does not support other binary formats than ELF.\n");
+		kprintf(KERN_CRIT "TempOS does not support other binary format to kernel than ELF.\n");
 		return;
+	} else {
+		elf_sec = &(mboot_info->u.elf_sec);
+		kprintf ("elf_sec: num = %u, size = 0x%x,"
+		         " addr = 0x%x, shndx = 0x%x\n",
+		        (unsigned) elf_sec->num, (unsigned) elf_sec->size,
+				(unsigned) elf_sec->addr, (unsigned) elf_sec->shndx);
+
 	}
 
 	if( !(mboot_info->flags & FLAG_MMAP) ) {
 		kprintf(KERN_CRIT "Unable to get memory information. Abort.\n");
 		return;
+	} else {
+		char *mtype[] = { "Avaliable", "Reserved", "ACPI", "ACPI NVS" };
+		memory_map_t *mmap;
+
+		kprintf("\nmmap_addr = 0x%0.4x, mmap_length = 0x%0.4x\n",
+                   (unsigned) mboot_info->mmap_addr, (unsigned) mboot_info->mmap_length);
+           for (mmap = (memory_map_t *) mboot_info->mmap_addr;
+                (unsigned long) mmap < mboot_info->mmap_addr + mboot_info->mmap_length;
+                mmap = (memory_map_t *) ((unsigned long) mmap
+                                         + mmap->size + sizeof (mmap->size)))
+             kprintf (" size = 0x%0.4x, base_addr = 0x%0.8x,"
+                     " length = 0x%.8x, type = %s\n",
+                     (unsigned) mmap->size,
+                     (unsigned) mmap->base_addr_low,
+                     (unsigned) mmap->length_low,
+                     mtype[mmap->type - 1] );
+
 	}
 
 	if( (mboot_info->flags & FLAG_CMDLINE) ) {
-		kinf.cmdline = (u8 *)mboot_info->cmdline;
+		kinf.cmdline = (uchar8_t *)mboot_info->cmdline;
 	} else {
 		kinf.cmdline = NULL;
 	}
 
 	/* TODO: Configure processor */
+	/*setup_IDT();*/
+	setup_GDT();
 
 	/* Call the TempOS kernel */
 	tempos_main(kinf);

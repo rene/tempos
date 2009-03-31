@@ -4,10 +4,18 @@
 #
 #
 
-SUBDIRS = boot mm
+objs-files := gdt.o
+
+SUBDIRS = boot
 
 .PHONY: subdirs $(SUBDIRS)
 
+all: $(objs-files) $(SUBDIRS)
+
 $(SUBDIRS):
 	$(MAKE) -C $@
+
+.o: .c
+	$(CC) $(CFLAGS) -c $<
+
 

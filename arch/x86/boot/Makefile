@@ -7,8 +7,8 @@ objs-files := karch.o video.o
 
 all: boot.o $(objs-files)
 
-boot.o: boot.S multiboot.h karch.h
-	$(CC) -c $<
+boot.o: boot.S
+	$(CC) $(CFLAGS) -c boot.S
 
 .o: .c
 	$(CC) $(CFLAGS) -c $<

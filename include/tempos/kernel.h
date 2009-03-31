@@ -44,16 +44,16 @@
 
 
 	struct _mmap_tentry {
-  		u32 base_addr_low;
-  		u32 base_addr_high;
-  		u32 length_low;
-  		u32 length_high;
-  		u32 type;
+  		ulong32_t base_addr_low;
+  		ulong32_t base_addr_high;
+  		ulong32_t length_low;
+  		ulong32_t length_high;
+  		ulong32_t type;
 	};
 
 	struct _karch_t {
-		u8                  *cmdline;
-		u32                 mmap_size;
+		uchar8_t            *cmdline;
+		ulong32_t           mmap_size;
 		struct _mmap_tentry *mmap_table;
 	};
 

@@ -24,8 +24,8 @@
 
 #define ASM 1
 
-#include "multiboot.h"
-#include "karch.h"
+#include <x86/multiboot.h>
+#include <x86/karch.h>
 
 	.text
 
