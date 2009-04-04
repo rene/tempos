@@ -5,6 +5,7 @@
 
 #ifndef VIDEO_H_
 
+
 	#define VIDEO_H_ 1
 
 	#define VIDEO_MEM_ADDR 0xB8000

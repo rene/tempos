@@ -5,6 +5,7 @@
 
 #include "video.h"
 
+
 static unsigned char *videomem = (unsigned char *)VIDEO_MEM_ADDR;
 static unsigned char px        = 0;
 static unsigned char py        = 0;
