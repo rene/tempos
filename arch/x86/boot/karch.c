@@ -95,6 +95,7 @@ void karch(unsigned long magic, unsigned long addr)
 
 	/* TODO: Configure processor */
 	setup_GDT();
+
 	/*setup_IDT();*/
 
 	/* Call the TempOS kernel */

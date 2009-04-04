@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_X86_GEN
+#ifndef ARCH_X86_H
 
-	#define ARCH_X86_GEN
+	#define ARCH_X86_H
 
 	#include <unistd.h>
 
@@ -32,11 +32,5 @@
 	#define KERNEL_CS	0x08	/* Position 1 on GDT */
 	#define KERNEL_DS	0x10	/* Position 2 on GDT */
 
-
-	#define cli() asm volatile("cli")
-	#define sti() asm volatile("sti")
-	//inline void cli();
-	//inline void sti();
-
-#endif /* ARCH_X86_GEN */
+#endif /* ARCH_X86_H */
 

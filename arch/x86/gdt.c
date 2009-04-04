@@ -142,6 +142,6 @@ inline void load_gdt(void)
 		/* Reload CODE segment */
 		"ljmp %2, $reloadCS \n"
 		"reloadCS:             \n"
-			: : "m" (GDTR), "rI" (KERNEL_DS), "rI" (KERNEL_CS) : "eax");
+			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS) : "eax");
 }
 

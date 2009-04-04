@@ -4,7 +4,7 @@
 #
 #
 
-objs-files := gdt.o idt.o
+objs-files := gdt.o idt.o io.o
 
 SUBDIRS = boot kernel
 

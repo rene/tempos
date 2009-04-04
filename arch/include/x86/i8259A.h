@@ -2,8 +2,7 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: i8259A.c
- * Desc: Driver for Programmable Interrupt Controller (PIC) 8259A compatile
+ * File: i8259A.h
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,10 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <x86/i8259A.h>
+#ifndef  ARCH_X86_PIC
 
-void init_PIC(void)
-{
+	#define ARCH_X86_PIC
 
-}
+	#define pic_iowait()	asm volatile("nop; nop; nop");
+
+
+#endif /* ARCH_X86_PIC */
 

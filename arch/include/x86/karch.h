@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef KARCH_X86_H
+#ifndef ARCH_X86_KARCH_H
 
-	#define KARCH_X86_H
+	#define ARCH_X86_KARCH_H
 
 	/* Stak size = 16Kb */
 	#define STACK_SIZE	0x4000
@@ -42,5 +42,5 @@
 
 #endif
 
-#endif /* KARCH_X86_H */
+#endif /* ARCH_X86_KARCH_H */
 

@@ -20,11 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_IDT_H
+#ifndef ARCH_X86_IDT_H
 
-	#define ARCH_IDT_H
+	#define ARCH_X86_IDT_H
 
 	#include <x86/x86.h>
+	#include <x86/io.h>
+
 
 	#define IDT_TABLE_SIZE		31
 	#define FIRST_NONUSED_INT	 0//32
@@ -100,7 +102,8 @@
 	typedef struct _idt_tpint_desc idt_tpintdesc_t;
 
 	void setup_IDT(void);
+
 	inline void load_idt(void);
 
-#endif /* ARCH_IDT_H */
+#endif /* ARCH_X86_IDT_H */
 

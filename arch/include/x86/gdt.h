@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_GDT_H
+#ifndef ARCH_X86_GDT_H
 
-	#define ARCH_GDT_H
+	#define ARCH_X86_GDT_H
 
 	#include <x86/x86.h>
 
@@ -111,5 +111,5 @@
 	void setup_GDT(void);
 	inline void load_gdt(void);
 
-#endif /* ARCH_GDT_H */
+#endif /* ARCH_X86_GDT_H */
 
