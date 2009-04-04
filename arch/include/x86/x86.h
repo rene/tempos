@@ -2,58 +2,41 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: setup.ld
- * Desc: Script to define the layout of executable file
+ * File: x86.h
  *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/* The first function of executable file
- * start - defined in boot.S */
-ENTRY(start)
+#ifndef ARCH_X86_GEN
 
-/**
- * Executable file sections
- */
-SECTIONS {
+	#define ARCH_X86_GEN
 
-	/**
-	 * Bootloader will load the kernel at 1MB of memory, so
-	 * text section need to start at 1MB
-	 */
-	_KERNEL_START = 0x00100000;
+	#include <unistd.h>
 
-	.text _KERNEL_START : {
-		*(.text)
-	}
+	#define KERNEL_DPL 0x00
+	#define USER_DPL   0x03
 
-	.rodata ALIGN(0x1000) : {
-		*(.rodata)
-	}
+	#define KERNEL_CS	0x08	/* Position 1 on GDT */
+	#define KERNEL_DS	0x10	/* Position 2 on GDT */
 
-	.data ALIGN(0x1000) : {
-		*(.data)
-	}
 
-	.bss : {
-		*(.bss)
-		*(COMMON) /* This puts all uninitialized data here */
-	}
+	#define cli() asm volatile("cli")
+	#define sti() asm volatile("sti")
+	//inline void cli();
+	//inline void sti();
 
-	/* End of the kernel */
-	_KERNEL_END = . ;
-}
+#endif /* ARCH_X86_GEN */
 

@@ -2,8 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: setup.ld
- * Desc: Script to define the layout of executable file
+ * File: karch.h
+ * Desc: Kernel definitions for x86 architecture
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,39 +21,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/* The first function of executable file
- * start - defined in boot.S */
-ENTRY(start)
+#ifndef KARCH_X86_H
 
-/**
- * Executable file sections
- */
-SECTIONS {
+	#define KARCH_X86_H
 
-	/**
-	 * Bootloader will load the kernel at 1MB of memory, so
-	 * text section need to start at 1MB
-	 */
-	_KERNEL_START = 0x00100000;
+	/* Stak size = 16Kb */
+	#define STACK_SIZE	0x4000
 
-	.text _KERNEL_START : {
-		*(.text)
-	}
+#ifndef ASM
 
-	.rodata ALIGN(0x1000) : {
-		*(.rodata)
-	}
+	#include <unistd.h>
 
-	.data ALIGN(0x1000) : {
-		*(.data)
-	}
+	/* Kernel memory address
+	   See arch/x86/boot/setup.ld */
+	#define KERNEL_START_ADDR	&_KERNEL_START
+	#define KERNEL_END_ADDR		&_KERNEL_END
 
-	.bss : {
-		*(.bss)
-		*(COMMON) /* This puts all uninitialized data here */
-	}
+	extern uint32_t _KERNEL_START;
+	extern uint32_t _KERNEL_END;
 
-	/* End of the kernel */
-	_KERNEL_END = . ;
-}
+#endif
+
+#endif /* KARCH_X86_H */
 

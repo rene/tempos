@@ -23,10 +23,11 @@
  */
 
 #include <tempos/kernel.h>
+#include <x86/karch.h>
 #include <x86/multiboot.h>
 #include <x86/gdt.h>
+#include <x86/idt.h>
 #include "video.h" /* TODO: console */
-
 
 /**
  * karch
@@ -38,7 +39,6 @@ void karch(unsigned long magic, unsigned long addr)
 	karch_t kinf;
 	multiboot_info_t *mboot_info;
 	elf_section_header_table_t *elf_sec;
-
 
 	/* TODO: start console */
     clrscr();
@@ -61,6 +61,8 @@ void karch(unsigned long magic, unsigned long addr)
 		        (unsigned) elf_sec->num, (unsigned) elf_sec->size,
 				(unsigned) elf_sec->addr, (unsigned) elf_sec->shndx);
 
+		kprintf("Kernel start at: 0x%x\n", KERNEL_START_ADDR);
+		kprintf("Kernel end at:   0x%x\n", KERNEL_END_ADDR);
 	}
 
 	if( !(mboot_info->flags & FLAG_MMAP) ) {
@@ -92,8 +94,8 @@ void karch(unsigned long magic, unsigned long addr)
 	}
 
 	/* TODO: Configure processor */
-	/*setup_IDT();*/
 	setup_GDT();
+	/*setup_IDT();*/
 
 	/* Call the TempOS kernel */
 	tempos_main(kinf);

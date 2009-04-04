@@ -8,7 +8,7 @@ PWD     := $(shell pwd)
 
 ARCH    := x86
 CC      := gcc
-INCDIRS := -I$(PWD)/include -I$(PWD)/arch/$(ARCH)/include
+INCDIRS := -I$(PWD)/include -I$(PWD)/arch/include
 CFLAGS  := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs
 
 OBJS_FILE := $(PWD)/objs.list

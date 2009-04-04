@@ -26,8 +26,8 @@
 /**
  * setup_GDT
  *
- * TempOS use a Protected Flat Model with paging for memory organization,
- * the GDT have four entries:
+ * TempOS use a Protected Flat Model with paging for memory organization
+ * and protection. The GDT have four entries:
  * 		
  * 		Kernel CS (Code Segment, Ring 0) <-- For kernel code
  * 		Kernel DS (Data Segment, Ring 0) <-- For kernel data and stack
@@ -46,8 +46,6 @@
  *          |       USER_CS       |
  *          |---------------------|
  *          |       USER_DS       |
- *          |---------------------|
- *          |                     |
  *           =====================
  *
  *
@@ -55,89 +53,95 @@
 void setup_GDT(void)
 {
 	gdt_t gdt_table[GDT_TABLE_SIZE];
+	gdt_cdseg_t *gdtentry;
 
 	/* NULL descriptor */
-	GDT_SET_BASE(gdt_table[0],  0x00000);
-	GDT_SET_LIMIT(gdt_table[0], 0x00000);
-	gdt_table[0].high.type        = 0;
-	gdt_table[0].high.desc_type   = 0;
-	gdt_table[0].high.DPL         = 0;
-	gdt_table[0].high.present     = 0;
-	gdt_table[0].high.avaliable   = 0;
-	gdt_table[0].high.reserved    = 0;
-	gdt_table[0].high.DB          = 0;
-	gdt_table[0].high.granularity = 0;
+	gdtentry = (gdt_cdseg_t *)&gdt_table[0];
+	GDT_SET_BASE(gdtentry,  0x00000);
+	GDT_SET_LIMIT(gdtentry, 0x00000);
+	gdtentry->high.type        = 0;
+	gdtentry->high.desc_type   = 0;
+	gdtentry->high.DPL         = 0;
+	gdtentry->high.present     = 0;
+	gdtentry->high.avaliable   = 0;
+	gdtentry->high.reserved    = 0;
+	gdtentry->high.DB          = 0;
+	gdtentry->high.granularity = 0;
 
 
 	/* Kernel CS */
-	GDT_SET_BASE(gdt_table[1],  0x00000);
-	GDT_SET_LIMIT(gdt_table[1], 0xFFFFF);
-	gdt_table[1].high.type        = CODE_SEG;
-	gdt_table[1].high.desc_type   = STYPE_DC;
-	gdt_table[1].high.DPL         = KERNEL_DPL;
-	gdt_table[1].high.present     = 1;
-	gdt_table[1].high.avaliable   = 0;
-	gdt_table[1].high.reserved    = 0;
-	gdt_table[1].high.DB          = 1; /* 32-bit segment */
-	gdt_table[1].high.granularity = GDT_GR_4KB;
+	gdtentry = (gdt_cdseg_t *)&gdt_table[1];
+	GDT_SET_BASE(gdtentry,  0x00000);
+	GDT_SET_LIMIT(gdtentry, 0xFFFFF);
+	gdtentry->high.type        = CODE_SEG;
+	gdtentry->high.desc_type   = STYPE_DC;
+	gdtentry->high.DPL         = KERNEL_DPL;
+	gdtentry->high.present     = 1;
+	gdtentry->high.avaliable   = 0;
+	gdtentry->high.reserved    = 0;
+	gdtentry->high.DB          = 1; /* 32-bit segment */
+	gdtentry->high.granularity = GDT_GR_4KB;
 
 	/* Kernel DS */
-	GDT_SET_BASE(gdt_table[2],  0x00000);
-	GDT_SET_LIMIT(gdt_table[2], 0xFFFFF);
-	gdt_table[2].high.type        = DATA_SEG;
-	gdt_table[2].high.desc_type   = STYPE_DC;
-	gdt_table[2].high.DPL         = KERNEL_DPL;
-	gdt_table[2].high.present     = 1;
-	gdt_table[2].high.avaliable   = 0;
-	gdt_table[2].high.reserved    = 0;
-	gdt_table[2].high.DB          = 1; /* 32-bit segment */
-	gdt_table[2].high.granularity = GDT_GR_4KB;
+	gdtentry = (gdt_cdseg_t *)&gdt_table[2];
+	GDT_SET_BASE(gdtentry,  0x00000);
+	GDT_SET_LIMIT(gdtentry, 0xFFFFF);
+	gdtentry->high.type        = DATA_SEG;
+	gdtentry->high.desc_type   = STYPE_DC;
+	gdtentry->high.DPL         = KERNEL_DPL;
+	gdtentry->high.present     = 1;
+	gdtentry->high.avaliable   = 0;
+	gdtentry->high.reserved    = 0;
+	gdtentry->high.DB          = 1; /* 32-bit segment */
+	gdtentry->high.granularity = GDT_GR_4KB;
 
 
 	/* User CS */
-	GDT_SET_BASE(gdt_table[1],  0x00000);
-	GDT_SET_LIMIT(gdt_table[1], 0xFFFFF);
-	gdt_table[3].high.type        = CODE_SEG;
-	gdt_table[3].high.desc_type   = STYPE_DC;
-	gdt_table[3].high.DPL         = USER_DPL;
-	gdt_table[3].high.present     = 1;
-	gdt_table[3].high.avaliable   = 0;
-	gdt_table[3].high.reserved    = 0;
-	gdt_table[3].high.DB          = 1; /* 32-bit segment */
-	gdt_table[3].high.granularity = GDT_GR_4KB;
+	gdtentry = (gdt_cdseg_t *)&gdt_table[3];
+	GDT_SET_BASE(gdtentry,  0x00000);
+	GDT_SET_LIMIT(gdtentry, 0xFFFFF);
+	gdtentry->high.type        = CODE_SEG;
+	gdtentry->high.desc_type   = STYPE_DC;
+	gdtentry->high.DPL         = USER_DPL;
+	gdtentry->high.present     = 1;
+	gdtentry->high.avaliable   = 0;
+	gdtentry->high.reserved    = 0;
+	gdtentry->high.DB          = 1; /* 32-bit segment */
+	gdtentry->high.granularity = GDT_GR_4KB;
 
 	/* User DS */
-	GDT_SET_BASE(gdt_table[2],  0x00000);
-	GDT_SET_LIMIT(gdt_table[2], 0xFFFFF);
-	gdt_table[4].high.type        = DATA_SEG;
-	gdt_table[4].high.desc_type   = STYPE_DC;
-	gdt_table[4].high.DPL         = USER_DPL;
-	gdt_table[4].high.present     = 1;
-	gdt_table[4].high.avaliable   = 0;
-	gdt_table[4].high.reserved    = 0;
-	gdt_table[4].high.DB          = 1; /* 32-bit segment */
-	gdt_table[4].high.granularity = GDT_GR_4KB;
+	gdtentry = (gdt_cdseg_t *)&gdt_table[4];
+	GDT_SET_BASE(gdtentry,  0x00000);
+	GDT_SET_LIMIT(gdtentry, 0xFFFFF);
+	gdtentry->high.type        = DATA_SEG;
+	gdtentry->high.desc_type   = STYPE_DC;
+	gdtentry->high.DPL         = USER_DPL;
+	gdtentry->high.present     = 1;
+	gdtentry->high.avaliable   = 0;
+	gdtentry->high.reserved    = 0;
+	gdtentry->high.DB          = 1; /* 32-bit segment */
+	gdtentry->high.granularity = GDT_GR_4KB;
 
 
-	GDTR.table_limit = (GDT_TABLE_SIZE * sizeof(gdt_t));
+	GDTR.table_limit = (GDT_TABLE_SIZE * sizeof(gdt_t)) - 1;
 	GDTR.gdt_ptr     = (uint32_t)&(gdt_table);
 	load_gdt();
 }
 
 
-inline void load_gdt()
+inline void load_gdt(void)
 {
-	asm("lgdtl (%0)        \n"
+	asm("lgdtl %0         \n"
 		/* Reload DATA segment */
-		"movw $0x10, %%ax      \n"
-		"movw %%ax, %%ds       \n"
-		"movw %%ax, %%es       \n"
-		"movw %%ax, %%fs       \n"
-		"movw %%ax, %%gs       \n"
-		"movw %%ax, %%ss       \n"
+		"movw %1,   %%ax    \n"
+		"movw %%ax, %%ds    \n"
+		"movw %%ax, %%fs    \n"
+		"movw %%ax, %%gs    \n"
+		"movw %%ax, %%ss    \n"
+		"movw %%ax, %%es    \n"
 		/* Reload CODE segment */
-		"ljmp $0x08, $reloadCS \n"
+		"ljmp %2, $reloadCS \n"
 		"reloadCS:             \n"
-			: : "r" (&GDTR) : "eax");
+			: : "m" (GDTR), "rI" (KERNEL_DS), "rI" (KERNEL_CS) : "eax");
 }
 

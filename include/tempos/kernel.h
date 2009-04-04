@@ -31,6 +31,7 @@
 
 	#include "../arch/x86/boot/video.h" /* temporary */
 
+
 	#define CHECK_BIT(a, b)		((a >> b) & 0x01)
 	#define SET_BIT(a, b)		a |= (0x01 << b)
 

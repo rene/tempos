@@ -4,16 +4,17 @@
 #
 #
 
-objs-files := gdt.o idt.o
+objs-files := i8259A.o
 
-SUBDIRS = boot kernel
+#SUBDIRS = boot kernel
 
-.PHONY: subdirs $(SUBDIRS)
+#.PHONY: subdirs $(SUBDIRS)
 
-all: $(objs-files) $(SUBDIRS)
+#all: $(objs-files) $(SUBDIRS)
+all: $(objs-files)
 
-$(SUBDIRS):
-	$(MAKE) -C $@
+#$(SUBDIRS):
+#	$(MAKE) -C $@
 
 .o: .c
 	$(CC) $(CFLAGS) -c $<
