@@ -28,6 +28,8 @@
 #include <x86/multiboot.h>
 #include <x86/gdt.h>
 #include <x86/idt.h>
+#include <x86/i8259A.h>
+#include <x86/io.h>
 #include "video.h" /* TODO: console */
 
 /**
@@ -96,8 +98,15 @@ void karch(unsigned long magic, unsigned long addr)
 
 	/* TODO: Configure processor */
 	setup_GDT();
-
-	/*setup_IDT();*/
+	setup_IDT();
+	init_PIC();
+	sti();
+	/*{
+		int i = 10;
+		int b = 0;
+		int c = i / b;
+	}*/
+	/*asm volatile("int $0x1F");*/
 
 	/* Call the TempOS kernel */
 	tempos_main(kinf);

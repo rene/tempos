@@ -25,8 +25,26 @@
 
 	#define ARCH_X86_PIC
 
+	#include <unistd.h>
+
+	#define PIC_MASTER_CMD		0x20
+	#define PIC_MASTER_DATA		0x21
+	#define PIC_SLAVE_CMD		0xA0
+	#define PIC_SLAVE_DATA		0xA1
+
+	/* Masks for PIC commands */
+	#define PIC_ICW1_IC4		0x01
+	#define PIC_ICW1_INIT		0x10
+
+	#define PIC_ICW4_8086		0x01
+	#define PIC_ICW4_AEOI		0x02
+
+
+	/* A simple wait for io operations */
 	#define pic_iowait()	asm volatile("nop; nop; nop");
 
+
+	void init_PIC(void);
 
 #endif /* ARCH_X86_PIC */
 

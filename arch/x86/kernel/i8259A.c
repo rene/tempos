@@ -23,9 +23,46 @@
  */
 
 #include <x86/i8259A.h>
+#include <x86/io.h>
 
+
+/**
+ * init_PIC
+ *
+ * Initialize the two PICs (Master and Slave):
+ */
 void init_PIC(void)
 {
+	/* ICW1 */
+	outb((PIC_ICW1_INIT | PIC_ICW1_IC4), PIC_MASTER_CMD);
+	pic_iowait();
 
+	outb((PIC_ICW1_INIT | PIC_ICW1_IC4), PIC_SLAVE_CMD);
+	pic_iowait();
+
+
+	/* ICW2
+	 * Remap interrupts TODO: comment */
+	outb(0x20, PIC_MASTER_DATA);
+	pic_iowait();
+
+	outb(0x28, PIC_SLAVE_DATA);
+	pic_iowait();
+
+
+	/* ICW3 */
+	outb(0x04, PIC_MASTER_DATA);
+	pic_iowait();
+
+	outb(0x02, PIC_SLAVE_DATA);
+	pic_iowait();
+
+
+	/* ICW4 */
+	outb((PIC_ICW4_8086 | PIC_ICW4_AEOI), PIC_MASTER_DATA);
+	pic_iowait();
+
+	outb((PIC_ICW4_8086 | PIC_ICW4_AEOI), PIC_MASTER_DATA);
+	pic_iowait();
 }
 

@@ -49,7 +49,7 @@ void setup_IDT(void)
 	cli();
 
 	/* Setup IDT with exceptions handlers */
-	for(pos=0; pos<=16; pos++) {
+	for(pos=0; pos<=14; pos++) {
 		idtentry = (idt_tpintdesc_t *)&idt_table[pos];
 		IDT_SET_OFFSET(idtentry, (uint32_t)&nullint);
 		idtentry->seg_selector   = KERNEL_CS;
@@ -59,13 +59,13 @@ void setup_IDT(void)
 		idtentry->high.gate_size = IDT_INTGATE_S32;
 		idtentry->high.reserved1 = 0;
 		idtentry->high.DPL       = KERNEL_DPL;
-		idtentry->high.present   = 1 & !(pos & 15); /* Int15 = Not present */
+		idtentry->high.present   = 1;
 	}
 
 	/* Unused - Reserved */
-	for(pos=17; pos<=31; pos++) {
+	for(pos=15; pos<=31; pos++) {
 		idtentry = (idt_tpintdesc_t *)&idt_table[pos];
-		IDT_SET_OFFSET(idtentry, (uint32_t)&nullint);
+		IDT_SET_OFFSET(idtentry, 0x000000);
 		idtentry->seg_selector   = KERNEL_CS;
 		idtentry->high.notused   = 0x0;
 		idtentry->high.reserved3 = 0x0;
@@ -95,9 +95,6 @@ void setup_IDT(void)
 	IDTR.table_limit = (IDT_TABLE_SIZE * sizeof(idt_t)) - 1;
 	IDTR.idt_ptr     = (uint32_t)&(idt_table);
 	load_idt();
-
-	/* Enable interrupts */
-	sti();
 }
 
 

@@ -30,7 +30,7 @@
 
 
 	#define IDT_TABLE_SIZE		31
-	#define FIRST_NONUSED_INT	 0//32
+	#define FIRST_NONUSED_INT	0//32
 
 	#define IDT_SET_OFFSET(a, offset)	a->offset_low       = (offset & 0xFFFF);          \
 										a->high.offset_high = ((offset >> 16) & 0xFFFF);
