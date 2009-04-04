@@ -39,6 +39,11 @@
 	#define PIC_ICW4_8086		0x01
 	#define PIC_ICW4_AEOI		0x02
 
+	#define PIC_ICW3_M_CASCADE  0x04
+	#define PIC_ICW3_S_CASCADE  0x02
+
+	#define IRQ0_VECTOR			0x20
+	#define IRQ8_VECTOR			0x28
 
 	/* A simple wait for io operations */
 	#define pic_iowait()	asm volatile("nop; nop; nop");

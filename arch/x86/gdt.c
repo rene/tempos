@@ -125,7 +125,7 @@ void setup_GDT(void)
 
 
 	GDTR.table_limit = (GDT_TABLE_SIZE * sizeof(gdt_t)) - 1;
-	GDTR.gdt_ptr     = (uint32_t)&(gdt_table);
+	GDTR.gdt_ptr     = (uint32_t)gdt_table;
 	load_gdt();
 }
 

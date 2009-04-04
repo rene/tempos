@@ -33,6 +33,17 @@
  */
 void init_PIC(void)
 {
+	uchar8_t mask_m, mask_s;
+
+	/* Save current mask */
+	mask_m = inb(PIC_MASTER_DATA);
+	mask_s = inb(PIC_SLAVE_DATA);
+
+	/* Mask all interrupts */
+	outb(0xFF, PIC_MASTER_DATA);
+	outb(0xFF, PIC_SLAVE_DATA);
+
+
 	/* ICW1 */
 	outb((PIC_ICW1_INIT | PIC_ICW1_IC4), PIC_MASTER_CMD);
 	pic_iowait();
@@ -42,19 +53,28 @@ void init_PIC(void)
 
 
 	/* ICW2
-	 * Remap interrupts TODO: comment */
-	outb(0x20, PIC_MASTER_DATA);
+	   Remap interrupts:
+	   	On master:
+	   		IRQ0 to 0x20
+			IRQ1 to 0x21
+			...
+		On slave:
+			IRQ8 to 0x28
+			IRQ9 to 0x29
+			...
+	 */
+	outb(IRQ0_VECTOR, PIC_MASTER_DATA);
 	pic_iowait();
 
-	outb(0x28, PIC_SLAVE_DATA);
+	outb(IRQ8_VECTOR, PIC_SLAVE_DATA);
 	pic_iowait();
 
 
 	/* ICW3 */
-	outb(0x04, PIC_MASTER_DATA);
+	outb(PIC_ICW3_M_CASCADE, PIC_MASTER_DATA);
 	pic_iowait();
 
-	outb(0x02, PIC_SLAVE_DATA);
+	outb(PIC_ICW3_S_CASCADE, PIC_SLAVE_DATA);
 	pic_iowait();
 
 
@@ -64,5 +84,11 @@ void init_PIC(void)
 
 	outb((PIC_ICW4_8086 | PIC_ICW4_AEOI), PIC_MASTER_DATA);
 	pic_iowait();
+
+
+	/* Restore masks */
+	//outb(mask_m, PIC_MASTER_DATA);
+	//outb(mask_s, PIC_SLAVE_DATA);
 }
+
 
