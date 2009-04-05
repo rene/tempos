@@ -109,6 +109,9 @@
 	typedef struct _gdt_entry  gdt_t;
 	typedef struct _gdt_cd_seg gdt_cdseg_t;
 
+	/* GDT table */
+	gdt_t gdt_table[GDT_TABLE_SIZE];
+
 	void setup_GDT(void);
 	inline void load_gdt(void);
 

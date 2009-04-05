@@ -29,11 +29,11 @@
 	#include <x86/io.h>
 
 
-	#define IDT_TABLE_SIZE		31
+	#define IDT_TABLE_SIZE		256
 	#define FIRST_NONUSED_INT	32
 
 	#define IDT_SET_OFFSET(a, offset)	a->offset_low       = (offset & 0x0000FFFF);    \
-										a->high.offset_high = ((offset >> 16) & 0xFFFF);
+										a->high.offset_high = ((offset >> 16));
 
 
 	#define IDT_INT_GATE		0x6
@@ -101,6 +101,11 @@
 
 	typedef struct _idt_entry      idt_t;
 	typedef struct _idt_tpint_desc idt_tpintdesc_t;
+
+
+	/* IDT table */
+	idt_t idt_table[IDT_TABLE_SIZE];
+
 
 	void setup_IDT(void);
 

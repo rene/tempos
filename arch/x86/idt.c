@@ -42,7 +42,6 @@ void nullint(void)
  */
 void setup_IDT(void)
 {
-	idt_t           idt_table[IDT_TABLE_SIZE + 1];
 	idt_tpintdesc_t *idtentry;
 	uint16_t pos;
 
@@ -64,9 +63,9 @@ void setup_IDT(void)
 
 
 	/* Unused - Reserved */
-	for(pos=15; pos<=31; pos++) {
+	for(pos=15; pos<IDT_TABLE_SIZE; pos++) {
 		idtentry = (idt_tpintdesc_t *)&idt_table[pos];
-		IDT_SET_OFFSET(idtentry, 0x000000);
+		IDT_SET_OFFSET(idtentry, (uint32_t)(nullint));
 		idtentry->seg_selector   = KERNEL_CS;
 		idtentry->high.notused   = 0x0;
 		idtentry->high.reserved3 = 0x0;
@@ -74,7 +73,7 @@ void setup_IDT(void)
 		idtentry->high.gate_size = IDT_INTGATE_S32;
 		idtentry->high.reserved1 = 0;
 		idtentry->high.DPL       = KERNEL_DPL;
-		idtentry->high.present   = 0;
+		idtentry->high.present   = 1;
 	}
 
 

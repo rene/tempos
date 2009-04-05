@@ -105,7 +105,7 @@ void karch(unsigned long magic, unsigned long addr)
 		int i = 10;
 		int b = 0;
 		int c = i / b;
-		kprintf("C: %ld\n", c);
+		//kprintf("C: %ld\n", c);
 	}
 	/*asm volatile("int $0x1F");*/
 

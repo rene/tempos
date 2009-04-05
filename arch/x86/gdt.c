@@ -53,7 +53,6 @@
  */
 void setup_GDT(void)
 {
-	gdt_t gdt_table[GDT_TABLE_SIZE];
 	gdt_cdseg_t *gdtentry;
 
 	/* NULL descriptor */
