@@ -96,18 +96,11 @@ void karch(unsigned long magic, unsigned long addr)
 		kinf.cmdline = NULL;
 	}
 
-	/* TODO: Configure processor */
+	/* Configure processor */
 	setup_GDT();
 	setup_IDT();
 	init_PIC();
 	sti();
-	{
-		int i = 10;
-		int b = 0;
-		int c = i / b;
-		//kprintf("C: %ld\n", c);
-	}
-	/*asm volatile("int $0x1F");*/
 
 	/* Call the TempOS kernel */
 	tempos_main(kinf);

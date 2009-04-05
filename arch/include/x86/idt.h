@@ -32,8 +32,8 @@
 	#define IDT_TABLE_SIZE		256
 	#define FIRST_NONUSED_INT	32
 
-	#define IDT_SET_OFFSET(a, offset)	a->offset_low       = (offset & 0x0000FFFF);    \
-										a->high.offset_high = ((offset >> 16));
+	#define IDT_SET_OFFSET(a, offset)	a->offset_low       = (offset & 0x0000FFFF);          \
+										a->high.offset_high = ((offset >> 16) & 0x0000FFFF);
 
 
 	#define IDT_INT_GATE		0x6
@@ -68,7 +68,7 @@
 	 * idt_tpint_desc
 	 *
 	 * The IDT table entry format for Interrupt-gate and Trap-gate descriptors. Both are
-	 * very similar, so we can use just one structure to keep then.
+	 * very similar, so we can use just one structure to keep them.
 	 * This is not the better way to express a IDT entry, but it's clear and more easy 
 	 * to understand.
 	 *
@@ -101,10 +101,6 @@
 
 	typedef struct _idt_entry      idt_t;
 	typedef struct _idt_tpint_desc idt_tpintdesc_t;
-
-
-	/* IDT table */
-	idt_t idt_table[IDT_TABLE_SIZE];
 
 
 	void setup_IDT(void);

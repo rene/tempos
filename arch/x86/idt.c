@@ -26,6 +26,11 @@
 
 #include <tempos/kernel.h> /* temporary */
 
+
+/* IDT table */
+idt_t idt_table[IDT_TABLE_SIZE];
+
+
 void nullint(void)
 {
 	kprintf("\nUma excessao ocorreu!\n");
@@ -37,8 +42,27 @@ void nullint(void)
 /**
  * setup_IDT
  *
- * TODO: comment here...
+ * Setup the IDT table, but not enable interrupts yet. Interrupts will be
+ * enable after PIC initialization. See arch/x86/kernel/i8259A.c.
  *
+ * As you should know, x86 architecture permits three types of gate
+ * descriptors in IDT: Task-gate, Interrupt-gate and Trap-gate descriptors.
+ * TempOS uses only Interrupt-gate descritors, that has this format:
+ *
+ *
+ * 31                  16 15 14 13 12        8  7     5 4       0
+ * |------------------------------------------------------------|
+ * |  Offset 31..16      | P | DPL | 0 D 1 1 0 | 0 0 0 | UNUSED | 4
+ * |---------------------|--------------------------------------|
+ * |  Segment Selector   |           Offset 15..0               | 0
+ * |------------------------------------------------------------|
+ * 31                                                           0
+ *
+ * Offset is the address of the ISR (Interrupt Service Routine) and
+ * Segment Selector is the point to descritor in GDT table, in our case,
+ * KERNEL_CS.
+ *
+ * For complete understand, see Intel Manual vol.3, chapter 5.
  */
 void setup_IDT(void)
 {

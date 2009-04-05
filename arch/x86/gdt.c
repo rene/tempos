@@ -24,6 +24,11 @@
 
 #include <x86/gdt.h>
 
+
+/* GDT table */
+gdt_t gdt_table[GDT_TABLE_SIZE];
+
+
 /**
  * setup_GDT
  *
