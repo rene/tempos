@@ -33,12 +33,6 @@
  */
 void init_PIC(void)
 {
-	uchar8_t mask_m, mask_s;
-
-	/* Save current mask */
-	mask_m = inb(PIC_MASTER_DATA);
-	mask_s = inb(PIC_SLAVE_DATA);
-
 	/* Mask all interrupts */
 	outb(0xFF, PIC_MASTER_DATA);
 	outb(0xFF, PIC_SLAVE_DATA);
@@ -84,11 +78,47 @@ void init_PIC(void)
 
 	outb((PIC_ICW4_8086 | PIC_ICW4_AEOI), PIC_MASTER_DATA);
 	pic_iowait();
-
-
-	/* Restore masks */
-	//outb(mask_m, PIC_MASTER_DATA);
-	//outb(mask_s, PIC_SLAVE_DATA);
 }
 
+
+/**
+ * get_picmask
+ *
+ * Return the interrupt mask
+ *
+ * Parameters:
+ * 		pic - PIC_MASTER or PIC_SLAVE
+ *
+ * Return:
+ * 		uchar8_t - Mask or 0 on error
+ */
+uchar8_t get_picmask(uchar8_t pic)
+{
+	uchar8_t mask;
+	if(pic != PIC_MASTER_DATA && pic != PIC_SLAVE_DATA) {
+		return(0);
+	} else {
+		mask = inb(pic);
+		pic_iowait();
+		return(mask);
+	}
+}
+
+
+/**
+ * set_picmask
+ *
+ * Set the interrupt mask
+ *
+ * Parameters:
+ * 		mask - Mask
+ * 		pic  - PIC_MASTER or PIC_SLAVE
+ */
+void set_picmask(uchar8_t mask, uchar8_t pic)
+{
+	if(pic == PIC_MASTER_DATA || pic == PIC_SLAVE_DATA) {
+		outb(mask, pic);
+		pic_iowait();
+	}
+}
 

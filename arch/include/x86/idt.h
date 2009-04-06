@@ -29,8 +29,7 @@
 	#include <x86/io.h>
 
 
-	#define IDT_TABLE_SIZE		256
-	#define FIRST_NONUSED_INT	32
+	#define IDT_TABLE_SIZE		31
 
 	#define IDT_SET_OFFSET(a, offset)	a->offset_low       = (offset & 0x0000FFFF);          \
 										a->high.offset_high = ((offset >> 16) & 0x0000FFFF);
@@ -52,10 +51,10 @@
 	 * 		TRAP_DESC - Trap-gate descriptor
 	 * 		  ^              ^
 	 *        |              |
-	 * 		  |              |
-	 * 		  |              [---- Intel terminology
-	 * 		  |
-	 * 		  [---- TempOS terminology
+	 *        |              |
+	 *        |              [---- Intel terminology
+	 *        |
+	 *        [---- TempOS terminology
 	 *
 	 */
 	struct _idt_entry {

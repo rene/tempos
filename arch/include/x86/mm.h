@@ -2,7 +2,7 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: i8259A.h
+ * File: mm.h
  *
  * This file is part of TempOS.
  *
@@ -21,40 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  ARCH_X86_PIC
+#ifndef ARCH_X86_MM_H
 
-	#define ARCH_X86_PIC
+	#define ARCH_X86_MM_H
 
 	#include <unistd.h>
 
-	#define PIC_MASTER_CMD		0x20
-	#define PIC_MASTER_DATA		0x21
-	#define PIC_SLAVE_CMD		0xA0
-	#define PIC_SLAVE_DATA		0xA1
 
-	#define PIC_MASTER			PIC_MASTER_DATA /* Do not change this */
-	#define PIC_SLAVE			PIC_SLAVE_DATA  /* Do not change this */
+	void init_mm(void);
 
-	/* Masks for PIC commands */
-	#define PIC_ICW1_IC4		0x01
-	#define PIC_ICW1_INIT		0x10
-
-	#define PIC_ICW4_8086		0x01
-	#define PIC_ICW4_AEOI		0x02
-
-	#define PIC_ICW3_M_CASCADE  0x04
-	#define PIC_ICW3_S_CASCADE  0x02
-
-	#define IRQ0_VECTOR			0x20
-	#define IRQ8_VECTOR			0x28
-
-	/* A simple wait for io operations */
-	#define pic_iowait()	asm volatile("nop; nop; nop");
-
-
-	void init_PIC(void);
-	uchar8_t get_picmask(uchar8_t pic);
-	void set_picmask(uchar8_t mask, uchar8_t pic);
-
-#endif /* ARCH_X86_PIC */
+#endif /* ARCH_X86_MM_H */
 

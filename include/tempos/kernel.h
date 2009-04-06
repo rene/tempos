@@ -45,6 +45,24 @@
 	#define KERN_DEBUG			"!4!"
 
 
+	/* Command line max size */
+	#define CMDLINE_MAX			1024
+
+	/* Max memory regions */
+	#define MBOOT_MMAP_MAXREG	  30
+
+	/* Memory map structure
+	   Types avaliable:
+	   		0x01 - Avaliable
+			0x02 - Reserved
+			0x03 - ACPI
+			0x04 - ACPI NVS
+	 */
+	#define MTYPE_AVALIABLE		0x01
+	#define MTYPE_RESERVED		0x02
+	#define MTYPE_ACPI			0x03
+	#define MTYPE_ACPI_NVS		0x04
+
 	struct _mmap_tentry {
   		ulong32_t base_addr_low;
   		ulong32_t base_addr_high;
@@ -53,10 +71,12 @@
   		ulong32_t type;
 	};
 
+
+	/* Information passed from first stage (karch) */
 	struct _karch_t {
-		uchar8_t            *cmdline;
-		ulong32_t           mmap_size;
-		struct _mmap_tentry *mmap_table;
+		uchar8_t            cmdline[CMDLINE_MAX];
+		uchar8_t			mmap_size;  		/* Number of elements      */
+		struct _mmap_tentry mmap_table[MBOOT_MMAP_MAXREG];
 	};
 
 	typedef struct _karch_t karch_t;

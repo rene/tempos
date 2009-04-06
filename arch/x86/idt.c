@@ -43,7 +43,8 @@ void nullint(void)
  * setup_IDT
  *
  * Setup the IDT table, but not enable interrupts yet. Interrupts will be
- * enable after PIC initialization. See arch/x86/kernel/i8259A.c.
+ * enable after PIC initialization. See arch/x86/kernel/i8259A.c and 
+ * arch/x86/boot/karch.c.
  *
  * As you should know, x86 architecture permits three types of gate
  * descriptors in IDT: Task-gate, Interrupt-gate and Trap-gate descriptors.
@@ -85,27 +86,22 @@ void setup_IDT(void)
 		idtentry->high.present   = 1;
 	}
 
+	/* 15 - Intel Reserved */
+	idtentry = (idt_tpintdesc_t *)&idt_table[15];
+	IDT_SET_OFFSET(idtentry, 0x00000000);
+	idtentry->seg_selector   = KERNEL_CS;
+	idtentry->high.notused   = 0x0;
+	idtentry->high.reserved3 = 0x0;
+	idtentry->high.type      = IDT_INT_GATE;
+	idtentry->high.gate_size = IDT_INTGATE_S32;
+	idtentry->high.reserved1 = 0;
+	idtentry->high.DPL       = KERNEL_DPL;
+	idtentry->high.present   = 0;
 
-	/* Unused - Reserved */
-	for(pos=15; pos<IDT_TABLE_SIZE; pos++) {
+	/* 20-31 - Intel Reserved */
+	for(pos=20; pos<=31; pos++) {
 		idtentry = (idt_tpintdesc_t *)&idt_table[pos];
-		IDT_SET_OFFSET(idtentry, (uint32_t)(nullint));
-		idtentry->seg_selector   = KERNEL_CS;
-		idtentry->high.notused   = 0x0;
-		idtentry->high.reserved3 = 0x0;
-		idtentry->high.type      = IDT_INT_GATE;
-		idtentry->high.gate_size = IDT_INTGATE_S32;
-		idtentry->high.reserved1 = 0;
-		idtentry->high.DPL       = KERNEL_DPL;
-		idtentry->high.present   = 1;
-	}
-
-
-	/* Setup IDT non used entries with
-	   NULL Interrupt-gate descriptor *
-	for(pos=FIRST_NONUSED_INT; pos<IDT_TABLE_SIZE; pos++) {
-		idtentry = (idt_tpintdesc_t *)&idt_table[pos];
-		IDT_SET_OFFSET(idtentry, 0x000000);
+		IDT_SET_OFFSET(idtentry, 0x00000000);
 		idtentry->seg_selector   = KERNEL_CS;
 		idtentry->high.notused   = 0x0;
 		idtentry->high.reserved3 = 0x0;
@@ -114,7 +110,8 @@ void setup_IDT(void)
 		idtentry->high.reserved1 = 0;
 		idtentry->high.DPL       = KERNEL_DPL;
 		idtentry->high.present   = 0;
-	}*/
+	}
+
 
 	IDTR.table_limit = (IDT_TABLE_SIZE * sizeof(idt_t)) - 1;
 	IDTR.idt_ptr     = (uint32_t)idt_table;
