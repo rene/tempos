@@ -28,6 +28,22 @@
 	#include <unistd.h>
 
 
+	/* Page directory entry */
+	struct _pdir_entry {
+		uint32_t present   : 1;
+		uint32_t rw		   : 1;
+		uint32_t level     : 1;
+		uint32_t write     : 1;
+		uint32_t cache     : 1;
+		uint32_t accessed  : 1;
+		uint32_t reserved  : 1;
+		uint32_t size      : 1;
+		uint32_t global    : 1;
+		uint32_t avaliable : 3;
+		uint32_t address   : 20;
+	};
+
+
 	void init_mm(void);
 
 #endif /* ARCH_X86_MM_H */

@@ -53,7 +53,9 @@ SECTIONS {
 		*(COMMON) /* This puts all uninitialized data here */
 	}
 
-	/* End of the kernel */
+	/* End of the kernel
+	   PS: We need 4096 aligned because of the paging system */
+	. = ALIGN(0x1000);
 	_KERNEL_END = . ;
 }
 

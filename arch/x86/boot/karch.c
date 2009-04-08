@@ -90,7 +90,7 @@ void karch(unsigned long magic, unsigned long addr)
 			kinf.mmap_table[i].length_high    = mmap->length_high;
 			kinf.mmap_table[i].type           = mmap->type;
 
-			kprintf("%0.12ld : %0.12ld - %s\n", kinf.mmap_table[i].base_addr_low,
+			kprintf("%0.12ld:%0.12ld - %s\n", kinf.mmap_table[i].base_addr_low,
 						kinf.mmap_table[i].base_addr_low +
 						kinf.mmap_table[i].length_low,
 						mtypes[kinf.mmap_table[i].type - 1]);
