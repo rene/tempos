@@ -28,6 +28,7 @@
 	#include <x86/karch.h>
 
 
+	#define	KERNEL_PAGE_SIZE	0x1000 /* 4Kb */
 
 #endif /* ARCH_X86_PAGE_H */
 
