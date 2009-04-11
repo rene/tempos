@@ -32,23 +32,31 @@ SECTIONS {
 
 	/**
 	 * Bootloader will load the kernel at 1MB of memory, so
-	 * text section need to start at 1MB
+	 * this is the physical address of the Kernel.
 	 */
-	_KERNEL_START = 0x00100000;
+	. = 0x00100000;
+	_KERNEL_PA_START = . ;
 
-	.text _KERNEL_START : {
+	/**
+	 * With paging system, Kernel will be reallocated to (3GB+1MB)
+	 * of virtual address space.
+	 */
+	. = 0xC0100000;
+	_KERNEL_START = . ; /* (3GB+1MB) */
+
+	.text _KERNEL_START : AT(ADDR(.text) - 0xC0000000) {
 		*(.text)
 	}
 
-	.rodata ALIGN(0x1000) : {
+	.rodata ALIGN(0x1000) : AT(ADDR(.rodata) - 0xC0000000) {
 		*(.rodata)
 	}
 
-	.data ALIGN(0x1000) : {
+	.data ALIGN(0x1000) : AT(ADDR(.data) - 0xC0000000) {
 		*(.data)
 	}
 
-	.bss : {
+	.bss : AT(ADDR(.bss) - 0xC0000000) {
 		*(.bss)
 		*(COMMON) /* This puts all uninitialized data here */
 	}

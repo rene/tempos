@@ -51,6 +51,18 @@ void karch(unsigned long magic, unsigned long addr)
 	char8_t *mtypes[] = { "Avaliable", "Reserved", "ACPI", "ACPI NVS" };
 
 
+	/**
+	 * Here we use the GDT trick to translate the virtual
+	 * into physical address, the first thing to do it's
+	 * enable the paging system and reload de GDT with
+	 * base 0, after that, we can continue to load the kernel
+	 */
+	init_mm();
+	setup_GDT();
+	setup_IDT();
+	init_PIC();
+	sti();
+
 	/* TODO: start console */
     clrscr();
 	setattr(LIGHT_GRAY);
@@ -67,7 +79,6 @@ void karch(unsigned long magic, unsigned long addr)
 
 	if( (mboot_info->flags & FLAG_ELF) ) {
 		elf_sec = &(mboot_info->u.elf_sec);
-		kprintf("Kernel start at: 0x%x\n", KERNEL_START_ADDR);
 	}
 
 	/* Get memory map */
@@ -108,13 +119,6 @@ void karch(unsigned long magic, unsigned long addr)
 	} else {
 		kinf.cmdline[0] = '\0';
 	}
-
-	/* Configure processor */
-	setup_GDT();
-	setup_IDT();
-	init_PIC();
-	init_mm();
-	sti();
 
 	/* Call the TempOS kernel */
 	tempos_main(kinf);

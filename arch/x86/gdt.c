@@ -146,7 +146,7 @@ inline void load_gdt(void)
 		"movw %%ax, %%es    \n"
 		/* Reload CODE segment */
 		"ljmp %2, $reloadCS \n"
-		"reloadCS:             \n"
+		"reloadCS:            "
 			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS) : "eax");
 }
 

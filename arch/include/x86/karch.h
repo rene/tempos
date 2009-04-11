@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
  * File: karch.h
- * Desc: Kernel definitions for x86 architecture
+ *
  * This file is part of TempOS.
  *
  *
@@ -29,17 +29,20 @@
 	/* Stak size = 16Kb */
 	#define STACK_SIZE	0x4000
 
+	#define KERNEL_PAGE_OFFSET  0xC0000000
+	#define PHYADDR(x)			((x) - KERNEL_PAGE_OFFSET)
+
 #ifndef ASM
 
 	#include <unistd.h>
 
-	/* Kernel memory address
-	   See arch/x86/boot/setup.ld */
-	#define KERNEL_START_ADDR	&_KERNEL_START
-	#define KERNEL_END_ADDR		&_KERNEL_END
-
 	extern uint32_t _KERNEL_START;
 	extern uint32_t _KERNEL_END;
+
+	/* Kernel memory addresses
+	   See arch/x86/boot/setup.ld */
+	#define KERNEL_START_ADDR	 &_KERNEL_START
+	#define KERNEL_END_ADDR		 &_KERNEL_END
 
 #endif
 

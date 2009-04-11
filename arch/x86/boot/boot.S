@@ -4,7 +4,7 @@
  *
  * File: boot.S
  * Desc: Boot Stage: Follow multiboot specification. Call karch to start
-         the TempOS kernel.
+ *       the TempOS kernel.
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,15 +27,16 @@
 #include <x86/multiboot.h>
 #include <x86/karch.h>
 
+#define BOOT_GDT_ENTRIES 3
+
+/**
+ * Text Section. Here we do not have the paging system yet
+ */
+
 	.text
 
 	.globl start, _start
 	.extern karch
-
-start:
-_start:
-
-	jmp multiboot_entry
 
 	.align 4
 
@@ -47,7 +48,35 @@ multiboot_header:
 	/* Checksum */
 	.long -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
 
-multiboot_entry:
+start:
+_start:
+
+	/**
+     * Save contents of EAX into ECX
+	 */
+	 movl %eax, %ecx
+
+	/**
+	 * Bootloader leave us at 1MB of memory, but Kernel was
+	 * linked at 3GB+1MB of virtual address, so we need to
+	 * ajust the base at GDT table to translate the virtual
+	 * address (3GB+1MB) to the physical address (1MB).
+	 * After enabling paging system, we can reload GDT with
+	 * base 0, because the address translation will be done
+	 * by paging system.
+	 */
+
+	lgdt PHYADDR(boot_gdt_desc)
+	movw $0x10, %ax
+	movw %ax, %ds
+	movw %ax, %fs
+	movw %ax, %gs
+	movw %ax, %ss
+	movw %ax, %es
+
+	ljmp $0x08, $higherhalf
+
+higherhalf:
 	/* Initialize the stack pointer */
 	movl $(stack + STACK_SIZE), %esp
 
@@ -57,7 +86,7 @@ multiboot_entry:
 
 	/* Push multiboot structure and magic value */
 	pushl %ebx
-	pushl %eax
+	pushl %ecx
 
 	/* Go to kernel, should never return from here  */
 	call EXT_C(karch)
@@ -66,6 +95,27 @@ multiboot_entry:
 error:
 	jmp error
 
+
+/**
+ * Data section: GDT table only for boot
+ */
+
+.data
+
+	.word 0							// 32 bit align boot_gdt_desc
+boot_gdt_desc:
+	.word BOOT_GDT_ENTRIES*8-1		// Size of GDT table
+	.long gdt - KERNEL_PAGE_OFFSET	// Linear address of GDT
+
+gdt:
+	.long 0, 0				  		// Null descriptor
+	.quad 0x40CF9A000000FFFF  		// 0x08 - Code selector: Base 0x40000000, Limit 0xFFFF
+	.quad 0x40CF92000000FFFF  		// 0x10 - Data selector: Base 0x40000000, Limit 0xFFFF
+
+/**
+ * BSS Section, our stack goes here
+ */
+.bss
 	/* Stack area */
 	.comm stack, STACK_SIZE
 

@@ -23,79 +23,94 @@
  */
 
 #include <x86/mm.h>
+#include <x86/io.h>
 #include <x86/karch.h>
-#include <x86/gdt.h>
 
 
 /**
  * This is the low level memory manager system of TempOS
  *
+ * TempOS uses a reallocable kernel, which means that kernel
+ * are mapped to 3GB+1MB of virtual address space. This is done
+ * using GDT trick while pageing system is not enable (in boot
+ * stage). When paging system are working, GDT are reloaded with
+ * base 0, since translation will be done by paging system.
  *
+ *  \/\/\/\/\/\/\ VIRTUAL ADDRESS SPACE MAP \/\/\/\/\/\/\
  *
+ *                   ----------------4GB
+ *                  |     Kernel     |
+ *                  |                |
+ *                  |   3GB to 4GB   |
+ *                  |----------------3GB
+ *                  |                |
+ *                  |                |
+ *                  |                |
+ *                  |                |
+ *                  |      User      |
+ *                  |                |
+ *                  |   0  to  3GB   |
+ *                  |                |
+ *                   ----------------0
  *
+ *  \/\/\/\/\/\/\/\/ KERNEL MEMORY MAP /\/\/\/\/\/\/\/\/\
  *
- *  ----------------4GB
- * |                |
- * | Kernel virtual |
- * |     space      |
- * |                |
- * |   3GB to 4GB   |
- * |                |
- * |----------------3GB
- * |                |
- * |  User virtual  |
- * |     space      |
- * |                |
- * |   0 to 3GB     |
- * |                |
- *  ----------------0
+ *                
+ *                  |      ...       |
+ *                  |                |
+ *                  |----------------X = Number of page tables used by Kernel
+ *                  |     .....      |
+ *                  |     .....      |
+ *                  |   kpgtables    |
+ *                  |----------------KERNEL_END_ADDR + (1024 * 4) bytes
+ *                  |    kpagedir    |
+ *                  |----------------KERNEL_END_ADDR
+ *                  |                |
+ *                  |     Kernel     |
+ *                  |  Code + Data   |
+ *                  |    Sections    |
+ *                  |----------------KERNEL_START_ADDR
+ *                  |                |
+ *                  |      ...       |
+ *
  */
 
-uint32_t read_cr0() {
-	uint32_t cr0;
-	asm volatile("movl %%cr0, %0" : "=r" (cr0));
-	return(cr0);
-}
 
-void write_cr0(uint32_t value)
-{
-	asm volatile("movl %0, %%cr0" : : "r" (value));
-}
+uint32_t *kpagedir;
+uint32_t *kpgtables;
 
-uint32_t read_cr3() {
-	uint32_t cr3;
-	asm volatile("movl %%cr3, %0" : "=r" (cr3));
-	return(cr3);
-}
-
-void write_cr3(uint32_t value)
-{
-	asm volatile("movl %0, %%cr3" : : "r" (value));
-}
+/* Physical address of tables */
+void *kpagedir_ptr;
+void *kpgtables_ptr;
 
 
 /**
  * init_mm
  *
  * This function starts the low level Memory Manager allocator, configuring
- * 4Kb pages and creating two memory zones: DMA and NORMAL. If the system has
- * less then 16MB of memory, NORMAL zone will contain the whole "giant" ;-)
- * memory. Otherwise, DMA will contain the first 16MB of memory and NORMAL
- * zone the rest.
- *
- * 
- *
- *
+ * 4Kb pages and allocating correct memory to the kernel
  */
 void init_mm(void)
 {
+	kpagedir  = (uint32_t *)KERNEL_END_ADDR;
+	kpgtables = (uint32_t *)kpagedir + 0x1000;
+
+	/* Physical address of tables */
+	kpagedir_ptr  = (void *)kpagedir - KERNEL_PAGE_OFFSET;
+	kpgtables_ptr = (void *)kpgtables - KERNEL_PAGE_OFFSET;
+
+
 	uint32_t *pagedir     = (uint32_t *)KERNEL_END_ADDR;
-	uint32_t *pagetable	  = pagedir + 0x1000;
+	uint32_t *pagetable	  = (uint32_t *)pagedir + 0x1000;
+
+	void *pagetablePTR = (void*)pagetable - KERNEL_PAGE_OFFSET;
+	void *pagedirPTR   = (void*)pagedir - KERNEL_PAGE_OFFSET;
 
 	uint32_t i, address;
 
 	for(i=0; i<1024; i++) {
-		pagedir[i] = 0 | 2;
+		pagedir[i]   = 0 | 2;
+		pagetable[i] = 0 | 2;
 	}
 
 	/* Map 0MB-4MB*/
@@ -106,23 +121,11 @@ void init_mm(void)
 	}
 
 	/* Page DIR */
-	pagedir[0]  = (uint32_t)pagetable | 0x03;//& 0xFFFFF003;
-	for(i=1; i<1024; i++) {
-		pagedir[i] = 0 | 2;
-	}
+	pagedir[0]   = (uint32_t)pagetablePTR | 0x03;//& 0xFFFFF003;
+	pagedir[768] = (uint32_t)pagetablePTR | 0x03;
 
-	write_cr3((uint32_t)pagedir);
-	//write_cr0(read_cr0() | 0x80000000);
-	{
-		uint32_t newcr0 = read_cr0() | 0x80000000;
-
-	asm volatile(
-		"movl %0,   %%cr0   \n"
-		/* Reload CODE segment */
-		"ljmp $0x08, $1f    \n"
-		"1:                 \n"
-		"movl $stack, %%esp"
-			: : "r" (newcr0) );
-	}
+	write_cr3((uint32_t)pagedirPTR);
+	write_cr0(read_cr0() | 0x80000000);
 }
+
 

@@ -2,7 +2,7 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: io.h
+ * File: page.h
  *
  * This file is part of TempOS.
  *
@@ -21,33 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_X86_IO_H
+#ifndef ARCH_X86_PAGE_H
 
-	#define ARCH_X86_IO_H
+	#define ARCH_X86_PAGE_H
 
-	#include <unistd.h>
+	#include <x86/karch.h>
 
-	inline uchar8_t inb(uint16_t port);
 
-	inline void outb(uchar8_t value, uint16_t port);
 
-	inline uint16_t inw(uint16_t port);
-
-	inline void outw(uint16_t value, uint16_t port);
-
-	inline uint32_t inl(uint16_t port);
-
-	inline void outl(uint32_t value, uint16_t port);
-
-	inline void cli(void);
-
-	inline void sti(void);
-
-	inline uint32_t read_cr0();
-
-	inline void write_cr0(uint32_t value);
-
-	inline void write_cr3(uint32_t value);
-
-#endif /* ARCH_X86_IO_H */
+#endif /* ARCH_X86_PAGE_H */
 

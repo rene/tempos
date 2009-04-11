@@ -79,3 +79,21 @@ inline void sti(void)
 }
 
 
+inline uint32_t read_cr0() {
+	uint32_t cr0;
+	asm volatile("movl %%cr0, %0" : "=r" (cr0));
+	return(cr0);
+}
+
+
+inline void write_cr0(uint32_t value)
+{
+	asm volatile("movl %0, %%cr0" : : "r" (value));
+}
+
+
+inline void write_cr3(uint32_t value)
+{
+	asm volatile("movl %0, %%cr3" : : "r" (value));
+}
+
