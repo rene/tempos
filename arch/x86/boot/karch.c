@@ -52,59 +52,40 @@ void karch(unsigned long magic, unsigned long addr)
 
 
 	/**
-	 * Here we use the GDT trick to translate the virtual
-	 * into physical address, the first thing to do it's
-	 * enable the paging system and reload de GDT with
-	 * base 0, after that, we can continue to load the kernel
+	 * Here the address translation it's done by GDT trick, we need to
+	 * take care about addresses passed by multiboot structures (physical)
+	 * and translate them to virtual address
 	 */
-	init_mm();
-	setup_GDT();
-	setup_IDT();
-	init_PIC();
-	sti();
-
-	/* TODO: start console */
-    clrscr();
-	setattr(LIGHT_GRAY);
-
-	/* This is the first message from kernel :) */
-	kprintf("TempOS\n");
 
 	/* Multiboot data */
 	if( magic != MULTIBOOT_BOOTLOADER_MAGIC ) {
-		kprintf(KERN_CRIT "Invalid bootloader magic number: 0x%x\n", magic);
 		return;
 	}
-	mboot_info = (multiboot_info_t *)addr;
+	mboot_info = (multiboot_info_t *)VIRADDR((uint32_t)addr);
 
-	if( (mboot_info->flags & FLAG_ELF) ) {
-		elf_sec = &(mboot_info->u.elf_sec);
+	/* Memory information */
+	if( !(mboot_info->flags & FLAG_MEM) ) {
+		return;
+	} else {
+		kinf.mem_lower = mboot_info->mem_lower;
+		kinf.mem_upper = mboot_info->mem_upper;
 	}
 
 	/* Get memory map */
 	if( !(mboot_info->flags & FLAG_MMAP) ) {
-		kprintf(KERN_CRIT "Unable to get memory information. Abort.\n");
 		return;
 	} else {
- 		mmap  = (memory_map_t *)mboot_info->mmap_addr;
+ 		mmap  = (memory_map_t *)VIRADDR((uint32_t)mboot_info->mmap_addr);
 
 		i = 0;
-		while( (ulong32_t)mmap < (mboot_info->mmap_addr + mboot_info->mmap_length) ) {
-
-			if(mmap->size > sizeof(mmap_tentry)) {
-				kprintf(KERN_CRIT "Incompatible size of memory structure, the results are unpredictable!\n");
-			}
+		while( (ulong32_t)mmap <
+					(ulong32_t)VIRADDR(mboot_info->mmap_addr + mboot_info->mmap_length) ) {
 
 			kinf.mmap_table[i].base_addr_low  = mmap->base_addr_low;
 			kinf.mmap_table[i].base_addr_high = mmap->base_addr_high;
 			kinf.mmap_table[i].length_low     = mmap->length_low;
 			kinf.mmap_table[i].length_high    = mmap->length_high;
 			kinf.mmap_table[i].type           = mmap->type;
-
-			kprintf("%0.12ld:%0.12ld - %s\n", kinf.mmap_table[i].base_addr_low,
-						kinf.mmap_table[i].base_addr_low +
-						kinf.mmap_table[i].length_low,
-						mtypes[kinf.mmap_table[i].type - 1]);
 
 			mmap = (memory_map_t *)((ulong32_t)mmap +
 						mmap->size + sizeof(mmap->size));
@@ -115,10 +96,42 @@ void karch(unsigned long magic, unsigned long addr)
 
 	/* Command line */
 	if( (mboot_info->flags & FLAG_CMDLINE) ) {
-		strcpy((char *)kinf.cmdline, (const char *)mboot_info->cmdline);
+		strcpy((char *)kinf.cmdline, (const char *)VIRADDR((uint32_t)mboot_info->cmdline));
 	} else {
 		kinf.cmdline[0] = '\0';
 	}
+
+
+	/**
+	 * Still here we use the GDT trick to translate the virtual
+	 * into physical address, now the first thing to do it's
+	 * enable the paging system and reload de GDT with
+	 * base 0, after that, we can continue to load the kernel
+	 */
+	init_pg(kinf);
+	setup_GDT();
+
+	/* Setup interrupts */
+	setup_IDT();
+	init_PIC();
+	sti();
+
+
+	/* TODO: start console */
+    clrscr();
+	setattr(LIGHT_GRAY);
+
+	/* This is the first message from kernel =:) */
+	kprintf("TempOS\n");
+
+	for(i=0; i<kinf.mmap_size; i++) {
+		kprintf("%0.12ld:%0.12ld - %s\n", kinf.mmap_table[i].base_addr_low,
+					kinf.mmap_table[i].base_addr_low +
+					kinf.mmap_table[i].length_low,
+					mtypes[kinf.mmap_table[i].type - 1]);
+	}
+
+	kprintf(">> First stage done.\n");
 
 	/* Call the TempOS kernel */
 	tempos_main(kinf);

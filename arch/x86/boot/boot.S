@@ -105,7 +105,7 @@ error:
 	.word 0							// 32 bit align boot_gdt_desc
 boot_gdt_desc:
 	.word BOOT_GDT_ENTRIES*8-1		// Size of GDT table
-	.long gdt - KERNEL_PAGE_OFFSET	// Linear address of GDT
+	.long gdt - KERNEL_ADDR_OFFSET	// Linear address of GDT
 
 gdt:
 	.long 0, 0				  		// Null descriptor

@@ -5,6 +5,7 @@
 
 #ifndef VIDEO_H_
 
+	#include <x86/karch.h>
 
 	#define VIDEO_H_ 1
 

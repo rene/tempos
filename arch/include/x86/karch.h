@@ -26,23 +26,26 @@
 
 	#define ARCH_X86_KARCH_H
 
-	/* Stak size = 16Kb */
-	#define STACK_SIZE	0x4000
+	/* Stack size */
+	#define STACK_SIZE			0x4000 /* 16Kb */
 
-	#define KERNEL_PAGE_OFFSET  0xC0000000
-	#define PHYADDR(x)			((x) - KERNEL_PAGE_OFFSET)
+	#define KERNEL_ADDR_OFFSET  0xC0000000
+	#define PHYADDR(x)			((x) - KERNEL_ADDR_OFFSET)
+	#define VIRADDR(x)			((x) + KERNEL_ADDR_OFFSET)
 
 #ifndef ASM
 
 	#include <unistd.h>
 
+	extern uint32_t _KERNEL_PA_START;
 	extern uint32_t _KERNEL_START;
 	extern uint32_t _KERNEL_END;
 
 	/* Kernel memory addresses
 	   See arch/x86/boot/setup.ld */
-	#define KERNEL_START_ADDR	 &_KERNEL_START
-	#define KERNEL_END_ADDR		 &_KERNEL_END
+	#define KERNEL_PA_START		 (uint32_t)&_KERNEL_PA_START
+	#define KERNEL_START_ADDR	 (uint32_t)&_KERNEL_START
+	#define KERNEL_END_ADDR		 (uint32_t)&_KERNEL_END
 
 #endif
 

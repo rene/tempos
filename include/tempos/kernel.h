@@ -75,7 +75,9 @@
 	/* Information passed from first stage (karch) */
 	struct _karch_t {
 		uchar8_t            cmdline[CMDLINE_MAX];
-		uchar8_t			mmap_size;  		/* Number of elements      */
+		uint32_t            mem_lower;
+		uint32_t            mem_upper;
+		uchar8_t			mmap_size;  /* Number of elements */
 		struct _mmap_tentry mmap_table[MBOOT_MMAP_MAXREG];
 	};
 

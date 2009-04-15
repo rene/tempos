@@ -27,6 +27,9 @@
 
 	#include <unistd.h>
 
+	#define CR0_PG_MASK		0x80000000
+
+
 	inline uchar8_t inb(uint16_t port);
 
 	inline void outb(uchar8_t value, uint16_t port);

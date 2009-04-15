@@ -25,7 +25,7 @@
 
 	#define ARCH_X86_MM_H
 
-	#include <unistd.h>
+	#include <tempos/kernel.h>
 
 
 	/* Page directory entry */
@@ -44,7 +44,7 @@
 	};
 
 
-	void init_mm(void);
+	void init_pg(karch_t kinf);
 
 #endif /* ARCH_X86_MM_H */
 

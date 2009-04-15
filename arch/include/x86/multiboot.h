@@ -34,7 +34,7 @@
 #endif
 
 /* Masks for flags returned by bootloader */
-#define FLAG_MEM						0x0000
+#define FLAG_MEM						0x0001
 #define FLAG_BDEV						0x0002
 #define FLAG_CMDLINE					0x0004
 #define FLAG_MODS						0x0008
