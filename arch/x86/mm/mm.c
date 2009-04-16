@@ -25,14 +25,16 @@
 #include <x86/mm.h>
 #include <x86/page.h>
 #include <x86/io.h>
+#include <x86/gdt.h>
 #include <x86/karch.h>
+#include <tempos/kernel.h>
 
 
 /**
  * This is the low level memory manager system of TempOS
  *
  * TempOS uses a reallocable kernel, which means that kernel
- * are mapped to 3GB+1MB of virtual address space. This is done
+ * are mapped to 3GB of virtual address space. This is done
  * using GDT trick while pageing system is not enable (in boot
  * stage). When paging system are working, GDT are reloaded with
  * base 0, since translation will be done by paging system.
@@ -43,7 +45,7 @@
  *                  |     Kernel     |
  *                  |                |
  *                  |   3GB to 4GB   |
- *                  |----------------3GB+1MB
+ *                  |----------------3GB
  *                  |                |
  *                  |                |
  *                  |                |
@@ -70,22 +72,22 @@
  *    Block2        |    DMA Zone    |
  *      |           |  (0 to 16MB)   |
  *      |           |                |
- *      |           |----------------End of remaining memory pages
+ *      |           |----------------End of system memory pages
  *      |           |     .....      |
  *      |           |     .....      | 
  *      |           |    mempages    |
  *       ---------> |----------------End of page tables used by Kernel
- *                  |     .....      |
- *                  |     .....      |
- *                  |   kpgtables    |
- *                  |----------------KERNEL_END_ADDR + (1024 * 4) bytes
- *                  |    kpagedir    |
- *                  |----------------KERNEL_END_ADDR
- *                  |                |
- *                  |     Kernel     |
- *                  |  Code + Data   |
- *                  |    Sections    |
- *                  |----------------KERNEL_START_ADDR
+ *      |           |     .....      |
+ *      |           |     .....      |
+ *      |           |    kpgtables   |
+ *      |           |----------------KERNEL_END_ADDR + 4Kb
+ *    Kernel        |    kpagedir    |
+ *    Block1        |----------------KERNEL_END_ADDR
+ *      |           |                |
+ *      |           |     Kernel     |
+ *      |           |  Code + Data   |
+ *      |           |    Sections    |
+ *       ---------->|----------------KERNEL_START_ADDR
  *                  |                |
  *                  |      ...       |
  *
@@ -99,52 +101,56 @@ uint32_t *mempages;
 /* Physical address of tables */
 void *kpagedir_ptr;
 void *kpgtables_ptr;
-void *mempages_ptr;
 
 /* Stack pointers */
+uint32_t *stack_pages1;
+uint32_t *stack_pages2;
 uint32_t *stack_pages1_top;
 uint32_t *stack_pages2_top;
+uint32_t stackp1_top;
+uint32_t stackp2_top;
 
 
 /**
  * init_pg
  *
- * This function starts the low level Memory Manager, configuring
- * 4Kb pages and allocating correct memory to the kernel
+ * This function starts the low level Memory Manager, configure
+ * 4Kb pages, allocate and map correct memory to the kernel, prepare
+ * pages stacks and so on.
  */
-void init_pg(karch_t kinf)
+void init_pg(karch_t *kinf)
 {
 	uint32_t i, j, ap, np, nt;
 	uint32_t address;
-	uint32_t nptotal; /* Number of total free memory pages to the system */
+	uint32_t nptotal; /* Number of total memory pages to the system */
 	uint32_t totalmem;
 	uint32_t mempages_size;
+	uint32_t mempg_ct;
+	uint32_t m_end, m_length, index;
+	uint32_t kpa_start, kpa_length;
 
 
 	kpagedir      = (uint32_t *)KERNEL_END_ADDR;
-	kpgtables     = (uint32_t *)kpagedir + 0x1000;
-	kpagedir_ptr  = (void *)kpagedir - KERNEL_ADDR_OFFSET;
-	kpgtables_ptr = (void *)kpgtables - KERNEL_ADDR_OFFSET;
+	kpgtables     = (uint32_t *)((uint32_t)kpagedir + 0x1000);
+	kpagedir_ptr  = (void *)((uint32_t)kpagedir - KERNEL_ADDR_OFFSET);
+	kpgtables_ptr = (void *)((uint32_t)kpgtables - KERNEL_ADDR_OFFSET);
 
-	/* Calculate how many pages Kernel needs
-	   PS: 256 - First 1MB of memory */
-	np = 256 + (PAGE_ALIGN((uint32_t)KERNEL_END_ADDR -
+	/* Calculate how many pages we need to Kernel Block1
+	   PS: 256 - For the first 1MB of memory
+	         1 - For kpagedir                             */
+	np = 256 + 1 + (PAGE_ALIGN((uint32_t)KERNEL_END_ADDR -
 					(uint32_t)KERNEL_START_ADDR) >> PAGE_SHIFT);
 
-	/* Ajust pointers to remaining memory pages */
-	mempages     = (uint32_t *)kpgtables + (sizeof(uint32_t) * np);
-	mempages_ptr = (void *)mempages - KERNEL_ADDR_OFFSET;
+	/* Calculate how many pages are remaining to the system        */
+	totalmem = kinf->mem_upper << 10; /* Total upper system memory */
+	nptotal  = (totalmem / 4096) - np;
 
-	/* Calculate how many pages are remaining to the system       */
-	totalmem = kinf.mem_upper << 10; /* Total upper system memory */
-	nptotal  = (PAGE_ALIGN(totalmem) >> PAGE_SHIFT) - np;
-
-	/* Calculate and sum pages that we need to Kernel Block2      */
+	/* Calculate and sum pages that we need to Kernel Block2       */
 	mempages_size = PAGE_ALIGN(nptotal * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
 	np           += (2 * mempages_size);
 
 	/* Calculate total page tables Kernel needs */
-	nt = TABLE_ALIGN(np) >> TABLE_SHIFT;
+	nt = (TABLE_ALIGN(np) >> TABLE_SHIFT);
 
 
 	/* Zero kernel page directory */
@@ -180,34 +186,205 @@ void init_pg(karch_t kinf)
 
 	/* Page DIR */
 	for(i=0; i<nt; i++) {
-		kpagedir[0 + i]   = ((uint32_t)kpgtables_ptr + (i * PAGE_SIZE)) |
-								(PAGE_WRITABLE | PAGE_PRESENT); /* 0MB     */
-		kpagedir[768 + i] = ((uint32_t)kpgtables_ptr + (i * PAGE_SIZE)) |
-								(PAGE_WRITABLE | PAGE_PRESENT); /* 3GB+1MB */
+		kpagedir[0 + i]   = ((uint32_t)kpgtables_ptr +
+								(i * TABLE_SIZE * TABLE_ENTRY_SIZE)) |
+									(PAGE_WRITABLE | PAGE_PRESENT); /* 0MB  */
+		kpagedir[768 + i] = ((uint32_t)kpgtables_ptr +
+								(i * TABLE_SIZE * TABLE_ENTRY_SIZE)) |
+									(PAGE_WRITABLE | PAGE_PRESENT); /* 3GB  */
 	}
 
 	/* Enable Paging System */
 	write_cr3((uint32_t)kpagedir_ptr);
 	write_cr0(read_cr0() | CR0_PG_MASK);
 
+	/* Reload GDT */
+	setup_GDT();
+
+
+	/* Ajust pointers to system memory pages */
+ 	mempages = (uint32_t *)((uint32_t)kpgtables +
+					(TABLE_SIZE * TABLE_ENTRY_SIZE * nt));
+
+
 	/* Configure mempages (Page Table entries) */
-	address -= PAGE_SIZE;
+	address = PAGE_SIZE * (np + 1);
 	for(i=0; i<mempages_size; i++) {
 		mempages[i] = address | (PAGE_WRITABLE | PAGE_PRESENT);
 		address    += PAGE_SIZE;
 	}
 
+	/* Configure stack addresses
+	   PS: If the system has less then 16MB of memory,
+	       just one stack will exist. */
+	stack_pages1     = (uint32_t *)((uint32_t)mempages +
+							(nptotal * TABLE_ENTRY_SIZE));
+	stack_pages1_top = &stackp1_top;
+
+	if(kinf->mem_upper <= 0x3C00) {
+		stack_pages2     = stack_pages1;
+		stack_pages2_top = stack_pages1_top;
+	} else {
+		stack_pages2     = (uint32_t *)((uint32_t)stack_pages1 +
+								(0x1000 * TABLE_ENTRY_SIZE));
+
+		stack_pages2_top = &stackp2_top;
+	}
+
+
+	/** 
+	   Re-arrange memory map to insert kernel region. In a
+	   region of free memory we could have three situations:
+	   
+		      |-------------[********]--------------|
+		1     |             [ kernel ]              |
+		      |-------------[********]--------------|
+
+		   [**|*****]-------------------------------|
+		2  [ kernel ]                               |
+		   [**|*****]-------------------------------|
+
+		      |----------------------------------[**|*****]
+		3     |                                  [ kernel ]
+		      |----------------------------------[**|*****]
+
+	*/
+	kpa_start  = KERNEL_PA_START;
+	kpa_length = (KERNEL_END_ADDR + (np * PAGE_SIZE) +
+					(nt * TABLE_SIZE * TABLE_ENTRY_SIZE)) - KERNEL_START_ADDR;
+
+	for(i=0; i<kinf->mmap_size; i++) {
+
+		m_end = kinf->mmap_table[i].base_addr_low +
+						kinf->mmap_table[i].length_low;
+
+		if(m_end > (kpa_start + kpa_length)) {
+
+			if(kinf->mmap_table[i].base_addr_low < kpa_start) {
+				/* Situation 1 */
+				m_length = kinf->mmap_table[i].length_low;
+
+				kinf->mmap_table[i].length_low =
+					(kpa_start - kinf->mmap_table[i].base_addr_low);
+
+				/* Create another free region */
+				m_length -= kinf->mmap_table[i].length_low;
+				index     = kinf->mmap_size++;
+
+				if(index < MBOOT_MMAP_MAXREG) {
+					kinf->mmap_table[index].base_addr_low  =
+											(kpa_start + kpa_length);
+					kinf->mmap_table[index].base_addr_high = 0x00000000;
+					kinf->mmap_table[index].length_low     = m_length;
+					kinf->mmap_table[index].length_high    = 0x00000000;
+					kinf->mmap_table[index].type           = MTYPE_RESERVED;
+				} else {
+					kprintf(KERN_CRIT "Memory region table full! :'(\n");
+					for(;;);
+				}
+
+			} else if( kinf->mmap_table[i].base_addr_low <
+						(kpa_start + kpa_length) ) {
+
+				/* Situation 2 */
+				kinf->mmap_table[i].base_addr_low = (kpa_start + kpa_length);
+				kinf->mmap_table[i].length_low   -= kpa_length;
+			}
+
+		} else {
+			/* Situation 3 */
+			if( (kinf->mmap_table[i].base_addr_low < kpa_start) &&
+					m_end < (kpa_start + kpa_length) )
+				kinf->mmap_table[i].length_low =
+						(kpa_start - kinf->mmap_table[i].base_addr_low);
+		}
+	}
+
+	/* Map memory */
+	mempg_ct  = 0;
+	for(i=0; i<kinf->mmap_size; i++) {
+		if(kinf->mmap_table[i].type == MTYPE_AVALIABLE) {
+
+			/* Map only over the 1MB of memory, because the first 1MB 
+			   is mapped on kernel page tables */
+			if(kinf->mmap_table[i].base_addr_low >= 0x40000000) {
+
+				/* Map the region */
+				m_end   = kinf->mmap_table[i].base_addr_low +
+								kinf->mmap_table[i].length_low;
+				address = PAGE_ALIGN(kinf->mmap_table[i].base_addr_low);
+
+				while(address < m_end) {
+					mempages[mempg_ct++] = address | (PAGE_WRITABLE | PAGE_PRESENT);
+					address             += PAGE_SIZE;
+				}
+			}
+		}
+	}
+
 	/* Start stacks */
+	if(mempg_ct >= 0x1000) {
+		*stack_pages1_top = 0x1000;
+		*stack_pages2_top = mempg_ct - 0x1000;
 
-	/*
-	asm volatile("movl %0, %%eax \n"
-				 "movl %1, %%ebx \n"
-	             "loop:         \n"
-				 "jmp loop      \n" : : "r" (np), "r" (mempages_size): "eax");*/
+		for(i=0; i<0x1000; i++) {
+			stack_pages1[i] = (uint32_t)&mempages[i];
+			stack_pages2[i] = (uint32_t)&mempages[i + 0x1000];
+		}
+		for(i=0x1000; i<mempg_ct; i++) {
+			stack_pages2[i] = (uint32_t)&mempages[i];
+		}
+	} else {
+		*stack_pages1_top = mempg_ct;
 
-
-
-
+		for(i=0; i<mempg_ct; i++) {
+			stack_pages1[i] = (uint32_t)&mempages[i];
+		}
+	}
 }
 
+
+/**
+ * alloc_page
+ *
+ * Return the address to a free page entry or 0 if memory
+ * is full
+ *
+ * Parameters:
+ * 		zone - DMA_ZONE or NORMAL_ZONE
+ */
+uint32_t *alloc_page(zone_t zone)
+{
+	switch(zone) {
+		case DMA_ZONE:
+			if(*stack_pages1_top)
+				return((uint32_t *)stack_pages1[(*stack_pages1_top)--]);
+			break;
+
+		case NORMAL_ZONE:
+			if(*stack_pages2_top)
+				return((uint32_t *)stack_pages2[(*stack_pages2_top)--]);
+			break;
+
+		default:
+			return(0);
+	}
+	return(0);
+}
+
+
+/**
+ * free_page
+ *
+ * Free the page entry allocated with alloc_page
+ */
+void free_page(uint32_t *page_e)
+{
+	if( (*page_e >> PAGE_SHIFT) <= 0x1000 ) {
+		stack_pages1[++(*stack_pages1_top)] = (uint32_t)page_e;
+	} else {
+		stack_pages2[++(*stack_pages2_top)] = (uint32_t)page_e;
+	}
+	return;
+}
 

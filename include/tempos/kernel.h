@@ -49,7 +49,7 @@
 	#define CMDLINE_MAX			1024
 
 	/* Max memory regions */
-	#define MBOOT_MMAP_MAXREG	  30
+	#define MBOOT_MMAP_MAXREG	  20
 
 	/* Memory map structure
 	   Types avaliable:

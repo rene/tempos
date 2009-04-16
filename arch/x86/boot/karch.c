@@ -26,7 +26,6 @@
 #include <tempos/kernel.h>
 #include <x86/karch.h>
 #include <x86/multiboot.h>
-#include <x86/gdt.h>
 #include <x86/idt.h>
 #include <x86/i8259A.h>
 #include <x86/io.h>
@@ -45,7 +44,6 @@ void karch(unsigned long magic, unsigned long addr)
 {
 	karch_t kinf;
 	multiboot_info_t *mboot_info;
-	elf_section_header_table_t *elf_sec;
 	memory_map_t *mmap;
 	uint32_t i;
 	char8_t *mtypes[] = { "Avaliable", "Reserved", "ACPI", "ACPI NVS" };
@@ -108,8 +106,7 @@ void karch(unsigned long magic, unsigned long addr)
 	 * enable the paging system and reload de GDT with
 	 * base 0, after that, we can continue to load the kernel
 	 */
-	init_pg(kinf);
-	setup_GDT();
+	init_pg(VIRADDR(&kinf));
 
 	/* Setup interrupts */
 	setup_IDT();
@@ -125,7 +122,7 @@ void karch(unsigned long magic, unsigned long addr)
 	kprintf("TempOS\n");
 
 	for(i=0; i<kinf.mmap_size; i++) {
-		kprintf("%0.12ld:%0.12ld - %s\n", kinf.mmap_table[i].base_addr_low,
+		kprintf("%0.9x:%0.9x - %s\n", kinf.mmap_table[i].base_addr_low,
 					kinf.mmap_table[i].base_addr_low +
 					kinf.mmap_table[i].length_low,
 					mtypes[kinf.mmap_table[i].type - 1]);

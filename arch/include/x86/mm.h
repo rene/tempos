@@ -28,6 +28,11 @@
 	#include <tempos/kernel.h>
 
 
+	/* Memory zones */
+	#define DMA_ZONE		0x01
+	#define NORMAL_ZONE		0x02
+
+
 	/* Page directory entry */
 	struct _pdir_entry {
 		uint32_t present   : 1;
@@ -43,8 +48,11 @@
 		uint32_t address   : 20;
 	};
 
+	typedef uchar8_t zone_t;
 
-	void init_pg(karch_t kinf);
+	void init_pg(karch_t *kinf);
+	uint32_t *alloc_page(zone_t zone);
+	void free_page(uint32_t *page_e);
 
 #endif /* ARCH_X86_MM_H */
 
