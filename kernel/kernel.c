@@ -48,9 +48,9 @@ void tempos_main(karch_t kinf)
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
 	for(i=0; i<8; i++) {
-		page = alloc_page(DMA_ZONE);
+		page = alloc_page(NORMAL_ZONE);
 		if(page)
-			kprintf("P: %.9x\n", *page >> 12);
+			kprintf("P: %.9x\n", (*page >> 12));
 	}
 
 	for(;;);

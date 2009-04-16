@@ -68,23 +68,23 @@
  *      |           |                |
  *      |           |----------------|
  *      |           |     .....      |
- *    Kernel        |  stack_pages1  |
- *    Block2        |    DMA Zone    |
+ *      |           |  stack_pages1  |
+ *      |           |    DMA Zone    |
  *      |           |  (0 to 16MB)   |
- *      |           |                |
- *      |           |----------------End of system memory pages
+ *    Kernel        |                |
+ *    Block2        |----------------End of system memory pages
  *      |           |     .....      |
  *      |           |     .....      | 
  *      |           |    mempages    |
- *       ---------> |----------------End of page tables used by Kernel
+ *      |           |----------------End of page tables used by Kernel
  *      |           |     .....      |
  *      |           |     .....      |
  *      |           |    kpgtables   |
- *      |           |----------------KERNEL_END_ADDR + 4Kb
- *    Kernel        |    kpagedir    |
- *    Block1        |----------------KERNEL_END_ADDR
- *      |           |                |
- *      |           |     Kernel     |
+ *      |---------->|----------------KERNEL_END_ADDR + 4Kb
+ *      |           |    kpagedir    |
+ *      |           |----------------KERNEL_END_ADDR
+ *    Kernel        |                |
+ *    Block1        |     Kernel     |
  *      |           |  Code + Data   |
  *      |           |    Sections    |
  *       ---------->|----------------KERNEL_START_ADDR
@@ -124,7 +124,7 @@ void init_pg(karch_t *kinf)
 	uint32_t address;
 	uint32_t nptotal; /* Number of total memory pages to the system */
 	uint32_t totalmem;
-	uint32_t mempages_size;
+	uint32_t kpgtables_size, mempages_size;
 	uint32_t mempg_ct;
 	uint32_t m_end, m_length, index;
 	uint32_t kpa_start, kpa_length;
@@ -146,11 +146,15 @@ void init_pg(karch_t *kinf)
 	nptotal  = (totalmem / 4096) - np;
 
 	/* Calculate and sum pages that we need to Kernel Block2       */
-	mempages_size = PAGE_ALIGN(nptotal * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
-	np           += (2 * mempages_size);
+	mempages_size   = PAGE_ALIGN(nptotal * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
+	np             += (2 * mempages_size);
+	kpgtables_size  = PAGE_ALIGN(np * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
 
 	/* Calculate total page tables Kernel needs */
-	nt = (TABLE_ALIGN(np) >> TABLE_SHIFT);
+	nt = (TABLE_ALIGN(np + kpgtables_size) >> TABLE_SHIFT);
+
+	/* Final number of pages used by kernel     */
+	np = nt * TABLE_SIZE;
 
 
 	/* Zero kernel page directory */
@@ -208,8 +212,8 @@ void init_pg(karch_t *kinf)
 
 
 	/* Configure mempages (Page Table entries) */
-	address = KERNEL_PA_START + (PAGE_SIZE * (np + 1));
-	for(i=0; i<mempages_size; i++) {
+	address = KERNEL_PA_START + (PAGE_SIZE * np);
+	for(i=0; i<nptotal; i++) {
 		mempages[i] = address | (PAGE_WRITABLE | PAGE_PRESENT);
 		address    += PAGE_SIZE;
 	}
@@ -312,9 +316,9 @@ void init_pg(karch_t *kinf)
 				/* Map the region */
 				m_end   = kinf->mmap_table[i].base_addr_low +
 								kinf->mmap_table[i].length_low;
-				address = kinf->mmap_table[i].base_addr_low;
+				address = PAGE_ALIGN(kinf->mmap_table[i].base_addr_low);
 
-				while((address < m_end) && (mempg_ct < (mempages_size-1))) {
+				while( (address < m_end) ) {
 					mempages[mempg_ct++] = address | (PAGE_WRITABLE | PAGE_PRESENT);
 					address             += PAGE_SIZE;
 				}
