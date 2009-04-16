@@ -208,7 +208,7 @@ void init_pg(karch_t *kinf)
 
 
 	/* Configure mempages (Page Table entries) */
-	address = PAGE_SIZE * (np + 1);
+	address = KERNEL_PA_START + (PAGE_SIZE * (np + 1));
 	for(i=0; i<mempages_size; i++) {
 		mempages[i] = address | (PAGE_WRITABLE | PAGE_PRESENT);
 		address    += PAGE_SIZE;
@@ -218,7 +218,7 @@ void init_pg(karch_t *kinf)
 	   PS: If the system has less then 16MB of memory,
 	       just one stack will exist. */
 	stack_pages1     = (uint32_t *)((uint32_t)mempages +
-							(nptotal * TABLE_ENTRY_SIZE));
+							(mempages_size * PAGE_SIZE));
 	stack_pages1_top = &stackp1_top;
 
 	if(kinf->mem_upper <= 0x3C00) {
@@ -307,20 +307,21 @@ void init_pg(karch_t *kinf)
 
 			/* Map only over the 1MB of memory, because the first 1MB 
 			   is mapped on kernel page tables */
-			if(kinf->mmap_table[i].base_addr_low >= 0x40000000) {
+			if(kinf->mmap_table[i].base_addr_low >= 0x100000) {
 
 				/* Map the region */
 				m_end   = kinf->mmap_table[i].base_addr_low +
 								kinf->mmap_table[i].length_low;
-				address = PAGE_ALIGN(kinf->mmap_table[i].base_addr_low);
+				address = kinf->mmap_table[i].base_addr_low;
 
-				while(address < m_end) {
+				while((address < m_end) && (mempg_ct < (mempages_size-1))) {
 					mempages[mempg_ct++] = address | (PAGE_WRITABLE | PAGE_PRESENT);
 					address             += PAGE_SIZE;
 				}
 			}
 		}
 	}
+
 
 	/* Start stacks */
 	if(mempg_ct >= 0x1000) {

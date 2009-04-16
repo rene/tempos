@@ -58,9 +58,9 @@ _start:
 
 	/**
 	 * Bootloader leave us at 1MB of memory, but Kernel was
-	 * linked at 3GB+1MB of virtual address, so we need to
-	 * ajust the base at GDT table to translate the virtual
-	 * address (3GB+1MB) to the physical address (1MB).
+	 * linked at 3GB of virtual address, so we need to ajust
+	 * the base at GDT table to translate the virtual address
+	 * (3GB) to the physical address (1MB).
 	 * After enabling paging system, we can reload GDT with
 	 * base 0, because the address translation will be done
 	 * by paging system.

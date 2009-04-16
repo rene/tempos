@@ -23,25 +23,35 @@
  */
 
 #include <tempos/kernel.h>
+#include <x86/mm.h>
 #include <string.h>
 
 
 /* information passed from first stage */
 karch_t kinfo;
 
-
+extern uint32_t *stack_pages1;
 /**
  * tempos_main
  *
  * This is the function called when first stage is done, which means that
  * all dependent machine boot code was executed. See arch/$ARCH/boot/karch.c
  */
-void tempos_main(karch_t kinf) {
+void tempos_main(karch_t kinf)
+{
+	uint32_t *page;
+	uint32_t i;
 
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
+
+	for(i=0; i<8; i++) {
+		page = alloc_page(DMA_ZONE);
+		if(page)
+			kprintf("P: %.9x\n", *page >> 12);
+	}
 
 	for(;;);
 }
