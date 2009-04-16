@@ -35,7 +35,7 @@
  *
  * TempOS uses a reallocable kernel, which means that kernel
  * are mapped to 3GB of virtual address space. This is done
- * using GDT trick while pageing system is not enable (in boot
+ * using GDT trick while paging system is not enable (in boot
  * stage). When paging system are working, GDT are reloaded with
  * base 0, since translation will be done by paging system.
  *
@@ -80,7 +80,7 @@
  *      |           |     .....      |
  *      |           |     .....      |
  *      |           |    kpgtables   |
- *      |---------->|----------------KERNEL_END_ADDR + 4Kb
+ *       ---------->|----------------KERNEL_END_ADDR + 4Kb
  *      |           |    kpagedir    |
  *      |           |----------------KERNEL_END_ADDR
  *    Kernel        |                |
@@ -94,21 +94,19 @@
  */
 
 
-uint32_t *kpagedir;
-uint32_t *kpgtables;
-uint32_t *mempages;
-
-/* Physical address of tables */
-void *kpagedir_ptr;
-void *kpgtables_ptr;
+uint32_t *kpagedir   = 0;
+uint32_t *kpgtables  = 0;
+uint32_t *mempages   = 0;
 
 /* Stack pointers */
-uint32_t *stack_pages1;
-uint32_t *stack_pages2;
-uint32_t *stack_pages1_top;
-uint32_t *stack_pages2_top;
-uint32_t stackp1_top;
-uint32_t stackp2_top;
+static uint32_t *stack_pages1      = 0;
+static uint32_t *stack_pages2      = 0;
+static uint32_t *stack_pages1_top  = 0;
+static uint32_t *stack_pages2_top  = 0;
+static uint32_t stackp1_top        = 0;
+static uint32_t stackp2_top        = 0;
+static uint32_t stackp1_maxtop     = 0;
+static uint32_t stackp2_maxtop     = 0;
 
 
 /**
@@ -124,12 +122,17 @@ void init_pg(karch_t *kinf)
 	uint32_t address;
 	uint32_t nptotal; /* Number of total memory pages to the system */
 	uint32_t totalmem;
-	uint32_t kpgtables_size, mempages_size;
 	uint32_t mempg_ct;
+	uint32_t kpgtables_size, mempages_size;
 	uint32_t m_end, m_length, index;
 	uint32_t kpa_start, kpa_length;
 
+	/* Physical address of tables */
+	void *kpagedir_ptr;
+	void *kpgtables_ptr;
 
+
+	/* Ajust pointers */
 	kpagedir      = (uint32_t *)KERNEL_END_ADDR;
 	kpgtables     = (uint32_t *)((uint32_t)kpagedir + 0x1000);
 	kpagedir_ptr  = (void *)((uint32_t)kpagedir - KERNEL_ADDR_OFFSET);
@@ -181,6 +184,7 @@ void init_pg(karch_t *kinf)
 	/* Map Kernel memory */
 	address = KERNEL_PA_START;
 	j       = 256;
+	ap      = j;
 	for(i=0; i<nt && ap<np; i++) {
 		for(; j<TABLE_SIZE && ap<np; j++, ap++) {
 			kpgtables[ap] = address | (PAGE_WRITABLE | PAGE_PRESENT);
@@ -212,7 +216,7 @@ void init_pg(karch_t *kinf)
 
 
 	/* Configure mempages (Page Table entries) */
-	address = KERNEL_PA_START + (PAGE_SIZE * np);
+	address = KERNEL_PA_START + (PAGE_SIZE * TABLE_SIZE * nt);
 	for(i=0; i<nptotal; i++) {
 		mempages[i] = address | (PAGE_WRITABLE | PAGE_PRESENT);
 		address    += PAGE_SIZE;
@@ -334,7 +338,7 @@ void init_pg(karch_t *kinf)
 
 		for(i=0; i<0x1000; i++) {
 			stack_pages1[i] = (uint32_t)&mempages[i];
-			stack_pages2[i] = (uint32_t)&mempages[i + 0x1000];
+			stack_pages2[i] = (int32_t)&mempages[i + 0x1000];
 		}
 		for(i=0x1000; i<mempg_ct; i++) {
 			stack_pages2[i] = (uint32_t)&mempages[i];
@@ -346,6 +350,8 @@ void init_pg(karch_t *kinf)
 			stack_pages1[i] = (uint32_t)&mempages[i];
 		}
 	}
+	stackp1_maxtop = *stack_pages1_top;
+	stackp2_maxtop = *stack_pages2_top;
 }
 
 
@@ -386,9 +392,15 @@ uint32_t *alloc_page(zone_t zone)
 void free_page(uint32_t *page_e)
 {
 	if( (*page_e >> PAGE_SHIFT) <= 0x1000 ) {
-		stack_pages1[++(*stack_pages1_top)] = (uint32_t)page_e;
+		if(*stack_pages1_top < stackp1_maxtop) {
+			stack_pages1[++(*stack_pages1_top)] = (uint32_t)page_e;
+			*page_e |= (PAGE_WRITABLE | PAGE_PRESENT);
+		}
 	} else {
-		stack_pages2[++(*stack_pages2_top)] = (uint32_t)page_e;
+		if(*stack_pages2_top < stackp2_maxtop) {
+			stack_pages2[++(*stack_pages2_top)] = (uint32_t)page_e;
+			*page_e |= (PAGE_WRITABLE | PAGE_PRESENT);
+		}
 	}
 	return;
 }

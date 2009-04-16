@@ -30,7 +30,6 @@
 /* information passed from first stage */
 karch_t kinfo;
 
-extern uint32_t *stack_pages1;
 /**
  * tempos_main
  *
@@ -49,8 +48,10 @@ void tempos_main(karch_t kinf)
 
 	for(i=0; i<8; i++) {
 		page = alloc_page(NORMAL_ZONE);
+		page = alloc_page(DMA_ZONE);
 		if(page)
 			kprintf("P: %.9x\n", (*page >> 12));
+		free_page(page);
 	}
 
 	for(;;);

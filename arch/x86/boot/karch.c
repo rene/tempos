@@ -89,7 +89,7 @@ void karch(unsigned long magic, unsigned long addr)
 						mmap->size + sizeof(mmap->size));
 			i++;
 		}
-		kinf.mmap_size = i;
+		kinf.mmap_size = --i;
 	}
 
 	/* Command line */
