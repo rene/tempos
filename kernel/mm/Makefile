@@ -4,16 +4,17 @@
 #
 #
 
-objs-files := kernel.o
+objs-files := init_mm.o kmalloc.o
 
-SUBDIRS = mm
+#SUBDIRS = boot kernel
 
-.PHONY: subdirs $(SUBDIRS)
+#.PHONY: subdirs $(SUBDIRS)
 
-all: $(objs-files) $(SUBDIRS)
+all: $(objs-files)
+#$(SUBDIRS)
 
-$(SUBDIRS):
-	$(MAKE) -C $@
+#$(SUBDIRS):
+#	$(MAKE) -C $@
 
 .o: .c
 	$(CC) $(CFLAGS) -c $<

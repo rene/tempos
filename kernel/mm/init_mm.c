@@ -2,8 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: kernel.c
- * Desc: The TempOS kernel
+ * File: init_mm.c
+ * Desc: Functions to start the memory manager
  *
  * This file is part of TempOS.
  *
@@ -22,45 +22,62 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <tempos/kernel.h>
-#include <x86/mm.h>
-#include <string.h>
+#include <tempos/mm.h>
 
+extern uint32_t *kpagedir;
 
-/* information passed from first stage */
-karch_t kinfo;
+/* Kernel Map memory */
+mem_map kmem;
 
-/**
- * tempos_main
- *
- * This is the function called when first stage is done, which means that
- * all dependent machine boot code was executed. See arch/$ARCH/boot/karch.c
- */
-void tempos_main(karch_t kinf)
+void init_mm(void)
 {
-	uint32_t *page;
+	uint32_t kpages = get_kspages();
 	uint32_t i;
 
-	memcpy(&kinfo, &kinf, sizeof(karch_t));
+	/* Init Kernel map */
+	kmem.pagedir = kpagedir;
+	bmap_clear(&kmem);
 
-	kprintf("We are in TempOS kernel!\n");
-	kprintf("Command line passed: %s\n", kinfo.cmdline);
-
-	for(i=0; i<8; i++) {
-		page = alloc_page(NORMAL_ZONE);
-		page = alloc_page(DMA_ZONE);
-		if(page)
-			kprintf("P: %.9x\n", (*page >> 12));
-		free_page(page);
+	/*
+	   Map used space
+	   NOTE: page_alloc could be called just after this map !
+	*/
+	for(i=0; i<kpages; i++) {
+		bmap_on(&kmem, i);
+		bmap_on(&kmem, KERNEL_PDIR_SPACE + i);
 	}
 
-	for(;;);
+	/* We are ready for kmalloc =:) */
 }
 
 
-void panic(const char *str)
+/**
+ * bmap_clear
+ *
+ * Clear a bit map
+ */
+void bmap_clear(mem_map *map)
 {
-	kprintf(KERN_CRIT "%s\n", str);
-	for(;;);
+	uchar8_t *bmap = map->bitmap;
+	uint32_t i;
+
+	for(i=0; i<BITMAP_SIZE; i++) {
+		bmap[i] = 0;
+	}
 }
+
+
+/**
+ * bmap_on
+ *
+ * Mark a bit (page) on a bitmap
+ */
+void bmap_on(mem_map *map, uint32_t page)
+{
+	uint32_t byte = page >> BITMAP_SHIFT;
+	uint32_t bit  = page - (byte * sizeof(uchar8_t));
+
+	map->bitmap[byte] |= (BITMAP_FBIT >> bit);
+}
+
 

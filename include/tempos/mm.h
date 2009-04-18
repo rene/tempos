@@ -21,27 +21,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_X86_MM_H
+#ifndef MEM_MANAGER_H
 
-	#define ARCH_X86_MM_H
+	#define MEM_MANAGER_H
 
 	#include <tempos/kernel.h>
-
-	/* Directory position that kernel is mapped */
-	#define KERNEL_PDIR_SPACE	768 /* 3GB */
-
-	/* Memory zones */
-	#define DMA_ZONE		0x01
-	#define NORMAL_ZONE		0x02
+	#include <x86/page.h>
+	#include <x86/mm.h>
 
 
-	typedef uchar8_t zone_t;
+	#define BITMAP_SIZE	  0x20000 /* (TABLE_SIZE^2) / sizeof(uchar8_t) */
+	#define BITMAP_SHIFT	    3
+	#define BITMAP_FBIT		 0x80
 
-	void init_pg(karch_t *kinf);
-	uint32_t *alloc_page(zone_t zone);
-	void free_page(uint32_t *page_e);
-	uint32_t get_maxpages(void);
-	uint32_t get_kspages(void);
+	#define GET_DINDEX(page)	(TABLE_ALIGN(page) >> TABLE_SHIFT)
 
-#endif /* ARCH_X86_MM_H */
+
+	/* Map of a directory */
+	struct _mem_map {
+		uint32_t *pagedir;	/* page directory */
+		uchar8_t bitmap[BITMAP_SIZE];
+	};
+
+	/* Region of allocated memory */
+	struct _mregion {
+		uint32_t initial_addr;
+		uint32_t size;
+	};
+
+	typedef struct _mem_map mem_map;
+	typedef struct _mregion mregion;
+
+	void init_mm(void);
+
+	void bmap_clear(mem_map *map);
+
+	void bmap_on(mem_map *map, uint32_t page);
+
+	uint32_t *kmalloc(uint32_t size, uint16_t flags);
+
+	uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags);
+
+#endif /* MEM_MANAGER_H */
+
 

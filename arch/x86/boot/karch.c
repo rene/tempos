@@ -24,6 +24,7 @@
  */
 
 #include <tempos/kernel.h>
+#include <tempos/mm.h>
 #include <x86/karch.h>
 #include <x86/multiboot.h>
 #include <x86/idt.h>
@@ -113,6 +114,8 @@ void karch(unsigned long magic, unsigned long addr)
 	init_PIC();
 	sti();
 
+	/* Init the Memory Manager */
+	init_mm();
 
 	/* TODO: start console */
     clrscr();

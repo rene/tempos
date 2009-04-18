@@ -29,6 +29,7 @@
 	#include <ctype.h>
 	#include <unistd.h>
 	#include <stdlib.h>
+	#include <tempos/error.h>
 
 	#include "../arch/x86/boot/video.h" /* temporary */
 
@@ -90,6 +91,8 @@
 	int sprintf(char *str, const char *format, ...);
 
 	int kprintf(const char *format, ...);
+
+	void panic(const char *str);
 
 	void tempos_main(karch_t kinf);
 

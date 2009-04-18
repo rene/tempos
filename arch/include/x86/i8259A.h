@@ -49,7 +49,7 @@
 	#define IRQ8_VECTOR			0x28
 
 	/* A simple wait for io operations */
-	#define pic_iowait()	asm volatile("nop; nop; nop");
+	#define pic_delay()	asm volatile("nop; nop; nop");
 
 
 	void init_PIC(void);

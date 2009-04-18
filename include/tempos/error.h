@@ -2,7 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: mm.h
+ * File: error.h
+ * Desc: Contain the error codes for TempOS
  *
  * This file is part of TempOS.
  *
@@ -21,27 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_X86_MM_H
+#ifndef ERROR_H
 
-	#define ARCH_X86_MM_H
+	#define ERROR_H
 
-	#include <tempos/kernel.h>
+	#define ENOMEM		1
 
-	/* Directory position that kernel is mapped */
-	#define KERNEL_PDIR_SPACE	768 /* 3GB */
+#endif /* ERROR_H */
 
-	/* Memory zones */
-	#define DMA_ZONE		0x01
-	#define NORMAL_ZONE		0x02
-
-
-	typedef uchar8_t zone_t;
-
-	void init_pg(karch_t *kinf);
-	uint32_t *alloc_page(zone_t zone);
-	void free_page(uint32_t *page_e);
-	uint32_t get_maxpages(void);
-	uint32_t get_kspages(void);
-
-#endif /* ARCH_X86_MM_H */
 

@@ -93,10 +93,14 @@
  *
  */
 
-
+/* Kernel tables */
 uint32_t *kpagedir   = 0;
 uint32_t *kpgtables  = 0;
-uint32_t *mempages   = 0;
+
+/* Pages */
+static uint32_t maxpages  = 0; /* Total of pages on the system   */
+static uint32_t ks_pages  = 0; /* Number of pages used by kernel */
+static uint32_t *mempages = 0;
 
 /* Stack pointers */
 static uint32_t *stack_pages1      = 0;
@@ -197,8 +201,8 @@ void init_pg(karch_t *kinf)
 		kpagedir[0 + i]   = ((uint32_t)kpgtables_ptr +
 								(i * TABLE_SIZE * TABLE_ENTRY_SIZE)) |
 									(PAGE_WRITABLE | PAGE_PRESENT); /* 0MB  */
-		kpagedir[768 + i] = ((uint32_t)kpgtables_ptr +
-								(i * TABLE_SIZE * TABLE_ENTRY_SIZE)) |
+		kpagedir[KERNEL_PDIR_SPACE + i] = ((uint32_t)kpgtables_ptr +
+										(i * TABLE_SIZE * TABLE_ENTRY_SIZE)) |
 									(PAGE_WRITABLE | PAGE_PRESENT); /* 3GB  */
 	}
 
@@ -352,6 +356,9 @@ void init_pg(karch_t *kinf)
 	}
 	stackp1_maxtop = *stack_pages1_top;
 	stackp2_maxtop = *stack_pages2_top;
+
+	maxpages = np + nptotal;
+	ks_pages = np;
 }
 
 
@@ -403,5 +410,27 @@ void free_page(uint32_t *page_e)
 		}
 	}
 	return;
+}
+
+
+/**
+ * get_maxpages
+ *
+ * Return the total of pages on the system
+ */
+uint32_t get_maxpages(void)
+{
+	return(maxpages);
+}
+
+
+/**
+ * get_kspages
+ *
+ * Return the total of pages used only by kernel (Block1 + Block2)
+ */
+uint32_t get_kspages(void)
+{
+	return(ks_pages);
 }
 

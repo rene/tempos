@@ -40,10 +40,10 @@ void init_PIC(void)
 
 	/* ICW1 */
 	outb((PIC_ICW1_INIT | PIC_ICW1_IC4), PIC_MASTER_CMD);
-	pic_iowait();
+	pic_delay();
 
 	outb((PIC_ICW1_INIT | PIC_ICW1_IC4), PIC_SLAVE_CMD);
-	pic_iowait();
+	pic_delay();
 
 
 	/* ICW2
@@ -58,26 +58,26 @@ void init_PIC(void)
 			...
 	 */
 	outb(IRQ0_VECTOR, PIC_MASTER_DATA);
-	pic_iowait();
+	pic_delay();
 
 	outb(IRQ8_VECTOR, PIC_SLAVE_DATA);
-	pic_iowait();
+	pic_delay();
 
 
 	/* ICW3 */
 	outb(PIC_ICW3_M_CASCADE, PIC_MASTER_DATA);
-	pic_iowait();
+	pic_delay();
 
 	outb(PIC_ICW3_S_CASCADE, PIC_SLAVE_DATA);
-	pic_iowait();
+	pic_delay();
 
 
 	/* ICW4 */
 	outb((PIC_ICW4_8086 | PIC_ICW4_AEOI), PIC_MASTER_DATA);
-	pic_iowait();
+	pic_delay();
 
 	outb((PIC_ICW4_8086 | PIC_ICW4_AEOI), PIC_MASTER_DATA);
-	pic_iowait();
+	pic_delay();
 }
 
 
@@ -99,7 +99,7 @@ uchar8_t get_picmask(uchar8_t pic)
 		return(0);
 	} else {
 		mask = inb(pic);
-		pic_iowait();
+		pic_delay();
 		return(mask);
 	}
 }
@@ -118,7 +118,7 @@ void set_picmask(uchar8_t mask, uchar8_t pic)
 {
 	if(pic == PIC_MASTER_DATA || pic == PIC_SLAVE_DATA) {
 		outb(mask, pic);
-		pic_iowait();
+		pic_delay();
 	}
 }
 
