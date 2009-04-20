@@ -24,11 +24,15 @@
 
 #include <tempos/kernel.h>
 #include <tempos/mm.h>
+#include <x86/mm.h>
 #include <string.h>
 
 
 /* information passed from first stage */
 karch_t kinfo;
+
+extern uint32_t *kpagedir;
+
 
 /**
  * tempos_main
@@ -38,7 +42,7 @@ karch_t kinfo;
  */
 void tempos_main(karch_t kinf)
 {
-	uint32_t *page;
+	uint32_t *mymem;
 	uint32_t i;
 
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
@@ -46,21 +50,17 @@ void tempos_main(karch_t kinf)
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
-	/*
-	for(i=0; i<10; i++) {
-		page = alloc_page(NORMAL_ZONE);
-		kprintf("> %lx\n", page);
-	}*/
-
-	page = kmalloc(sizeof(uint32_t) * 52000, GFP_NORMAL_Z);
-	if(page == 0) {
+	mymem = (uint32_t *)kmalloc(sizeof(uint32_t) * 52000, GFP_NORMAL_Z);
+	if(mymem == 0) {
 		kprintf("Erro ao alocar memoria!\n");
 	} else {
-		for(i=0; i<51998; i++) {
-			page[i] = 100;
+		for(i=0; i<52000; i++) {
+			mymem[i] = 100;
 		}
-		kprintf("OK -- %ld\n", (uint32_t)page);
+		kfree(mymem);
 	}
+
+	kprintf("Deu tudo certo!\n");
 
 	for(;;);
 }

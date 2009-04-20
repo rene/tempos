@@ -35,6 +35,7 @@
 	#define BITMAP_FBIT		 0x80
 
 	#define GET_DINDEX(page)	(TABLE_ALIGN(page) >> TABLE_SHIFT)
+	#define DINDEX_VADDR(index) (KERNEL_START_ADDR + (index << TABLE_SHIFT))
 	#define TABLE_ADDR(index)	(index << PAGE_SHIFT)
 
 	/* Flags for kmalloc functions */
@@ -65,13 +66,13 @@
 
 	void bmap_on(mem_map *map, uint32_t block);
 
-	uint32_t *kmalloc(uint32_t size, uint16_t flags);
+	void bmap_off(mem_map *map, uint32_t block);
 
-	uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags);
+	void *kmalloc(uint32_t size, uint16_t flags);
 
-	void free_tab_entry(uint32_t *table, uint32_t pos);
+	void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags);
 
-	void fill_pgtable(uint32_t *table);
+	void kfree(uint32_t *ptr);
 
 #endif /* MEM_MANAGER_H */
 

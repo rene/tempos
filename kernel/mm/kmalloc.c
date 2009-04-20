@@ -35,7 +35,7 @@ extern mem_map kmem;
  *
  * Alloc memory =:)
 */
-uint32_t *kmalloc(uint32_t size, uint16_t flags)
+void *kmalloc(uint32_t size, uint16_t flags)
 {
 	return( _vmalloc_(&kmem, size, flags) );
 }
@@ -48,11 +48,11 @@ uint32_t *kmalloc(uint32_t size, uint16_t flags)
  * find space to alloc size bytes. We can also free the memory allocated
  * with _vmalloc_, to do that, every piece of memory allocated will start
  * with mregion structure, that contains the initial address and size of
- * region allocated. So once we call _free_ function it will look at
+ * region allocated. So once we call kfree function it will look at
  * inital_address-sizeof(mregion), get the region information and free the
  * memory.
  */
-uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
+void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 {
 	uint32_t npages, apages;
 	uint32_t pstart, freep;
@@ -60,7 +60,8 @@ uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	uint32_t size_region;
 	uchar8_t value, start, atable;
 	mregion *mem_area;
-	uint32_t newpage, *mem_block, *table;
+	uint32_t newpage, newtable;
+	uint32_t *mem_block, *table;
 	zone_t mzone;
 
 
@@ -118,14 +119,12 @@ uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	table = (uint32_t *)(memm->pagedir[index] >> PAGE_SHIFT);
 	if(table == 0) {
 		/* Alloc table */
-		if( !(newpage = alloc_page(mzone)) ) {
-			kprintf("ERRO\n");
+		if( !(newtable = alloc_table()) ) {
 			return(0);
 		} else {
-			memm->pagedir[index] = (newpage | PAGE_PRESENT);
-			table  = (uint32_t *)TABLE_ADDR(index);
+			memm->pagedir[index] = (newtable | PAGE_PRESENT);
+			table  = (uint32_t *)DINDEX_VADDR(index);
 			atable = 1;
-			fill_pgtable(table);
 		}
 	} else {
 		atable = 0;
@@ -151,19 +150,19 @@ uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 					}
 					apages++;
 					table[j] = newpage;
+					bmap_on(memm, (index * TABLE_SIZE) + j);
 				}
 			}
 		}
 
 		if(apages < npages) {
 			/* Alloc table */
-			if( !(newpage = alloc_page(mzone)) ) {
+			if( !(newtable = alloc_table()) ) {
 				goto error;
 			} else {
 				index++;
-				memm->pagedir[index] = (newpage | PAGE_PRESENT);
-				table  = (uint32_t *)TABLE_ADDR(index);
-				fill_pgtable(table);
+				memm->pagedir[index] = (newtable | PAGE_PRESENT);
+				table = (uint32_t *)DINDEX_VADDR(index);
 			}
 		}
 	}
@@ -195,17 +194,18 @@ error:
 	while(apages > 0) {
 		table = (uint32_t *)(memm->pagedir[index] >> PAGE_SHIFT);
 
-		for(i=j; i>0 && apages>0; i--) {
+		for(i=j; i>=1 && apages>0; i--) {
 			if((table[i] >> PAGE_SHIFT) != 0) {
 				/* free a page */
 				free_page(table[i]);
 				apages--;
 				table[i] = 0;
+				bmap_off(memm, (index * TABLE_SIZE) + i);
 			}
 
 		} j = TABLE_SIZE;
 
-		if(apages == 0 && i == 0) {
+		if(apages > 0 && i == 0) {
 			/* free a table */
 			free_page(memm->pagedir[index]);
 			memm->pagedir[index] = 0;
@@ -218,27 +218,53 @@ error:
 
 
 /**
- * free_tab_entry
+ * kfree
  *
- * Free a page from page table
+ * Free memory allocated with _vmalloc
  */
-void free_tab_entry(uint32_t *table, uint32_t pos)
+void kfree(uint32_t *ptr)
 {
-	free_page(table[pos]);
-	table[pos] = (PAGE_WRITABLE);
-}
+	mregion *mem_area = (mregion *)((uint32_t)ptr - sizeof(mregion));
+	uint32_t index    = mem_area->initial_addr >> TABLE_SHIFT;
+	uint32_t ffpage   = mem_area->initial_addr - (index * TABLE_SIZE) + 1;
+	uint32_t lpage    = ffpage + mem_area->size - 1;
+	uint32_t *pagedir, *table;
+	uint32_t i, j, k;
 
+	/* Free memory pages */
+	j = k = lpage;
+	while(j >= ffpage) {
+		table = (uint32_t *)(mem_area->memm->pagedir[index] >> PAGE_SHIFT);
 
-/**
- * zero_table
- *
- * Fill a table with zeros
- */
-void fill_pgtable(uint32_t *table)
-{
-	uint32_t i;
-	for(i=0; i<TABLE_SIZE; i++) {
-		table[i] = (PAGE_WRITABLE);
+		for(i=k; i>=1; i--) {
+			if((table[i] >> PAGE_SHIFT) != 0) {
+				/* free a page */
+				free_page(table[i]);
+				table[i] = 0;
+				bmap_off(mem_area->memm, j);
+				j--;
+			}
+		} k = TABLE_SIZE;
+
+		if(i == 0) {
+			/* free a table */
+			free_page(mem_area->memm->pagedir[index]);
+			mem_area->memm->pagedir[index] = 0;
+			index--;
+		}
 	}
+	index++;
+
+	/* Finally, we free the last page of block */
+	pagedir = mem_area->memm->pagedir;
+	bmap_off(mem_area->memm, mem_area->initial_addr);
+	free_page(table[ffpage]);
+	if(ffpage == 0) {
+		/* free the table */
+		free_page(pagedir[index]);
+		pagedir[index] = 0;
+	}
+
 }
+
 

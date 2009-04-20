@@ -93,6 +93,9 @@
 uint32_t *kpagedir   = 0;
 uint32_t *kpgtables  = 0;
 
+/* Temporary page table entry */
+static uint32_t tmp_entry = 0;
+
 /* Pages */
 static uint32_t maxpages  = 0; /* Total of pages on the system   */
 static uint32_t ks_pages  = 0; /* Number of pages used by kernel */
@@ -121,7 +124,7 @@ void init_pg(karch_t *kinf)
 	uint32_t address;
 	uint32_t nptotal; /* Number of total memory pages to the system */
 	uint32_t totalmem;
-	uint32_t kpgtables_size, mempages_size, z1_size;
+	uint32_t kblock2_size, mempages_size, z1_size;
 	uint32_t m_end, m_length, index;
 	uint32_t kpa_start, kpa_length;
 
@@ -138,7 +141,7 @@ void init_pg(karch_t *kinf)
 
 	/* Calculate how many pages we need to Kernel Block1
 	   PS: 256 - For the first 1MB of memory
-	         1 - For kpagedir                             */
+	         1 - For kpagedir                            */
 	np = 256 + 1 + (PAGE_ALIGN((uint32_t)KERNEL_END_ADDR -
 					(uint32_t)KERNEL_START_ADDR) >> PAGE_SHIFT);
 
@@ -149,12 +152,16 @@ void init_pg(karch_t *kinf)
 	/* Calculate and sum pages that we need to Kernel Block2       */
 	mempages_size   = PAGE_ALIGN(nptotal * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
 	np             += mempages_size;
-	kpgtables_size  = PAGE_ALIGN(np * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
+	kblock2_size    = PAGE_ALIGN(np * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
 
-	/* Calculate total page tables Kernel needs */
-	nt = (TABLE_ALIGN(np + kpgtables_size) >> TABLE_SHIFT);
+	/* Position of temporary page table entry */
+	tmp_entry = np + kblock2_size - 1;
 
-	/* Final number of pages used by kernel     */
+	/* Calculate total page tables Kernel needs
+	   PS: 1 - We need one free table entry for table alloc functions */
+	nt = (TABLE_ALIGN(np + kblock2_size + 1) >> TABLE_SHIFT);
+
+	/* Final number of pages used by kernel */
 	np = nt * TABLE_SIZE;
 
 
@@ -206,7 +213,6 @@ void init_pg(karch_t *kinf)
 
 	/* Reload GDT */
 	setup_GDT();
-
 
 
 	/* Configure stack addresses
@@ -404,4 +410,39 @@ uint32_t get_kspages(void)
 {
 	return(ks_pages);
 }
+
+
+/**
+ * alloc_table
+ *
+ * This functions allocs a page and map it to a temporary location
+ * (at kernel page tables), so we can access the contents of the table.
+ * The first position will point to the table itself and the others will
+ * be filled with zero.
+ */
+uint32_t alloc_table(void)
+{
+	uint32_t newpage, i;
+	uint32_t *table;
+
+	if( !(newpage = alloc_page(NORMAL_ZONE)) ) {
+		return(0);
+	}
+
+	/* Map table temporary to fill with values */
+	kpgtables[tmp_entry] = newpage | (PAGE_WRITABLE | PAGE_PRESENT);
+
+	table = (uint32_t *)(KERNEL_START_ADDR + (tmp_entry * PAGE_SIZE));
+
+	/* First position: Point to table itself */
+	for(i=0; i<TABLE_SIZE; i++) {
+		table[i] = 0;
+	}
+
+	/* un-map table */
+	kpgtables[tmp_entry] = 0;
+
+	return(newpage);
+}
+
 

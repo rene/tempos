@@ -81,3 +81,16 @@ void bmap_on(mem_map *map, uint32_t block)
 }
 
 
+/**
+ * bmap_off
+ *
+ * Unmark a bit (block) on a bitmap
+ */
+void bmap_off(mem_map *map, uint32_t block)
+{
+	uint32_t byte = block >> BITMAP_SHIFT;
+	uint32_t bit  = block - (byte * (sizeof(uchar8_t) * 8));
+
+	map->bitmap[byte] |= (uchar8_t)~(BITMAP_FBIT >> bit);
+}
+

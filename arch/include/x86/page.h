@@ -32,11 +32,13 @@
 	#define PAGE_SIZE       	(1UL << PAGE_SHIFT)
 	#define PAGE_MASK		 	(~(PAGE_SIZE - 1))
 	#define PAGE_ALIGN(addr)    (((addr) + PAGE_SIZE - 1) & PAGE_MASK)
+	#define PAGE_PADDR(p)		(p & 0xFFFFF000)
 
 	#define TABLE_SHIFT			10 /* 1024 */
 	#define TABLE_SIZE			(1UL << TABLE_SHIFT)
 	#define TABLE_MASK          (~(TABLE_SIZE - 1))
 	#define TABLE_ALIGN(addr)   (((addr) + TABLE_SIZE -1) & TABLE_MASK)
+	#define TABLE_PADDR(t)		(t & 0xFFFFF000)
 
 	#define TABLE_ENTRY_SIZE	sizeof(uint32_t)
 

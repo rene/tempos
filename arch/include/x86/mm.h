@@ -48,5 +48,9 @@
 
 	uint32_t get_kspages(void);
 
+	uint32_t alloc_table(void);
+
+	void free_table(uint32_t table);
+
 #endif /* ARCH_X86_MM_H */
 
