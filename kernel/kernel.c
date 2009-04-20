@@ -56,7 +56,7 @@ void tempos_main(karch_t kinf)
 	if(page == 0) {
 		kprintf("Erro ao alocar memoria!\n");
 	} else {
-		for(i=0; i<51999; i++) {
+		for(i=0; i<51998; i++) {
 			page[i] = 100;
 		}
 		kprintf("OK -- %ld\n", (uint32_t)page);
