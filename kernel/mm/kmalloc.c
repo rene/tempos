@@ -61,7 +61,7 @@ uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	uchar8_t value, start, atable;
 	mregion *mem_area;
 	uint32_t newpage, *mem_block, *table;
-	uint16_t mzone;
+	zone_t mzone;
 
 
 	/* Check flags */
@@ -92,8 +92,9 @@ uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 					freep++;
 				}
 			} else {
-				if(value == 1 && freep < npages) {
+				if(value != 0 && freep < npages) {
 					start = 0;
+					freep = 0;
 				} else {
 					freep++;
 				}
@@ -118,6 +119,7 @@ uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	if(table == 0) {
 		/* Alloc table */
 		if( !(newpage = alloc_page(mzone)) ) {
+			kprintf("ERRO\n");
 			return(0);
 		} else {
 			memm->pagedir[index] = (newpage | PAGE_PRESENT);

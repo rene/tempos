@@ -325,8 +325,8 @@ void init_pg(karch_t *kinf)
 		}
 	}
 
-	stackp1_maxtop = *stack_pages1_top;
-	stackp2_maxtop = *stack_pages2_top;
+	stackp1_maxtop = --(*stack_pages1_top);
+	stackp2_maxtop = --(*stack_pages2_top);
 
 	maxpages = np + nptotal;
 	ks_pages = np;

@@ -46,11 +46,21 @@ void tempos_main(karch_t kinf)
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
-	page = kmalloc(sizeof(uint32_t) * 2000, GFP_NORMAL_Z | GFP_ZEROP);
-	for(i=0; i<2000; i++) {
-		page[i] = 100;
+	/*
+	for(i=0; i<10; i++) {
+		page = alloc_page(NORMAL_ZONE);
+		kprintf("> %lx\n", page);
+	}*/
+
+	page = kmalloc(sizeof(uint32_t) * 52000, GFP_NORMAL_Z);
+	if(page == 0) {
+		kprintf("Erro ao alocar memoria!\n");
+	} else {
+		for(i=0; i<51999; i++) {
+			page[i] = 100;
+		}
+		kprintf("OK -- %ld\n", (uint32_t)page);
 	}
-	kprintf("OK\n");
 
 	for(;;);
 }
