@@ -23,7 +23,7 @@
  */
 
 #include <tempos/kernel.h>
-#include <x86/mm.h>
+#include <tempos/mm.h>
 #include <string.h>
 
 
@@ -46,13 +46,11 @@ void tempos_main(karch_t kinf)
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
-	for(i=0; i<8; i++) {
-		page = alloc_page(NORMAL_ZONE);
-		page = alloc_page(DMA_ZONE);
-		if(page)
-			kprintf("P: %.9x\n", (*page >> 12));
-		free_page(page);
+	page = kmalloc(sizeof(uint32_t) * 2000, GFP_NORMAL_Z | GFP_ZEROP);
+	for(i=0; i<2000; i++) {
+		page[i] = 100;
 	}
+	kprintf("OK\n");
 
 	for(;;);
 }

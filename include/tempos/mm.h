@@ -35,6 +35,12 @@
 	#define BITMAP_FBIT		 0x80
 
 	#define GET_DINDEX(page)	(TABLE_ALIGN(page) >> TABLE_SHIFT)
+	#define TABLE_ADDR(index)	(index << PAGE_SHIFT)
+
+	/* Flags for kmalloc functions */
+	#define GFP_DMA_Z		0x01
+	#define GFP_NORMAL_Z	0x02
+	#define GFP_ZEROP		0x04
 
 
 	/* Map of a directory */
@@ -45,9 +51,10 @@
 
 	/* Region of allocated memory */
 	struct _mregion {
+		struct _mem_map *memm;
 		uint32_t initial_addr;
 		uint32_t size;
-	};
+	} __attribute__ ((packed));
 
 	typedef struct _mem_map mem_map;
 	typedef struct _mregion mregion;
@@ -56,11 +63,15 @@
 
 	void bmap_clear(mem_map *map);
 
-	void bmap_on(mem_map *map, uint32_t page);
+	void bmap_on(mem_map *map, uint32_t block);
 
 	uint32_t *kmalloc(uint32_t size, uint16_t flags);
 
 	uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags);
+
+	void free_tab_entry(uint32_t *table, uint32_t pos);
+
+	void fill_pgtable(uint32_t *table);
 
 #endif /* MEM_MANAGER_H */
 

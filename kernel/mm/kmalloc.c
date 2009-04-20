@@ -54,17 +54,26 @@ uint32_t *kmalloc(uint32_t size, uint16_t flags)
  */
 uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 {
-	uint32_t npages, ntables;
+	uint32_t npages, apages;
 	uint32_t pstart, freep;
-	uint32_t i, b, index;
+	uint32_t i, j, b, index, oldindex, ffpage;
 	uint32_t size_region;
-	uchar8_t value, start;
-	mregion mem_area;
+	uchar8_t value, start, atable;
+	mregion *mem_area;
+	uint32_t newpage, *mem_block, *table;
+	uint16_t mzone;
 
-	/* Calculate number of pages and page tables needed */
+
+	/* Check flags */
+	if( (flags & GFP_DMA_Z) ) {
+		mzone = DMA_ZONE;
+	} else {
+		mzone = NORMAL_ZONE;
+	}
+
+	/* Calculate number of pages needed */
 	size_region = sizeof(mregion) + size;
 	npages      = PAGE_ALIGN(size_region) >> PAGE_SHIFT;
-	ntables     = TABLE_ALIGN(npages) >> TABLE_SHIFT;
 
 	/* Search for space in bitmap */
 	start  = 0;
@@ -78,34 +87,156 @@ uint32_t *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 			if(!start) {
 				if(value == 0) {
 					/* We found a free block */
-					pstart = ((i * sizeof(uchar8_t)) + b);
+					pstart = ((i * 8 * sizeof(uchar8_t)) + b);
 					start  = 1;
 					freep++;
 				}
 			} else {
 				if(value == 1 && freep < npages) {
-					return(0);
+					start = 0;
 				} else {
 					freep++;
 				}
 			}
 
-			if(freep >= size) {
-				/* We have the necessary space, now we need to take a
-				   look at rigth index in pagedir and if there is a
-				   table there, get it and fill with pages, otherwise
-				   we start a new table. Other tables will be started
-				   as they are needed. */
-				index = GET_DINDEX(pstart);
+			if(freep >= npages) {
+				start = 2;
+				break;
+			}
+		}
+	}
+	if(start != 2)
+		return(0);
 
-				if((memm->pagedir[index] >> PAGE_SHIFT)  == 0) {
-					/* Alloc table */
+	/* We have the necessary space, now we need to take a
+	   look at rigth index in pagedir and if there is a
+	   table there, get it and fill with pages, otherwise
+	   we start a new table. Other tables will be started
+	   as they are needed. */
+	index = GET_DINDEX(pstart);
+	table = (uint32_t *)(memm->pagedir[index] >> PAGE_SHIFT);
+	if(table == 0) {
+		/* Alloc table */
+		if( !(newpage = alloc_page(mzone)) ) {
+			return(0);
+		} else {
+			memm->pagedir[index] = (newpage | PAGE_PRESENT);
+			table  = (uint32_t *)TABLE_ADDR(index);
+			atable = 1;
+			fill_pgtable(table);
+		}
+	} else {
+		atable = 0;
+	}
+
+	oldindex = index;
+	ffpage   = 0;
+	apages   = 0; /* Allocated pages */
+	while(apages <= npages) {
+		table = (uint32_t *)(memm->pagedir[index] >> PAGE_SHIFT);
+
+		/* Search for a free entry in page table */
+		for(j=0; (j<TABLE_SIZE && apages <= npages); j++) {
+			if((table[j] >> PAGE_SHIFT) == 0) {
+				/* Alloc a page */
+				if( !(newpage = alloc_page(mzone)) ) {
+					goto error;
+				} else {
+					/* Is this the first page of our block? */
+					if(apages == 0) {
+						oldindex = index;
+						ffpage   = j;
+					}
+					apages++;
+					table[j] = newpage;
 				}
 			}
+		}
+
+		if(apages < npages) {
+			/* Alloc table */
+			if( !(newpage = alloc_page(mzone)) ) {
+				goto error;
+			} else {
+				index++;
+				memm->pagedir[index] = (newpage | PAGE_PRESENT);
+				table  = (uint32_t *)TABLE_ADDR(index);
+				fill_pgtable(table);
+			}
+		}
+	}
+
+	/* Start the block allocated information. The vfree 
+	   function will receive only an address as an argument,
+	   so the trick here is hold an information about the
+	   block just before the block itself. */
+	mem_block = (uint32_t *)((TABLE_ADDR(oldindex) +
+					(ffpage * TABLE_ENTRY_SIZE)) & 0xFFFFF000);
+	mem_area               = (mregion *)mem_block;
+	mem_area->memm         = memm;
+	mem_area->initial_addr = pstart;
+	mem_area->size         = npages;
+
+	mem_block = (uint32_t *)((uint32_t)mem_block + sizeof(mregion));
+
+	if( (flags & GFP_ZEROP) ) {
+		for(i=0; i<(size - sizeof(mregion)); i++) {
+			mem_block[i] = 0;
+		}
+	}
+
+	/* We have done =:) */
+	return(mem_block);
+
+error:
+	/* Free pages allocated */
+	while(apages > 0) {
+		table = (uint32_t *)(memm->pagedir[index] >> PAGE_SHIFT);
+
+		for(i=j; i>0 && apages>0; i--) {
+			if((table[i] >> PAGE_SHIFT) != 0) {
+				/* free a page */
+				free_page(table[i]);
+				apages--;
+				table[i] = 0;
+			}
+
+		} j = TABLE_SIZE;
+
+		if(apages == 0 && i == 0) {
+			/* free a table */
+			free_page(memm->pagedir[index]);
+			memm->pagedir[index] = 0;
+			index--;
 		}
 	}
 
 	return(0);
 }
 
+
+/**
+ * free_tab_entry
+ *
+ * Free a page from page table
+ */
+void free_tab_entry(uint32_t *table, uint32_t pos)
+{
+	free_page(table[pos]);
+	table[pos] = (PAGE_WRITABLE);
+}
+
+
+/**
+ * zero_table
+ *
+ * Fill a table with zeros
+ */
+void fill_pgtable(uint32_t *table)
+{
+	uint32_t i;
+	for(i=0; i<TABLE_SIZE; i++) {
+		table[i] = (PAGE_WRITABLE);
+	}
+}
 

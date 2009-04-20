@@ -44,7 +44,7 @@ void init_mm(void)
 	*/
 	for(i=0; i<kpages; i++) {
 		bmap_on(&kmem, i);
-		bmap_on(&kmem, KERNEL_PDIR_SPACE + i);
+		bmap_on(&kmem, (KERNEL_PDIR_SPACE * TABLE_SIZE) + i);
 	}
 
 	/* We are ready for kmalloc =:) */
@@ -70,14 +70,14 @@ void bmap_clear(mem_map *map)
 /**
  * bmap_on
  *
- * Mark a bit (page) on a bitmap
+ * Mark a bit (block) on a bitmap
  */
-void bmap_on(mem_map *map, uint32_t page)
+void bmap_on(mem_map *map, uint32_t block)
 {
-	uint32_t byte = page >> BITMAP_SHIFT;
-	uint32_t bit  = page - (byte * sizeof(uchar8_t));
+	uint32_t byte = block >> BITMAP_SHIFT;
+	uint32_t bit  = block - (byte * (sizeof(uchar8_t) * 8));
 
-	map->bitmap[byte] |= (BITMAP_FBIT >> bit);
+	map->bitmap[byte] |= (uchar8_t)(BITMAP_FBIT >> bit);
 }
 
 

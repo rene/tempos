@@ -68,14 +68,10 @@
  *      |           |                |
  *      |           |----------------|
  *      |           |     .....      |
- *      |           |  stack_pages1  |
- *      |           |    DMA Zone    |
+ *    Kernel        |  stack_pages1  |
+ *    Block2        |    DMA Zone    |
  *      |           |  (0 to 16MB)   |
- *    Kernel        |                |
- *    Block2        |----------------End of system memory pages
- *      |           |     .....      |
- *      |           |     .....      | 
- *      |           |    mempages    |
+ *      |           |                |
  *      |           |----------------End of page tables used by Kernel
  *      |           |     .....      |
  *      |           |     .....      |
@@ -100,7 +96,6 @@ uint32_t *kpgtables  = 0;
 /* Pages */
 static uint32_t maxpages  = 0; /* Total of pages on the system   */
 static uint32_t ks_pages  = 0; /* Number of pages used by kernel */
-static uint32_t *mempages = 0;
 
 /* Stack pointers */
 static uint32_t *stack_pages1      = 0;
@@ -126,8 +121,7 @@ void init_pg(karch_t *kinf)
 	uint32_t address;
 	uint32_t nptotal; /* Number of total memory pages to the system */
 	uint32_t totalmem;
-	uint32_t mempg_ct;
-	uint32_t kpgtables_size, mempages_size;
+	uint32_t kpgtables_size, mempages_size, z1_size;
 	uint32_t m_end, m_length, index;
 	uint32_t kpa_start, kpa_length;
 
@@ -154,7 +148,7 @@ void init_pg(karch_t *kinf)
 
 	/* Calculate and sum pages that we need to Kernel Block2       */
 	mempages_size   = PAGE_ALIGN(nptotal * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
-	np             += (2 * mempages_size);
+	np             += mempages_size;
 	kpgtables_size  = PAGE_ALIGN(np * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
 
 	/* Calculate total page tables Kernel needs */
@@ -214,32 +208,22 @@ void init_pg(karch_t *kinf)
 	setup_GDT();
 
 
-	/* Ajust pointers to system memory pages */
- 	mempages = (uint32_t *)((uint32_t)kpgtables +
-					(TABLE_SIZE * TABLE_ENTRY_SIZE * nt));
-
-
-	/* Configure mempages (Page Table entries) */
-	address = KERNEL_PA_START + (PAGE_SIZE * TABLE_SIZE * nt);
-	for(i=0; i<nptotal; i++) {
-		mempages[i] = address | (PAGE_WRITABLE | PAGE_PRESENT);
-		address    += PAGE_SIZE;
-	}
 
 	/* Configure stack addresses
 	   PS: If the system has less then 16MB of memory,
 	       just one stack will exist. */
-	stack_pages1     = (uint32_t *)((uint32_t)mempages +
-							(mempages_size * PAGE_SIZE));
+ 	stack_pages1     = (uint32_t *)((uint32_t)kpgtables +
+						(TABLE_SIZE * TABLE_ENTRY_SIZE * nt));
 	stack_pages1_top = &stackp1_top;
 
 	if(kinf->mem_upper <= 0x3C00) {
+		z1_size          = mempages_size;
 		stack_pages2     = stack_pages1;
 		stack_pages2_top = stack_pages1_top;
 	} else {
+		z1_size          = PAGE_ALIGN(DMA_ZONE_SIZE) >> PAGE_SHIFT;
 		stack_pages2     = (uint32_t *)((uint32_t)stack_pages1 +
-								(0x1000 * TABLE_ENTRY_SIZE));
-
+								(z1_size * TABLE_ENTRY_SIZE));
 		stack_pages2_top = &stackp2_top;
 	}
 
@@ -313,7 +297,8 @@ void init_pg(karch_t *kinf)
 	}
 
 	/* Map memory */
-	mempg_ct  = 0;
+	*stack_pages1_top = 0;
+	*stack_pages2_top = 0;
 	for(i=0; i<kinf->mmap_size; i++) {
 		if(kinf->mmap_table[i].type == MTYPE_AVALIABLE) {
 
@@ -327,33 +312,19 @@ void init_pg(karch_t *kinf)
 				address = PAGE_ALIGN(kinf->mmap_table[i].base_addr_low);
 
 				while( (address < m_end) ) {
-					mempages[mempg_ct++] = address | (PAGE_WRITABLE | PAGE_PRESENT);
-					address             += PAGE_SIZE;
+					if(*stack_pages1_top < z1_size) {
+						stack_pages1[(*stack_pages1_top)++] =
+								address | (PAGE_WRITABLE | PAGE_PRESENT);
+					} else {
+						stack_pages2[(*stack_pages2_top)++] =
+								address | (PAGE_WRITABLE | PAGE_PRESENT);
+					}
+					address += PAGE_SIZE;
 				}
 			}
 		}
 	}
 
-
-	/* Start stacks */
-	if(mempg_ct >= 0x1000) {
-		*stack_pages1_top = 0x1000;
-		*stack_pages2_top = mempg_ct - 0x1000;
-
-		for(i=0; i<0x1000; i++) {
-			stack_pages1[i] = (uint32_t)&mempages[i];
-			stack_pages2[i] = (int32_t)&mempages[i + 0x1000];
-		}
-		for(i=0x1000; i<mempg_ct; i++) {
-			stack_pages2[i] = (uint32_t)&mempages[i];
-		}
-	} else {
-		*stack_pages1_top = mempg_ct;
-
-		for(i=0; i<mempg_ct; i++) {
-			stack_pages1[i] = (uint32_t)&mempages[i];
-		}
-	}
 	stackp1_maxtop = *stack_pages1_top;
 	stackp2_maxtop = *stack_pages2_top;
 
@@ -371,17 +342,17 @@ void init_pg(karch_t *kinf)
  * Parameters:
  * 		zone - DMA_ZONE or NORMAL_ZONE
  */
-uint32_t *alloc_page(zone_t zone)
+uint32_t alloc_page(zone_t zone)
 {
 	switch(zone) {
 		case DMA_ZONE:
 			if(*stack_pages1_top)
-				return((uint32_t *)stack_pages1[(*stack_pages1_top)--]);
+				return(stack_pages1[(*stack_pages1_top)--]);
 			break;
 
 		case NORMAL_ZONE:
 			if(*stack_pages2_top)
-				return((uint32_t *)stack_pages2[(*stack_pages2_top)--]);
+				return(stack_pages2[(*stack_pages2_top)--]);
 			break;
 
 		default:
@@ -396,17 +367,17 @@ uint32_t *alloc_page(zone_t zone)
  *
  * Free the page entry allocated with alloc_page
  */
-void free_page(uint32_t *page_e)
+void free_page(uint32_t page_e)
 {
-	if( (*page_e >> PAGE_SHIFT) <= 0x1000 ) {
+	if( (page_e >> PAGE_SHIFT) <= 0x1000 ) {
 		if(*stack_pages1_top < stackp1_maxtop) {
-			stack_pages1[++(*stack_pages1_top)] = (uint32_t)page_e;
-			*page_e |= (PAGE_WRITABLE | PAGE_PRESENT);
+			stack_pages1[++(*stack_pages1_top)] =
+					page_e | (PAGE_WRITABLE | PAGE_PRESENT);
 		}
 	} else {
 		if(*stack_pages2_top < stackp2_maxtop) {
-			stack_pages2[++(*stack_pages2_top)] = (uint32_t)page_e;
-			*page_e |= (PAGE_WRITABLE | PAGE_PRESENT);
+			stack_pages2[++(*stack_pages2_top)] =
+					page_e | (PAGE_WRITABLE | PAGE_PRESENT);
 		}
 	}
 	return;

@@ -31,16 +31,21 @@
 	#define KERNEL_PDIR_SPACE	768 /* 3GB */
 
 	/* Memory zones */
-	#define DMA_ZONE		0x01
-	#define NORMAL_ZONE		0x02
+	#define DMA_ZONE		     0x01
+	#define NORMAL_ZONE		     0x02
+	#define DMA_ZONE_SIZE	0x1000000
 
 
 	typedef uchar8_t zone_t;
 
 	void init_pg(karch_t *kinf);
-	uint32_t *alloc_page(zone_t zone);
-	void free_page(uint32_t *page_e);
+
+	uint32_t alloc_page(zone_t zone);
+
+	void free_page(uint32_t page_e);
+
 	uint32_t get_maxpages(void);
+
 	uint32_t get_kspages(void);
 
 #endif /* ARCH_X86_MM_H */
