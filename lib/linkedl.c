@@ -1,8 +1,9 @@
-/*
+/**
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: stdlib.h
+ * File: linkedl.c
+ * Desc: Linked list
  *
  * This file is part of TempOS.
  *
@@ -21,16 +22,55 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef STDLIB_H
-
-	#define STDLIB_H
-
-	#include <unistd.h>
-
-	#define NULL ((void *)0)
+#include <linkedl.h>
 
 
-	int atoi(const char *nptr);
+uchar8_t llist_create(llist **list)
+{
+	llist *tmp = *list;
+	tmp   = NULL;
+	*list = tmp;
+	return(1);
+}
 
-#endif /* STDLIB_H */
+uchar8_t llist_add(llist **list, void *element)
+{
+	llist *plist = *list;
+	llist *new_node;
+	llist *tmp;
+
+	/* Alloc memory */
+	new_node = (llist *)kmalloc(sizeof(llist), GFP_NORMAL_Z);
+	if(new_node == 0) {
+		return(0);
+	}
+
+	/* Add to list */
+	new_node->element = element;
+	new_node->next    = NULL;
+
+	tmp = plist;
+	if(tmp != NULL) {
+		/* Add to the end of list */
+		while(tmp->next != NULL)
+			tmp = tmp->next;
+		tmp->next = new_node;
+	} else {
+		/* Head of list */
+		plist = new_node;
+	}
+
+	*list = plist;
+	return(1);
+}
+
+uchar8_t llist_remove(llist **list, uint32_t pos)
+{
+	return(0);
+}
+
+uchar8_t llist_destroy(llist **list)
+{
+	return(0);
+}
 

@@ -30,7 +30,7 @@
 	#include <x86/mm.h>
 
 
-	#define BITMAP_SIZE	  0x20000 /* (TABLE_SIZE^2) / sizeof(uchar8_t) */
+	#define BITMAP_SIZE	  0x20000 /* (TABLE_SIZE^2) / (sizeof(uchar8_t) * 8) */
 	#define BITMAP_SHIFT	    3
 	#define BITMAP_FBIT		 0x80
 
@@ -72,7 +72,7 @@
 
 	void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags);
 
-	void kfree(uint32_t *ptr);
+	void kfree(void *ptr);
 
 #endif /* MEM_MANAGER_H */
 

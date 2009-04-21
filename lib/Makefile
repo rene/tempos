@@ -3,7 +3,7 @@
 # Tempos - Tempos is an Educational and multi purposing Operating System
 #
 
-objs-files := ctype.o printf.o stdlib.o string.o
+objs-files := ctype.o printf.o stdlib.o string.o linkedl.o
 
 all: $(objs-files)
 

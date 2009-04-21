@@ -24,8 +24,9 @@
 
 #include <tempos/kernel.h>
 #include <tempos/mm.h>
-#include <x86/mm.h>
 #include <string.h>
+#include <stdlib.h>
+#include <linkedl.h>
 
 
 /* information passed from first stage */
@@ -42,25 +43,50 @@ extern uint32_t *kpagedir;
  */
 void tempos_main(karch_t kinf)
 {
-	uint32_t *mymem;
-	uint32_t i;
+	//uint32_t *mymem;
+	//uint32_t i;
+	//llist *mylist, *tmp;
+	char *ola = "Ola Mundo do TempOS --- testando\n";
+	char *p1, *p2, *p3, *p4;
 
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
-	mymem = (uint32_t *)kmalloc(sizeof(uint32_t) * 52000, GFP_NORMAL_Z);
-	if(mymem == 0) {
-		kprintf("Erro ao alocar memoria!\n");
-	} else {
-		for(i=0; i<52000; i++) {
-			mymem[i] = 100;
-		}
-		kfree(mymem);
+	p1 = (char*)kmalloc(sizeof(char) * strlen(ola), GFP_NORMAL_Z);
+	//strcpy(p1, ola);
+
+	p2 = (char*)kmalloc(sizeof(char) * strlen(ola), GFP_NORMAL_Z);
+	//strcpy(p2, ola);
+
+	p3 = (char*)kmalloc(sizeof(char) * strlen(ola), GFP_NORMAL_Z);
+	//strcpy(p3, ola);
+
+	p4 = (char*)kmalloc(sizeof(char) * strlen(ola), GFP_NORMAL_Z);
+	//strcpy(p4, ola);
+
+	kprintf("1> %ld\n", p1);
+	kprintf("2> %ld\n", p2);
+	kprintf("3> %ld\n", p3);
+	kprintf("4> %ld\n", p4);
+
+/*
+	llist_create(&mylist);
+
+	llist_add(&mylist, "Rene");
+	llist_add(&mylist, "de");
+	llist_add(&mylist, "Souza");
+	llist_add(&mylist, "Pinto");
+
+	tmp = mylist;
+	//while(tmp != NULL) {
+	for(i=0; i<3; i++) {
+		kprintf("> %s\n", tmp->element);
+		tmp = tmp->next;
 	}
 
-	kprintf("Deu tudo certo!\n");
+	//llist_destroy(&mylist);*/
 
 	for(;;);
 }

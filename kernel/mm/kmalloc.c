@@ -148,9 +148,9 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 						oldindex = index;
 						ffpage   = j;
 					}
+					bmap_on(memm, pstart + apages);
 					apages++;
 					table[j] = newpage;
-					bmap_on(memm, (index * TABLE_SIZE) + j);
 				}
 			}
 		}
@@ -198,9 +198,9 @@ error:
 			if((table[i] >> PAGE_SHIFT) != 0) {
 				/* free a page */
 				free_page(table[i]);
+				bmap_off(memm, pstart + apages);
 				apages--;
 				table[i] = 0;
-				bmap_off(memm, (index * TABLE_SIZE) + i);
 			}
 
 		} j = TABLE_SIZE;
@@ -222,7 +222,7 @@ error:
  *
  * Free memory allocated with _vmalloc
  */
-void kfree(uint32_t *ptr)
+void kfree(void *ptr)
 {
 	mregion *mem_area = (mregion *)((uint32_t)ptr - sizeof(mregion));
 	uint32_t index    = mem_area->initial_addr >> TABLE_SHIFT;
