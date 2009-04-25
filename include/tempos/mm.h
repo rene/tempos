@@ -34,9 +34,9 @@
 	#define BITMAP_SHIFT	    3
 	#define BITMAP_FBIT		 0x80
 
-	#define GET_DINDEX(page)	(TABLE_ALIGN(page) >> TABLE_SHIFT)
-	#define DINDEX_VADDR(index) (KERNEL_START_ADDR + (index << TABLE_SHIFT))
-	#define TABLE_ADDR(index)	(index << PAGE_SHIFT)
+	#define GET_DINDEX(page)	 (page >> TABLE_SHIFT)
+	#define DINDEX_VADDR(index)  (KERNEL_START_ADDR + (index << TABLE_SHIFT))
+	#define TABLE_ADDR(index)	 (index << PAGE_SHIFT)
 
 	/* Flags for kmalloc functions */
 	#define GFP_DMA_Z		0x01
@@ -46,9 +46,9 @@
 
 	/* Map of a directory */
 	struct _mem_map {
-		uint32_t *pagedir;	/* page directory */
+		volatile pagedir_t pagedir;	/* page directory */
 		uchar8_t bitmap[BITMAP_SIZE];
-	};
+	} __attribute__ ((packed));
 
 	/* Region of allocated memory */
 	struct _mregion {
@@ -62,11 +62,11 @@
 
 	void init_mm(void);
 
-	void bmap_clear(mem_map *map);
+	void bmap_clear(volatile mem_map *map);
 
-	void bmap_on(mem_map *map, uint32_t block);
+	void bmap_on(volatile mem_map *map, uint32_t block);
 
-	void bmap_off(mem_map *map, uint32_t block);
+	void bmap_off(volatile mem_map *map, uint32_t block);
 
 	void *kmalloc(uint32_t size, uint16_t flags);
 

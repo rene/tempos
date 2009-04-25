@@ -42,6 +42,8 @@
 
 	#define TABLE_ENTRY_SIZE	sizeof(uint32_t)
 
+	#define MAKE_ENTRY(addr, params)	(((addr) & 0xFFFFF000) | params)
+
 	#define PAGE_PRESENT		0x01
 	#define PAGE_WRITABLE		0x02
 	#define PAGE_USER			0x04

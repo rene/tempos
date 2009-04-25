@@ -46,8 +46,8 @@ void karch(unsigned long magic, unsigned long addr)
 	karch_t kinf;
 	multiboot_info_t *mboot_info;
 	memory_map_t *mmap;
-	uint32_t i;
-	char8_t *mtypes[] = { "Avaliable", "Reserved", "ACPI", "ACPI NVS" };
+	uint32_t i, type;
+	char8_t *mtypes[] = { "Avaliable", "Reserved", "ACPI", "ACPI NVS", "Unknown" };
 
 
 	/**
@@ -109,13 +109,15 @@ void karch(unsigned long magic, unsigned long addr)
 	 */
 	init_pg(VIRADDR(&kinf));
 
+	/* Init the Memory Manager */
+	//init_mm();
+
 	/* Setup interrupts */
 	setup_IDT();
 	init_PIC();
-	sti();
+	//sti();
 
-	/* Init the Memory Manager */
-	init_mm();
+	//while(1);
 
 	/* TODO: start console */
     clrscr();
@@ -125,10 +127,15 @@ void karch(unsigned long magic, unsigned long addr)
 	kprintf("TempOS\n");
 
 	for(i=0; i<kinf.mmap_size; i++) {
+		type = kinf.mmap_table[i].type - 1;
+
+		if(type > 4)
+			type = 4;
+
 		kprintf("%0.9x:%0.9x - %s\n", kinf.mmap_table[i].base_addr_low,
 					kinf.mmap_table[i].base_addr_low +
 					kinf.mmap_table[i].length_low,
-					mtypes[kinf.mmap_table[i].type - 1]);
+					mtypes[type]);
 	}
 
 	kprintf(">> First stage done.\n");
