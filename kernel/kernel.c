@@ -46,30 +46,10 @@ void tempos_main(karch_t kinf)
 	//uint32_t *mymem;
 	//uint32_t i;
 	//llist *mylist, *tmp;
-	char *ola = "Ola Mundo do TempOS --- testando\n";
-	char *p1, *p2, *p3, *p4;
-
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
-
-	p1 = (char*)kmalloc(sizeof(char) * strlen(ola), GFP_NORMAL_Z);
-	//strcpy(p1, ola);
-
-	p2 = (char*)kmalloc(sizeof(char) * strlen(ola), GFP_NORMAL_Z);
-	//strcpy(p2, ola);
-
-	p3 = (char*)kmalloc(sizeof(char) * strlen(ola), GFP_NORMAL_Z);
-	//strcpy(p3, ola);
-
-	p4 = (char*)kmalloc(sizeof(char) * strlen(ola), GFP_NORMAL_Z);
-	//strcpy(p4, ola);
-
-	kprintf("1> %ld\n", p1);
-	kprintf("2> %ld\n", p2);
-	kprintf("3> %ld\n", p3);
-	kprintf("4> %ld\n", p4);
 
 /*
 	llist_create(&mylist);

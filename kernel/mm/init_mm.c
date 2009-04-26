@@ -24,23 +24,26 @@
 
 #include <tempos/mm.h>
 
-extern uint32_t *kpagedir;
+extern volatile pagedir_t *kerneldir;
 
 /* Kernel Map memory */
-mem_map kmem;
+volatile mem_map kmem;
+
 
 void init_mm(void)
 {
-	uint32_t kpages = get_kspages();
+	uint32_t kpages;
 	uint32_t i;
 
+	kpages = PAGE_ALIGN(get_kernel_size()) >> PAGE_SHIFT;
+
 	/* Init Kernel map */
-	kmem.pagedir = kpagedir;
+	kmem.pagedir = kerneldir;
 	bmap_clear(&kmem);
 
 	/*
 	   Map used space
-	   NOTE: page_alloc could be called just after this map !
+	   NOTE: kmalloc could be called just after this map !
 	*/
 	for(i=0; i<kpages; i++) {
 		bmap_on(&kmem, i);
@@ -56,13 +59,12 @@ void init_mm(void)
  *
  * Clear a bit map
  */
-void bmap_clear(mem_map *map)
+void bmap_clear(volatile mem_map *map)
 {
-	uchar8_t *bmap = map->bitmap;
 	uint32_t i;
 
 	for(i=0; i<BITMAP_SIZE; i++) {
-		bmap[i] = 0;
+		map->bitmap[i] = 0;
 	}
 }
 
@@ -72,7 +74,7 @@ void bmap_clear(mem_map *map)
  *
  * Mark a bit (block) on a bitmap
  */
-void bmap_on(mem_map *map, uint32_t block)
+void bmap_on(volatile mem_map *map, uint32_t block)
 {
 	uint32_t byte = block >> BITMAP_SHIFT;
 	uint32_t bit  = block - (byte * (sizeof(uchar8_t) * 8));
@@ -86,7 +88,7 @@ void bmap_on(mem_map *map, uint32_t block)
  *
  * Unmark a bit (block) on a bitmap
  */
-void bmap_off(mem_map *map, uint32_t block)
+void bmap_off(volatile mem_map *map, uint32_t block)
 {
 	uint32_t byte = block >> BITMAP_SHIFT;
 	uint32_t bit  = block - (byte * (sizeof(uchar8_t) * 8));

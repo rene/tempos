@@ -22,14 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <x86/mm.h>
-#include <x86/page.h>
-#include <x86/io.h>
-#include <x86/gdt.h>
-#include <x86/karch.h>
-#include <tempos/kernel.h>
-
-
 /**
  * This is the low level memory manager system of TempOS
  *
@@ -63,25 +55,15 @@
  *                  |                |
  *       ---------> |----------------End of memory used by Kernel
  *      |           |     .....      |
- *      |           |  stack_pages2  |
- *      |           |   NORMAL Zone  |
  *      |           |                |
- *      |           |----------------|
- *      |           |     .....      |
- *    Kernel        |  stack_pages1  |
- *    Block2        |    DMA Zone    |
- *      |           |  (0 to 16MB)   |
+ *    Kernel        |   stack_pages  |
+ *    Block2        |     .....      |
  *      |           |                |
- *      |           |----------------End of page tables used by Kernel
- *      |           |     .....      |
- *      |           |     .....      |
- *      |           |    kpgtables   |
- *       ---------->|----------------KERNEL_END_ADDR + 4Kb
- *      |           |    kpagedir    |
- *      |           |----------------KERNEL_END_ADDR
- *    Kernel        |                |
- *    Block1        |     Kernel     |
- *      |           |  Code + Data   |
+ *      |           |    kerneldir   |
+ *       ---------->|----------------KERNEL_END_ADDR
+ *      |           |                |
+ *    Kernel        |     Kernel     |
+ *    Block1        |  Code + Data   |
  *      |           |    Sections    |
  *       ---------->|----------------KERNEL_START_ADDR
  *                  |                |
@@ -89,27 +71,26 @@
  *
  */
 
-/* Kernel tables */
-uint32_t *kpagedir   = 0;
-uint32_t *kpgtables  = 0;
+#include <x86/mm.h>
+#include <x86/io.h>
+#include <x86/gdt.h>
+#include <x86/karch.h>
+#include <tempos/kernel.h>
 
-/* Temporary page table entry */
-static uint32_t tmp_entry = 0;
 
-/* Pages */
-static uint32_t maxpages  = 0; /* Total of pages on the system   */
-static uint32_t ks_pages  = 0; /* Number of pages used by kernel */
+/* Address used by kmalloc_e */
+static uint32_t free_phy_addr;
 
-/* Stack pointers */
-static uint32_t *stack_pages1      = 0;
-static uint32_t *stack_pages2      = 0;
-static uint32_t *stack_pages1_top  = 0;
-static uint32_t *stack_pages2_top  = 0;
-static uint32_t stackp1_top        = 0;
-static uint32_t stackp2_top        = 0;
-static uint32_t stackp1_maxtop     = 0;
-static uint32_t stackp2_maxtop     = 0;
+/* Stack pages */
+static uint32_t *stack_pages;
+static uint32_t stack_top;
+static uint32_t stack_max_top;
 
+/* Kernel pages directory */
+volatile pagedir_t *kerneldir;
+
+/* Kernel size: Block1 + Block2 */
+static uint32_t kernel_size;
 
 /**
  * init_pg
@@ -120,249 +101,181 @@ static uint32_t stackp2_maxtop     = 0;
  */
 void init_pg(karch_t *kinf)
 {
-	uint32_t i, j, ap, np, nt;
-	uint32_t address;
-	uint32_t nptotal; /* Number of total memory pages to the system */
-	uint32_t totalmem;
-	uint32_t kblock2_size, mempages_size, z1_size;
-	uint32_t m_end, m_length, index;
+	uint32_t stack_sz;                /* stack_pages  size          */
+	uint32_t totalmem;                /* Total memory of the system */
 	uint32_t kpa_start, kpa_length;
+	uint32_t m_end, index;
+	uint32_t address, *table1, *table2;
+	mmap_tentry *mmap;
+	uint32_t i, j;
 
-	/* Physical address of tables */
-	void *kpagedir_ptr;
-	void *kpgtables_ptr;
+	/* Initialize free_phy_addr. We use "virtual address" because
+	   translation are done by GDT trick */
+	free_phy_addr = (uint32_t)KERNEL_END_ADDR;
 
+	/**
+	 * Start Kernel pages directory
+	 */
+	kerneldir = make_kerneldir();
 
-	/* Ajust pointers */
-	kpagedir      = (uint32_t *)KERNEL_END_ADDR;
-	kpgtables     = (uint32_t *)((uint32_t)kpagedir + 0x1000);
-	kpagedir_ptr  = (void *)((uint32_t)kpagedir - KERNEL_ADDR_OFFSET);
-	kpgtables_ptr = (void *)((uint32_t)kpgtables - KERNEL_ADDR_OFFSET);
+	/**
+	 * Alloc space for stack pages
+	 */
+	totalmem = (kinf->mem_upper << 10);
+	stack_sz = (totalmem / PAGE_SIZE) * sizeof(uint32_t);
 
-	/* Calculate how many pages we need to Kernel Block1
-	   PS: 256 - For the first 1MB of memory
-	         1 - For kpagedir                            */
-	np = 256 + 1 + (PAGE_ALIGN((uint32_t)KERNEL_END_ADDR -
-					(uint32_t)KERNEL_START_ADDR) >> PAGE_SHIFT);
-
-	/* Calculate how many pages are remaining to the system        */
-	totalmem = kinf->mem_upper << 10; /* Total upper system memory */
-	nptotal  = (totalmem / 4096) - np;
-
-	/* Calculate and sum pages that we need to Kernel Block2       */
-	mempages_size   = PAGE_ALIGN(nptotal * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
-	np             += mempages_size;
-	kblock2_size    = PAGE_ALIGN(np * TABLE_ENTRY_SIZE) >> PAGE_SHIFT;
-
-	/* Position of temporary page table entry */
-	tmp_entry = np + kblock2_size - 1;
-
-	/* Calculate total page tables Kernel needs
-	   PS: 1 - We need one free table entry for table alloc functions */
-	nt = (TABLE_ALIGN(np + kblock2_size + 1) >> TABLE_SHIFT);
-
-	/* Final number of pages used by kernel */
-	np = nt * TABLE_SIZE;
+	stack_pages = (uint32_t *)kmalloc_e(stack_sz);
 
 
-	/* Zero kernel page directory */
-	for(i=0; i<1024; i++) {
-		kpagedir[i]  = (0 | PAGE_WRITABLE);
-	}
+	/* Map kernel memory */
+	address        = 0;
+	free_phy_addr -= KERNEL_ADDR_OFFSET;
+	table1         = kerneldir->tables[0];
+	table2         = kerneldir->tables[KERNEL_PDIR_SPACE];
+	i = j = 0;
+	while(address <= free_phy_addr) {
 
-	/* Zero ALL kernel page tables */
-	for(i=0; i<nt; i++) {
-		for(j=0; j<TABLE_SIZE; j++) {
-			kpgtables[(i * TABLE_SIZE) + j] = (0 | PAGE_WRITABLE);
+		table1[i] = MAKE_ENTRY(address, (PAGE_WRITABLE | PAGE_PRESENT));
+		table2[i] = table1[i];
+		address  += PAGE_SIZE;
+
+		if(i < TABLE_SIZE) {
+			i++;
+		} else {
+			i = 0;
+			j++;
+			table1 = kerneldir->tables[0 + j];
+			table2 = kerneldir->tables[KERNEL_PDIR_SPACE + j];
 		}
 	}
 
+	/** 
+	  * Re-arrange memory map to insert kernel region.
+	  */
+	kpa_start   = KERNEL_PA_START;
+	kpa_length  = free_phy_addr - kpa_start;
+	kernel_size = kpa_length;
 
-	/* Map 0-1MB */
-	address = 0;
-	ap      = 0;
-	for(i=0; i<256; i++, ap++) {
-		kpgtables[ap] = address | (PAGE_WRITABLE | PAGE_PRESENT);
-		address      += PAGE_SIZE;
+	for(i=0; i<kinf->mmap_size; i++) {
+		mmap = &(kinf->mmap_table[i]);
+
+		if(mmap->type == MTYPE_AVALIABLE) {
+
+			if(mmap->base_addr_low >= 0x100000) {
+				/* Create kernel region */
+				index = kinf->mmap_size++;
+				if(index < MBOOT_MMAP_MAXREG) {
+					kinf->mmap_table[index].base_addr_low  = kpa_start;
+					kinf->mmap_table[index].base_addr_high = 0x00000000;
+					kinf->mmap_table[index].length_low     = kpa_length;
+					kinf->mmap_table[index].length_high    = 0x00000000;
+					kinf->mmap_table[index].type           = MTYPE_RESERVED;
+				} else {
+					panic("Memory region table full! :'(\n");
+				}
+
+				/* Ajust memory */
+				mmap->base_addr_low += kpa_length;
+				mmap->length_low    -= kpa_length;
+			}
+		}
 	}
 
-	/* Map Kernel memory */
-	address = KERNEL_PA_START;
-	j       = 256;
-	ap      = j;
-	for(i=0; i<nt && ap<np; i++) {
-		for(; j<TABLE_SIZE && ap<np; j++, ap++) {
-			kpgtables[ap] = address | (PAGE_WRITABLE | PAGE_PRESENT);
-			address      += PAGE_SIZE;
-		} j = 0;
-	}
+	/* Start stack page */
+	stack_max_top = stack_sz / sizeof(uint32_t);
+	stack_top     = 0;
 
-	/* Page DIR */
-	for(i=0; i<nt; i++) {
-		kpagedir[0 + i]   = ((uint32_t)kpgtables_ptr +
-								(i * TABLE_SIZE * TABLE_ENTRY_SIZE)) |
-									(PAGE_WRITABLE | PAGE_PRESENT); /* 0MB  */
-		kpagedir[KERNEL_PDIR_SPACE + i] = ((uint32_t)kpgtables_ptr +
-										(i * TABLE_SIZE * TABLE_ENTRY_SIZE)) |
-									(PAGE_WRITABLE | PAGE_PRESENT); /* 3GB  */
+	for(i=0; i<kinf->mmap_size; i++) {
+		mmap = &(kinf->mmap_table[i]);
+
+		/* Map only memory avaliable and over 1MB */
+		if(mmap->type == MTYPE_AVALIABLE &&
+				mmap->base_addr_low >= 0x100000) {
+
+			m_end   = mmap->base_addr_low + mmap->length_low;
+			address = PAGE_ALIGN(mmap->base_addr_low);
+			while(address < m_end && stack_top < stack_max_top) {
+				stack_pages[stack_top++] = address;
+				address                 += PAGE_SIZE;
+			}
+		}
 	}
+	stack_top = 0;
 
 	/* Enable Paging System */
-	write_cr3((uint32_t)kpagedir_ptr);
+	write_cr3(kerneldir->dir_phy_addr);
 	write_cr0(read_cr0() | CR0_PG_MASK);
 
 	/* Reload GDT */
 	setup_GDT();
+}
 
 
-	/* Configure stack addresses
-	   PS: If the system has less then 16MB of memory,
-	       just one stack will exist. */
- 	stack_pages1     = (uint32_t *)((uint32_t)kpgtables +
-						(TABLE_SIZE * TABLE_ENTRY_SIZE * nt));
-	stack_pages1_top = &stackp1_top;
+/**
+ * make_kerneldir
+ *
+ * Start new kernel pages directory. This functions will
+ * alloc all tables used by directory (yes, I know this waste
+ * memory space, on x86 each directory will get 4MB of memory
+ * because all tables are allocated, but this approach turns
+ * the implementation more easy and clear to understand).
+ */
+pagedir_t *make_kerneldir(void)
+{
+	pagedir_t *kdir;
+	uint32_t *table;
+	uint32_t i, j;
 
-	if(kinf->mem_upper <= 0x3C00) {
-		z1_size          = mempages_size;
-		stack_pages2     = stack_pages1;
-		stack_pages2_top = stack_pages1_top;
-	} else {
-		z1_size          = PAGE_ALIGN(DMA_ZONE_SIZE) >> PAGE_SHIFT;
-		stack_pages2     = (uint32_t *)((uint32_t)stack_pages1 +
-								(z1_size * TABLE_ENTRY_SIZE));
-		stack_pages2_top = &stackp2_top;
-	}
+	kdir = (pagedir_t *)kmalloc_e(sizeof(pagedir_t));
 
+	kdir->tables_phy_addr = (uint32_t *)kmalloc_e(PAGE_SIZE);
+	kdir->dir_phy_addr    = GET_PHYADDR(kdir->tables_phy_addr);
 
-	/** 
-	   Re-arrange memory map to insert kernel region. In a
-	   region of free memory we could have three situations:
-	   
-		      |-------------[********]--------------|
-		1     |             [ kernel ]              |
-		      |-------------[********]--------------|
+	/* Alloc tables */
+	for(i=0; i<TABLE_SIZE; i++) {
+		kdir->tables[i] = (uint32_t *)kmalloc_e(PAGE_SIZE);
 
-		   [**|*****]-------------------------------|
-		2  [ kernel ]                               |
-		   [**|*****]-------------------------------|
+		/* Create dir entry */
+		kdir->tables_phy_addr[i] = MAKE_ENTRY(GET_PHYADDR(kdir->tables[i]),
+											(PAGE_WRITABLE | PAGE_PRESENT));
 
-		      |----------------------------------[**|*****]
-		3     |                                  [ kernel ]
-		      |----------------------------------[**|*****]
-
-	*/
-	kpa_start  = KERNEL_PA_START;
-	kpa_length = (KERNEL_END_ADDR + (np * PAGE_SIZE) +
-					(nt * TABLE_SIZE * TABLE_ENTRY_SIZE)) - KERNEL_START_ADDR;
-
-	for(i=0; i<kinf->mmap_size; i++) {
-
-		m_end = kinf->mmap_table[i].base_addr_low +
-						kinf->mmap_table[i].length_low;
-
-		if(m_end > (kpa_start + kpa_length)) {
-
-			if(kinf->mmap_table[i].base_addr_low < kpa_start) {
-				/* Situation 1 */
-				m_length = kinf->mmap_table[i].length_low;
-
-				kinf->mmap_table[i].length_low =
-					(kpa_start - kinf->mmap_table[i].base_addr_low);
-
-				/* Create another free region */
-				m_length -= kinf->mmap_table[i].length_low;
-				index     = kinf->mmap_size++;
-
-				if(index < MBOOT_MMAP_MAXREG) {
-					kinf->mmap_table[index].base_addr_low  =
-											(kpa_start + kpa_length);
-					kinf->mmap_table[index].base_addr_high = 0x00000000;
-					kinf->mmap_table[index].length_low     = m_length;
-					kinf->mmap_table[index].length_high    = 0x00000000;
-					kinf->mmap_table[index].type           = MTYPE_RESERVED;
-				} else {
-					kprintf(KERN_CRIT "Memory region table full! :'(\n");
-					for(;;);
-				}
-
-			} else if( kinf->mmap_table[i].base_addr_low <
-						(kpa_start + kpa_length) ) {
-
-				/* Situation 2 */
-				kinf->mmap_table[i].base_addr_low = (kpa_start + kpa_length);
-				kinf->mmap_table[i].length_low   -= kpa_length;
-			}
-
-		} else {
-			/* Situation 3 */
-			if( (kinf->mmap_table[i].base_addr_low < kpa_start) &&
-					m_end < (kpa_start + kpa_length) )
-				kinf->mmap_table[i].length_low =
-						(kpa_start - kinf->mmap_table[i].base_addr_low);
+		/* Start table */
+		table = kdir->tables[i];
+		for(j=0; j<TABLE_SIZE; j++) {
+			 table[j] = 0;
 		}
 	}
 
-	/* Map memory */
-	*stack_pages1_top = 0;
-	*stack_pages2_top = 0;
-	for(i=0; i<kinf->mmap_size; i++) {
-		if(kinf->mmap_table[i].type == MTYPE_AVALIABLE) {
+	return(kdir);
+}
 
-			/* Map only over the 1MB of memory, because the first 1MB 
-			   is mapped on kernel page tables */
-			if(kinf->mmap_table[i].base_addr_low >= 0x100000) {
 
-				/* Map the region */
-				m_end   = kinf->mmap_table[i].base_addr_low +
-								kinf->mmap_table[i].length_low;
-				address = PAGE_ALIGN(kinf->mmap_table[i].base_addr_low);
-
-				while( (address < m_end) ) {
-					if(*stack_pages1_top < z1_size) {
-						stack_pages1[(*stack_pages1_top)++] =
-								address | (PAGE_WRITABLE | PAGE_PRESENT);
-					} else {
-						stack_pages2[(*stack_pages2_top)++] =
-								address | (PAGE_WRITABLE | PAGE_PRESENT);
-					}
-					address += PAGE_SIZE;
-				}
-			}
-		}
-	}
-
-	stackp1_maxtop = --(*stack_pages1_top);
-	stackp2_maxtop = --(*stack_pages2_top);
-
-	maxpages = np + nptotal;
-	ks_pages = np;
+/**
+ * get_kernel_size
+ *
+ * Return the number of bytes used by Kernel
+ */
+uint32_t get_kernel_size(void)
+{
+	return(kernel_size);
 }
 
 
 /**
  * alloc_page
  *
- * Return the address to a free page entry or 0 if memory
- * is full
+ * Return a free page entry or 0 if memory is full
  *
  * Parameters:
  * 		zone - DMA_ZONE or NORMAL_ZONE
  */
 uint32_t alloc_page(zone_t zone)
 {
-	switch(zone) {
-		case DMA_ZONE:
-			if(*stack_pages1_top)
-				return(stack_pages1[(*stack_pages1_top)--]);
-			break;
+	if(stack_top >= stack_max_top)
+		return(0);
 
-		case NORMAL_ZONE:
-			if(*stack_pages2_top)
-				return(stack_pages2[(*stack_pages2_top)--]);
-			break;
-
-		default:
-			return(0);
+	if(zone == DMA_ZONE || zone == NORMAL_ZONE) {
+		return( stack_pages[stack_top++] );
 	}
 	return(0);
 }
@@ -375,74 +288,25 @@ uint32_t alloc_page(zone_t zone)
  */
 void free_page(uint32_t page_e)
 {
-	if( (page_e >> PAGE_SHIFT) <= 0x1000 ) {
-		if(*stack_pages1_top < stackp1_maxtop) {
-			stack_pages1[++(*stack_pages1_top)] =
-					page_e | (PAGE_WRITABLE | PAGE_PRESENT);
-		}
-	} else {
-		if(*stack_pages2_top < stackp2_maxtop) {
-			stack_pages2[++(*stack_pages2_top)] =
-					page_e | (PAGE_WRITABLE | PAGE_PRESENT);
-		}
-	}
-	return;
+	if(stack_top > 0)
+		stack_pages[--stack_top] = page_e;
 }
 
 
-/**
- * get_maxpages
- *
- * Return the total of pages on the system
- */
-uint32_t get_maxpages(void)
-{
-	return(maxpages);
-}
-
 
 /**
- * get_kspages
+ * kmalloc_e
  *
- * Return the total of pages used only by kernel (Block1 + Block2)
+ * This is our kmalloc_e (early), which aims to be used before
+ * enabling paging system. The variable free_phy_addr points to
+ * the physical free memory space (after kernel). So as far as
+ * we need more memory, the pointer will be incremented.
  */
-uint32_t get_kspages(void)
+void *kmalloc_e(uint32_t size)
 {
-	return(ks_pages);
-}
-
-
-/**
- * alloc_table
- *
- * This functions allocs a page and map it to a temporary location
- * (at kernel page tables), so we can access the contents of the table.
- * The first position will point to the table itself and the others will
- * be filled with zero.
- */
-uint32_t alloc_table(void)
-{
-	uint32_t newpage, i;
-	uint32_t *table;
-
-	if( !(newpage = alloc_page(NORMAL_ZONE)) ) {
-		return(0);
-	}
-
-	/* Map table temporary to fill with values */
-	kpgtables[tmp_entry] = newpage | (PAGE_WRITABLE | PAGE_PRESENT);
-
-	table = (uint32_t *)(KERNEL_START_ADDR + (tmp_entry * PAGE_SIZE));
-
-	/* First position: Point to table itself */
-	for(i=0; i<TABLE_SIZE; i++) {
-		table[i] = 0;
-	}
-
-	/* un-map table */
-	kpgtables[tmp_entry] = 0;
-
-	return(newpage);
+	uint32_t tmp   = free_phy_addr;
+	free_phy_addr  = PAGE_ALIGN(free_phy_addr + size);
+	return((void *)tmp);
 }
 
 
