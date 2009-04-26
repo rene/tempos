@@ -46,7 +46,7 @@
 
 	/* Map of a directory */
 	struct _mem_map {
-		volatile pagedir_t pagedir;	/* page directory */
+		volatile pagedir_t *pagedir;	/* page directory */
 		uchar8_t bitmap[BITMAP_SIZE];
 	} __attribute__ ((packed));
 

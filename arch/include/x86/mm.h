@@ -59,6 +59,8 @@
 
 	pagedir_t *make_kerneldir(void);
 
+	uint32_t get_kernel_size(void);
+
 	uint32_t alloc_page(zone_t zone);
 
 	void free_page(uint32_t page_e);

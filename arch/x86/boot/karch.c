@@ -110,7 +110,7 @@ void karch(unsigned long magic, unsigned long addr)
 	init_pg(VIRADDR(&kinf));
 
 	/* Init the Memory Manager */
-	//init_mm();
+	init_mm();
 
 	/* Setup interrupts */
 	setup_IDT();

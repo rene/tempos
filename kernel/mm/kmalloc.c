@@ -49,7 +49,7 @@ void *kmalloc(uint32_t size, uint16_t flags)
  * with mregion structure, that contains the initial address and size of
  * region allocated. So once we call kfree function it will look at
  * inital_address-sizeof(mregion), get the region information and free the
- * memory.
+ * memory. This is a very simple memory allocator, that works only with pages.
  */
 void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 {
@@ -109,35 +109,43 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	if(apages < npages)
 		return(NULL);
 
-	pgdir = &(memm->pagedir); while(1);
+	pgdir = memm->pagedir;
 
 
 	/* We have the necessary space, now we need to take a
-	   look at rigth index in pagedir and if there is a
-	   table there, get it and fill with pages, otherwise
-	   we start a new table. Other tables will be started
-	   as they are needed. *
+	   look at rigth index in pagedir and get the table */
 	index = GET_DINDEX(pstart);
-	if(pgdir->tables[index] == 0) {
-		* Alloc table *
-		if( !(newpage = alloc_page(mzone)) ) {
-			return(NULL);
-		} else {
-			pgdir->tables[index]         = MAKE_ENTRY(newpage, (PAGE_WRITABLE | PAGE_PRESENT));
-			pgdir->tables_phy_addr[index] = pgdir->tables[index];
+	table = pgdir->tables[index];
+	i     = pstart - (TABLE_SIZE * index);
 
-			table = (uint32_t *)pgdir->tables[index];
-			for(i=0; i<TABLE_SIZE; i++) {
-				table[i] = 0;
-			}
+	oldindex = index;
+	ffpage   = i;
+
+	/* Now, we need to alloc pages */
+	apages = 0;
+	while(apages <= npages) {
+
+		if( !(newpage = alloc_page(mzone)) ) {
+			goto error;
+		} else {
+			bmap_on(memm, (pstart + apages));
+			apages++;
+			table[i] = MAKE_ENTRY(newpage, (PAGE_WRITABLE | PAGE_PRESENT));
 		}
-	 }*/
+
+		if(i < TABLE_SIZE) {
+			i++;
+		} else {
+			index++;
+			table = pgdir->tables[index];
+		}
+	}
 
 	/* Start the block allocated information. The vfree 
 	   function will receive only an address as an argument,
 	   so the trick here is hold an information about the
 	   block just before the block itself. */
-	mem_block = (uint32_t *)(pstart * PAGE_SIZE);
+	mem_block              = (uint32_t *)(pstart * PAGE_SIZE);
 	mem_area               = (mregion *)mem_block;
 	mem_area->memm         = memm;
 	mem_area->initial_addr = pstart;
@@ -154,7 +162,7 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	/* We have done =:) */
 	return(mem_block);
 
-//error:
+error:
 	/* Free pages allocated */
 	return(0);
 }
@@ -166,7 +174,7 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
  * Free memory allocated with _vmalloc
  */
 void kfree(uint32_t *ptr)
-{
+{/*
 	mregion *mem_area = (mregion *)((uint32_t)ptr - sizeof(mregion));
 	uint32_t index    = mem_area->initial_addr >> TABLE_SHIFT;
 	uint32_t ffpage   = mem_area->initial_addr - (index * TABLE_SIZE) + 1;
@@ -176,7 +184,7 @@ void kfree(uint32_t *ptr)
 	uint32_t i, j, k;
 
 	pgdir = &(mem_area->memm->pagedir);
-
+*/
 }
 
 

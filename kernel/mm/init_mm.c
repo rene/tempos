@@ -24,7 +24,7 @@
 
 #include <tempos/mm.h>
 
-extern volatile pagedir_t kerneldir;
+extern volatile pagedir_t *kerneldir;
 
 /* Kernel Map memory */
 volatile mem_map kmem;
@@ -32,24 +32,23 @@ volatile mem_map kmem;
 
 void init_mm(void)
 {
-	//uint32_t kpages;
-	//uint32_t i;
+	uint32_t kpages;
+	uint32_t i;
 
-	//kpages = get_kspages();
+	kpages = PAGE_ALIGN(get_kernel_size()) >> PAGE_SHIFT;
 
 	/* Init Kernel map */
-	//kmem.pagedir = kerneldir;
-	//bmap_clear(&kmem);
+	kmem.pagedir = kerneldir;
+	bmap_clear(&kmem);
 
 	/*
 	   Map used space
-	   NOTE: page_alloc could be called just after this map !
-	*
+	   NOTE: kmalloc could be called just after this map !
+	*/
 	for(i=0; i<kpages; i++) {
 		bmap_on(&kmem, i);
 		bmap_on(&kmem, (KERNEL_PDIR_SPACE * TABLE_SIZE) + i);
-	}*/
-
+	}
 
 	/* We are ready for kmalloc =:) */
 }

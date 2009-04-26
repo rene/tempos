@@ -89,6 +89,8 @@ static uint32_t stack_max_top;
 /* Kernel pages directory */
 volatile pagedir_t *kerneldir;
 
+/* Kernel size: Block1 + Block2 */
+static uint32_t kernel_size;
 
 /**
  * init_pg
@@ -150,8 +152,9 @@ void init_pg(karch_t *kinf)
 	/** 
 	  * Re-arrange memory map to insert kernel region.
 	  */
-	kpa_start  = KERNEL_PA_START;
-	kpa_length = free_phy_addr - kpa_start;
+	kpa_start   = KERNEL_PA_START;
+	kpa_length  = free_phy_addr - kpa_start;
+	kernel_size = kpa_length;
 
 	for(i=0; i<kinf->mmap_size; i++) {
 		mmap = &(kinf->mmap_table[i]);
@@ -180,6 +183,7 @@ void init_pg(karch_t *kinf)
 
 	/* Start stack page */
 	stack_max_top = stack_sz / sizeof(uint32_t);
+	stack_top     = 0;
 
 	for(i=0; i<kinf->mmap_size; i++) {
 		mmap = &(kinf->mmap_table[i]);
@@ -196,6 +200,7 @@ void init_pg(karch_t *kinf)
 			}
 		}
 	}
+	stack_top = 0;
 
 	/* Enable Paging System */
 	write_cr3(kerneldir->dir_phy_addr);
@@ -246,6 +251,17 @@ pagedir_t *make_kerneldir(void)
 
 
 /**
+ * get_kernel_size
+ *
+ * Return the number of bytes used by Kernel
+ */
+uint32_t get_kernel_size(void)
+{
+	return(kernel_size);
+}
+
+
+/**
  * alloc_page
  *
  * Return a free page entry or 0 if memory is full
@@ -255,11 +271,11 @@ pagedir_t *make_kerneldir(void)
  */
 uint32_t alloc_page(zone_t zone)
 {
-	if(stack_top == 0)
+	if(stack_top >= stack_max_top)
 		return(0);
 
-	if(zone == DMA_ZONE || NORMAL_ZONE) {
-		return( stack_pages[stack_top--] );
+	if(zone == DMA_ZONE || zone == NORMAL_ZONE) {
+		return( stack_pages[stack_top++] );
 	}
 	return(0);
 }
@@ -272,7 +288,8 @@ uint32_t alloc_page(zone_t zone)
  */
 void free_page(uint32_t page_e)
 {
-	stack_pages[++stack_top] = page_e;
+	if(stack_top > 0)
+		stack_pages[--stack_top] = page_e;
 }
 
 
