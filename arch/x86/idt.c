@@ -24,8 +24,6 @@
 
 #include <x86/idt.h>
 
-#include <tempos/kernel.h> /* temporary */
-
 
 /* IDT table */
 idt_t idt_table[IDT_TABLE_SIZE];
