@@ -33,6 +33,7 @@ uchar8_t llist_create(llist **list)
 	return(1);
 }
 
+
 uchar8_t llist_add(llist **list, void *element)
 {
 	llist *plist = *list;
@@ -64,13 +65,71 @@ uchar8_t llist_add(llist **list, void *element)
 	return(1);
 }
 
+
 uchar8_t llist_remove(llist **list, uint32_t pos)
 {
-	return(0);
+	llist *_list = *list;
+	llist *prev, *next, *tmp;
+	uint32_t i, size;
+
+	size = llist_get_size(_list);
+
+	if(pos >= size)
+		return(0);
+
+	if(_list != NULL) {
+		if(pos == 0) {
+			/* Element on the top */
+			next  = _list->next;
+			kfree(_list);
+			_list = next;
+		} else if(pos < (size - 1)) {
+			/* Element at the middle */
+			//
+		} else {
+			/* Element at the end */
+			tmp = _list;
+
+			for(i=1; i<pos; i++) {
+				tmp = tmp->next;
+			}
+
+			prev       = tmp;
+			prev->next = NULL;
+			kfree(tmp->next);
+		}
+	}
+
+	*list = _list;
+	return(1);
 }
+
+
+uint32_t llist_get_size(llist *list)
+{
+	llist *_list = list;
+	uint32_t size      = 0;
+
+	while(_list != NULL) {
+		size++;
+		_list = _list->next;
+	}
+
+	return(size);
+}
+
 
 uchar8_t llist_destroy(llist **list)
 {
-	return(0);
+	llist *_list;
+	uint32_t size;
+	uint32_t pos;
+
+	_list = *list;
+	size = llist_get_size(_list);
+	for(pos=0; pos<size; pos++)
+		llist_remove(&_list, 0);
+
+	return(1);
 }
 

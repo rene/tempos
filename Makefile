@@ -34,7 +34,7 @@ clean:
 
 tempos: subdirs
 	@echo Generating objects file list
-	@find . -type f -name "*.o" > objs.list
+	@find . -type f -name "*.o" | sort > objs.list
 	@echo Linking...
 	@ld -o tempos.elf -T arch/$(ARCH)/boot/setup.ld @objs.list
 	@echo done.

@@ -125,24 +125,6 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	apages = 0;
 	while(apages <= npages) {
 
-		/* Search for a free entry in page table */
-		for(j=0; (j<TABLE_SIZE && apages <= npages); j++) {
-			if((table[j] >> PAGE_SHIFT) == 0) {
-				/* Alloc a page */
-				if( !(newpage = alloc_page(mzone)) ) {
-					goto error;
-				} else {
-					/* Is this the first page of our block? */
-					if(apages == 0) {
-						oldindex = index;
-						ffpage   = j;
-					}
-					bmap_on(memm, pstart + apages);
-					apages++;
-					table[j] = newpage;
-				}
-			}
-
 		if( !(newpage = alloc_page(mzone)) ) {
 			goto error;
 		} else {
@@ -183,27 +165,18 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 error:
 	/* Free pages allocated */
 	while(apages > 0) {
-		table = (uint32_t *)(memm->pagedir[index] >> PAGE_SHIFT);
 
-		for(i=j; i>=1 && apages>0; i--) {
-			if((table[i] >> PAGE_SHIFT) != 0) {
-				/* free a page */
-				free_page(table[i]);
-				bmap_off(memm, pstart + apages);
-				apages--;
-				table[i] = 0;
-			}
+		free_page(table[i]);
+		table[i] = 0;
+		apages--;
 
-		} j = TABLE_SIZE;
-
-		if(apages > 0 && i == 0) {
-			/* free a table */
-			free_page(memm->pagedir[index]);
-			memm->pagedir[index] = 0;
+		if(i > 0) {
+			i--;
+		} else {
 			index--;
+			table = pgdir->tables[index];
 		}
 	}
-
 	return(0);
 }
 
@@ -213,23 +186,37 @@ error:
  *
  * Free memory allocated with _vmalloc
  */
-<<<<<<< HEAD:kernel/mm/kmalloc.c
 void kfree(void *ptr)
 {
-=======
-void kfree(uint32_t *ptr)
-{/*
->>>>>>> mm:kernel/mm/kmalloc.c
 	mregion *mem_area = (mregion *)((uint32_t)ptr - sizeof(mregion));
+	mem_map *memm     = mem_area->memm;
 	uint32_t index    = mem_area->initial_addr >> TABLE_SHIFT;
-	uint32_t ffpage   = mem_area->initial_addr - (index * TABLE_SIZE) + 1;
+	uint32_t ffpage   = mem_area->initial_addr - (TABLE_SIZE * index);
 	uint32_t lpage    = ffpage + mem_area->size - 1;
 	uint32_t *table;
 	volatile pagedir_t *pgdir;
-	uint32_t i, j, k;
+	uint32_t i, j, dpages;
 
-	pgdir = &(mem_area->memm->pagedir);
-*/
+	j = index;
+	i = ffpage;
+
+	pgdir  = mem_area->memm->pagedir;
+	dpages = lpage;
+	table  = pgdir->tables[j];
+	while(dpages >= ffpage) {
+
+		free_page(table[i]);
+		bmap_off(memm, (mem_area->initial_addr + dpages));
+		dpages--;
+
+		if(i > 0) {
+			i--;
+		} else {
+			j--;
+			table = pgdir->tables[j];
+		}
+	}
+
 }
 
 

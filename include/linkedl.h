@@ -52,7 +52,7 @@
 
 	uchar8_t llist_destroy(llist **list);
 
-	//uint32_t llist_get_size(linked_list *list);
+	uint32_t llist_get_size(llist *list);
 	//uint32_t llist_search(linked_list *list, void *element, size_t size);
 
 #endif /* LLIST_H */

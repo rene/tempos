@@ -45,13 +45,12 @@ void tempos_main(karch_t kinf)
 {
 	//uint32_t *mymem;
 	//uint32_t i;
-	//llist *mylist, *tmp;
+	llist *mylist, *tmp;
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
-/*
 	llist_create(&mylist);
 
 	llist_add(&mylist, "Rene");
@@ -60,13 +59,14 @@ void tempos_main(karch_t kinf)
 	llist_add(&mylist, "Pinto");
 
 	tmp = mylist;
-	//while(tmp != NULL) {
-	for(i=0; i<3; i++) {
+	while(tmp != NULL) {
 		kprintf("> %s\n", tmp->element);
 		tmp = tmp->next;
 	}
 
-	//llist_destroy(&mylist);*/
+	llist_destroy(&mylist);
+
+	kprintf("Deu tudo certo!\n");
 
 	for(;;);
 }

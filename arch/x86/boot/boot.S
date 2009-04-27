@@ -32,11 +32,15 @@
 /**
  * Text Section. Here we do not have the paging system yet
  */
-
-	.text
+ 	.text
 
 	.globl start, _start
 	.extern karch
+
+start:
+_start:
+
+	jmp bootentry
 
 	.align 4
 
@@ -48,8 +52,7 @@ multiboot_header:
 	/* Checksum */
 	.long -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
 
-start:
-_start:
+bootentry:
 
 	/**
      * Save contents of EAX into ECX
