@@ -136,7 +136,7 @@ void setup_GDT(void)
 
 inline void load_gdt(void)
 {
-	asm("lgdtl %0         \n"
+	asm("lgdtl %0           \n"
 		/* Reload DATA segment */
 		"movw %1,   %%ax    \n"
 		"movw %%ax, %%ds    \n"

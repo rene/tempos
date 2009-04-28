@@ -34,8 +34,8 @@
 void init_PIC(void)
 {
 	/* Mask all interrupts */
-	outb(0xFF, PIC_MASTER_DATA);
-	outb(0xFF, PIC_SLAVE_DATA);
+	outb(PIC_MASTER_MASK, PIC_MASTER_DATA);
+	outb(PIC_SLAVE_MASK,  PIC_SLAVE_DATA);
 
 
 	/* ICW1 */

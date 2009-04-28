@@ -43,30 +43,40 @@ extern uint32_t *kpagedir;
  */
 void tempos_main(karch_t kinf)
 {
-	//uint32_t *mymem;
-	//uint32_t i;
-	llist *mylist, *tmp;
+	llist *mylist, *mylist2, *tmp;
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
 	llist_create(&mylist);
+	llist_create(&mylist2);
 
-	llist_add(&mylist, "Rene");
-	llist_add(&mylist, "de");
-	llist_add(&mylist, "Souza");
-	llist_add(&mylist, "Pinto");
+	llist_add(&mylist, "Hello");
+	llist_add(&mylist2, "It's amazing");
+	llist_add(&mylist, "World");
+	llist_add(&mylist2, " when you do things ");
+	llist_add(&mylist, "from TempOS !!!");
+	llist_add(&mylist2, "that it's hard to do!\n");
 
 	tmp = mylist;
 	while(tmp != NULL) {
-		kprintf("> %s\n", tmp->element);
+		kprintf("%s ", tmp->element);
 		tmp = tmp->next;
 	}
 
 	llist_destroy(&mylist);
 
-	kprintf("Deu tudo certo!\n");
+	kprintf("\n");
+	tmp = mylist2;
+	while(tmp != NULL) {
+		kprintf("%s ", tmp->element);
+		tmp = tmp->next;
+	}
+
+	llist_destroy(&mylist2);
+
+	kprintf("\nIt works!\n");
 
 	for(;;);
 }

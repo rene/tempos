@@ -30,12 +30,32 @@
 /* IDT table */
 idt_t idt_table[IDT_TABLE_SIZE];
 
-
+/*
 void nullint(void)
 {
 	kprintf("\nUma excessao ocorreu!\n");
 	for(;;);
-}
+}*/
+extern void nullint(void);
+asm ("nullint: iret");
+
+
+void ex0(void) { kprintf("INT 0\n"); while(1); }
+void ex1(void) { kprintf("INT 1\n"); while(1); }
+void ex2(void) { kprintf("INT 2\n"); while(1); }
+void ex3(void) { kprintf("INT 3\n"); while(1); }
+void ex4(void) { kprintf("INT 4\n"); while(1); }
+void ex5(void) { kprintf("INT 5\n"); while(1); }
+void ex6(void) { kprintf("INT 6\n"); while(1); }
+void ex7(void) { kprintf("INT 7\n"); while(1); }
+void ex8(void) { kprintf("INT 8\n"); while(1); }
+void ex9(void) { kprintf("INT 9\n"); while(1); }
+
+void ex10(void) { kprintf("INT 10\n"); while(1); }
+void ex11(void) { kprintf("INT 11\n"); while(1); }
+void ex12(void) { kprintf("INT 12\n"); while(1); }
+void ex13(void) { kprintf("INT 13\n"); while(1); }
+
 
 
 
@@ -75,7 +95,7 @@ void setup_IDT(void)
 	/* Setup IDT with exceptions handlers */
 	for(pos=0; pos<=14; pos++) {
 		idtentry = (idt_tpintdesc_t *)&idt_table[pos];
-		IDT_SET_OFFSET(idtentry, (uint32_t)(nullint));
+		IDT_SET_OFFSET(idtentry, nullint);
 		idtentry->seg_selector   = KERNEL_CS;
 		idtentry->high.notused   = 0x0;
 		idtentry->high.reserved3 = 0x0;
@@ -85,6 +105,21 @@ void setup_IDT(void)
 		idtentry->high.DPL       = KERNEL_DPL;
 		idtentry->high.present   = 1;
 	}
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[0]), ex0);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[1]), ex1);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[2]), ex2);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[3]), ex3);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[4]), ex4);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[5]), ex5);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[6]), ex6);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[7]), ex7);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[8]), ex8);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[9]), ex9);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[10]), ex10);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[11]), ex11);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[12]), ex12);
+	IDT_SET_OFFSET(((idt_tpintdesc_t *)&idt_table[13]), ex13);
+
 
 	/* 15 - Intel Reserved */
 	idtentry = (idt_tpintdesc_t *)&idt_table[15];
@@ -112,6 +147,22 @@ void setup_IDT(void)
 		idtentry->high.present   = 0;
 	}
 
+	/* User defined */
+	for(pos=32; pos<IDT_TABLE_SIZE; pos++) {
+		idtentry = (idt_tpintdesc_t *)&idt_table[pos];
+		IDT_SET_OFFSET(idtentry, nullint);
+		idtentry->seg_selector   = KERNEL_CS;
+		idtentry->high.notused   = 0x0;
+		idtentry->high.reserved3 = 0x0;
+		idtentry->high.type      = IDT_INT_GATE;
+		idtentry->high.gate_size = IDT_INTGATE_S32;
+		idtentry->high.reserved1 = 0;
+		idtentry->high.DPL       = KERNEL_DPL;
+		idtentry->high.present   = 1;
+	}
+
+	/* Map IRQs */
+	//
 
 	IDTR.table_limit = (IDT_TABLE_SIZE * sizeof(idt_t)) - 1;
 	IDTR.idt_ptr     = (uint32_t)idt_table;
