@@ -115,9 +115,7 @@ void karch(unsigned long magic, unsigned long addr)
 	/* Setup interrupts */
 	setup_IDT();
 	init_PIC();
-	//sti();
-
-	//while(1);
+	sti();
 
 	/* TODO: start console */
     clrscr();

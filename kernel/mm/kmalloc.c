@@ -216,7 +216,6 @@ void kfree(void *ptr)
 			table = pgdir->tables[j];
 		}
 	}
-
 }
 
 

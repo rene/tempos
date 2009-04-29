@@ -48,6 +48,10 @@
 	#define IRQ0_VECTOR			0x20
 	#define IRQ8_VECTOR			0x28
 
+	#define PIC_MASTER_MASK		0xFB /* We can't disable IRQ2 because slave it's there */
+	#define PIC_SLAVE_MASK		0xFF
+
+
 	/* A simple wait for io operations */
 	#define pic_delay()	asm volatile("nop; nop; nop");
 

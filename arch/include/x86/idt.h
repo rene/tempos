@@ -29,10 +29,10 @@
 	#include <x86/io.h>
 
 
-	#define IDT_TABLE_SIZE		31
+	#define IDT_TABLE_SIZE		256
 
-	#define IDT_SET_OFFSET(a, offset)	a->offset_low       = (offset & 0x0000FFFF);          \
-										a->high.offset_high = ((offset >> 16) & 0x0000FFFF);
+	#define IDT_SET_OFFSET(a, offset)	a->offset_low       = (((uint32_t)offset) & 0x0000FFFF);          \
+										a->high.offset_high = ((((uint32_t)offset) >> 16) & 0x0000FFFF);
 
 
 	#define IDT_INT_GATE		0x6
