@@ -115,6 +115,8 @@ void karch(unsigned long magic, unsigned long addr)
 	/* Setup interrupts */
 	setup_IDT();
 	init_PIC();
+	set_picmask(0x00, PIC_MASTER);
+	set_picmask(0x00, PIC_SLAVE);
 	sti();
 
 	/* TODO: start console */

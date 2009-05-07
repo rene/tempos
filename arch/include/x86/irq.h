@@ -1,15 +1,15 @@
 /**
- * Copyright (C) 2009 Renê de Souza Pinto
+ * Copyright (C); 2009 Renê de Souza Pvoido
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: x86.h
+ * File: exceptions.h
  *
  * This file is part of TempOS.
  *
  * TempOS is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * (at your option); any later version.
  * 
  * TempOS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,35 +21,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_X86_H
+#ifndef ARCH_X86_IRQ_H
 
-	#define ARCH_X86_H
+	#define ARCH_X86_IRQ_H
 
-#ifndef ASM
 	#include <unistd.h>
+	#include <x86/x86.h>
 
-	struct _pt_regs {
-		uint16_t fs;
-		uint16_t es;
-		uint16_t ds;
-		uint32_t ebp;
-		uint32_t esi;
-		uint32_t edi;
-		uint32_t edx;
-		uint32_t ecx;
-		uint32_t ebx;
-		uint32_t eax;
-	} __attribute__((packed));
+	void do_irq(uint32_t irqnum, pt_regs regs);
 
-	typedef struct _pt_regs pt_regs;
+	/* These are implemented in assembly (see isr.S) */
+	 extern void isr_irq0(void);
+	 extern void isr_irq1(void);
+	 extern void isr_irq2(void);
+	 extern void isr_irq3(void);
+	 extern void isr_irq4(void);
+	 extern void isr_irq5(void);
+	 extern void isr_irq6(void);
+	 extern void isr_irq7(void);
+	 extern void isr_irq8(void);
+	 extern void isr_irq9(void);
+	 extern void isr_irq10(void);
+	 extern void isr_irq11(void);
+	 extern void isr_irq12(void);
+	 extern void isr_irq13(void);
+	 extern void isr_irq14(void);
+	 extern void isr_irq15(void);
 
-#endif
-
-	#define KERNEL_DPL 0x00
-	#define USER_DPL   0x03
-
-	#define KERNEL_CS	0x08	/* Position 1 on GDT */
-	#define KERNEL_DS	0x10	/* Position 2 on GDT */
-
-#endif /* ARCH_X86_H */
+#endif /* EXCEPTIONS_H */
 

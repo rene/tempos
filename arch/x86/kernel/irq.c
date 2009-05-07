@@ -2,7 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: x86.h
+ * File: irq.c
+ * Desc: Architecture dependent functions to handle IRQs
  *
  * This file is part of TempOS.
  *
@@ -21,35 +22,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_X86_H
+#include <x86/irq.h>
+#include <x86/io.h>
+#include <tempos/kernel.h>
 
-	#define ARCH_X86_H
+void do_irq(uint32_t irqnum, pt_regs regs)
+{
+	uchar8_t key;
 
-#ifndef ASM
-	#include <unistd.h>
+	if(irqnum == 0)
+		return;
 
-	struct _pt_regs {
-		uint16_t fs;
-		uint16_t es;
-		uint16_t ds;
-		uint32_t ebp;
-		uint32_t esi;
-		uint32_t edi;
-		uint32_t edx;
-		uint32_t ecx;
-		uint32_t ebx;
-		uint32_t eax;
-	} __attribute__((packed));
+	if(irqnum == 1) {
+		key = inb(0x60);
+		//outb(0x20, 0x20);
+	}
+	kprintf("IRQ %d chamada! -- AX = %ld\n", irqnum, regs.eax);
+}
 
-	typedef struct _pt_regs pt_regs;
-
-#endif
-
-	#define KERNEL_DPL 0x00
-	#define USER_DPL   0x03
-
-	#define KERNEL_CS	0x08	/* Position 1 on GDT */
-	#define KERNEL_DS	0x10	/* Position 2 on GDT */
-
-#endif /* ARCH_X86_H */
 

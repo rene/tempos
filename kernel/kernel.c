@@ -76,8 +76,6 @@ void tempos_main(karch_t kinf)
 
 	llist_destroy(&mylist2);
 
-	kprintf("\nIt works!\n");
-
 	for(;;);
 }
 

@@ -4,7 +4,7 @@
 #
 #
 
-objs-files := i8259A.o
+objs-files := i8259A.o irq.o
 
 #SUBDIRS = boot kernel
 

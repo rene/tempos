@@ -2,7 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: x86.h
+ * File: exceptions.c
+ * Desc: Functions to handle processor exceptions
  *
  * This file is part of TempOS.
  *
@@ -21,35 +22,105 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_X86_H
+#include <tempos/kernel.h>
+#include <x86/exceptions.h>
 
-	#define ARCH_X86_H
 
-#ifndef ASM
-	#include <unistd.h>
+void ex_div()
+{
+	kprintf("Divisao por 0 detectada!\n");
+	while(1);
+}
 
-	struct _pt_regs {
-		uint16_t fs;
-		uint16_t es;
-		uint16_t ds;
-		uint32_t ebp;
-		uint32_t esi;
-		uint32_t edi;
-		uint32_t edx;
-		uint32_t ecx;
-		uint32_t ebx;
-		uint32_t eax;
-	} __attribute__((packed));
 
-	typedef struct _pt_regs pt_regs;
+void ex_debug()
+{
+}
 
-#endif
 
-	#define KERNEL_DPL 0x00
-	#define USER_DPL   0x03
+void ex_nmi()
+{
+}
 
-	#define KERNEL_CS	0x08	/* Position 1 on GDT */
-	#define KERNEL_DS	0x10	/* Position 2 on GDT */
 
-#endif /* ARCH_X86_H */
+void ex_break()
+{
+}
+
+
+void ex_overflow()
+{
+}
+
+
+void ex_bounds()
+{
+}
+
+
+void ex_inv_op()
+{
+}
+
+
+void ex_device()
+{
+}
+
+
+void ex_dfault()
+{
+}
+
+
+void ex_coproc()
+{
+}
+
+
+void ex_inv_tss()
+{
+}
+
+
+void ex_segnp()
+{
+}
+
+
+void ex_stack()
+{
+}
+
+
+void ex_gp()
+{
+}
+
+
+/* Page fault - This fault is handle by mm */
+void ex_pfault()
+{
+}
+
+
+void ex_floatp()
+{
+}
+
+
+void ex_align()
+{
+}
+
+
+void ex_machine()
+{
+}
+
+
+void ex_simd()
+{
+}
+
 
