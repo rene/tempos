@@ -287,10 +287,15 @@ int kprintf(const char *format, ...)
 {
 	char str[4096];
 	va_list args;
-	int res;
+	int res, offset;
+
+	if(format[0] == '!')
+		offset = 3;
+	else
+		offset = 0;
 
 	va_start(args, format);
-	res = vsprintf(str, format, args);
+	res = vsprintf(str, &format[offset], args);
 	va_end(args);
 
 	kprint(str);

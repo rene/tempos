@@ -41,6 +41,7 @@
 	void writechar(char ch, unsigned char attr);
 	void writechar_xy(char ch, unsigned char attr, unsigned char x, unsigned char y);
 	void kprint(char *str);
+	void scroll_screen(void);
 
 #endif /* VIDEO_H_ */
 

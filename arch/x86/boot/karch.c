@@ -30,6 +30,7 @@
 #include <x86/idt.h>
 #include <x86/i8259A.h>
 #include <x86/io.h>
+#include <x86/irq.h>
 #include <x86/mm.h>
 #include <string.h>
 #include "video.h" /* TODO: console */
@@ -115,6 +116,7 @@ void karch(unsigned long magic, unsigned long addr)
 	/* Setup interrupts */
 	setup_IDT();
 	init_PIC();
+	init_IRQ();
 	set_picmask(0x00, PIC_MASTER);
 	set_picmask(0x00, PIC_SLAVE);
 	sti();

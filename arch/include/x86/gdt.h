@@ -27,7 +27,7 @@
 
 	#include <x86/x86.h>
 
-	#define GDT_TABLE_SIZE	0x05
+	#define GDT_TABLE_SIZE	0x06
 
 	#define GDT_SET_BASE(a, base)      a->base_low         = (base & 0x0000FFFF);        \
 									   a->high.base_middle = ((base >> 16) & 0x000000FF);  \
@@ -96,6 +96,38 @@
 		} __attribute__ ((packed)) high;
 	} __attribute__ ((packed));
 
+
+	/**
+	 * gdt_tss_seg
+	 *
+	 * The GDT table entry format for TSS segment descriptors. As you may be
+	 * ask to yourself, we can use _gdt_cd_seg to hold an TSS_SEG but (again)
+	 * this way it's clear and more easy to understand.
+	 *
+	 * For more information, see Intel Manual vol.3, chapter 6, page 6-7.
+	 */
+	struct _gdt_tss_seg {
+		uint16_t  limit_low;
+		uint16_t  base_low;
+		struct _gdt_tss_high {
+			uint32_t base_middle : 8;
+			uint32_t type_res0   : 1;
+			uint32_t busy        : 1;
+			uint32_t type_res1   : 2;
+			uint32_t reserved1   : 1;
+			uint32_t DPL         : 2;
+			uint32_t present     : 1;
+			uint32_t limit_high  : 4;
+			uint32_t avaliable   : 1;
+			uint32_t reserved2   : 1;
+			uint32_t reserved3   : 1;
+			uint32_t granularity : 1;
+			uint32_t base_high   : 8;
+		} __attribute__ ((packed)) high;
+	} __attribute__ ((packed));
+
+
+
 	/**
 	 * gdtr_t
 	 *
@@ -106,8 +138,9 @@
 		uint32_t gdt_ptr;
 	} __attribute__ ((packed)) GDTR;
 
-	typedef struct _gdt_entry  gdt_t;
-	typedef struct _gdt_cd_seg gdt_cdseg_t;
+	typedef struct _gdt_entry   gdt_t;
+	typedef struct _gdt_cd_seg  gdt_cdseg_t;
+	typedef struct _gdt_tss_seg gdt_tsseg_t;
 
 
 	void setup_GDT(void);

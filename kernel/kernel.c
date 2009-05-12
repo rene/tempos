@@ -24,6 +24,7 @@
 
 #include <tempos/kernel.h>
 #include <tempos/mm.h>
+#include <drv/i8042.h>
 #include <string.h>
 #include <stdlib.h>
 #include <linkedl.h>
@@ -43,6 +44,10 @@ extern uint32_t *kpagedir;
  */
 void tempos_main(karch_t kinf)
 {
+	/* Start the second stage */
+	init_8042();
+
+	/* For test */
 	llist *mylist, *mylist2, *tmp;
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
 

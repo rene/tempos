@@ -76,12 +76,13 @@ void writechar(char ch, unsigned char attr)
 	if(px >= VIDEO_COLS) {
 		px = 0;
 		py++;
+
+		if(py > VIDEO_ROWS) {
+			scroll_screen();
+			py = VIDEO_ROWS;
+		}
 	} else {
 		px++;
-	}
-
-	if(py >= VIDEO_ROWS) {
-		py = 0;
 	}
 }
 
@@ -116,7 +117,13 @@ void kprint(char *str)
 	while((c = str[i]) != '\0') {
 		switch(c) {
 			case '\n':
-						if(py < VIDEO_ROWS) py++;
+						if(py <= VIDEO_ROWS) {
+								py++;
+								if(py >= VIDEO_ROWS) {
+									scroll_screen();
+									py = VIDEO_ROWS;
+								}
+						}
 						px = 0;
 						break;
 
@@ -130,5 +137,29 @@ void kprint(char *str)
 		i++;
 	}
 	return;
+}
+
+
+/**
+ * scroll_screen
+ */
+void scroll_screen(void)
+{
+	int i, j, oldpos, newpos;
+	unsigned char tmp1, tmp2;
+
+	for(i=1; i<VIDEO_ROWS; i++) {
+		oldpos = i * VIDEO_COLS * 2;
+		newpos = (i-1) * VIDEO_COLS * 2;
+
+		for(j=0; j<VIDEO_COLS*2; j+=2) {
+
+			tmp1 = videomem[oldpos + j];
+			tmp2 = videomem[oldpos + j + 1];
+
+			videomem[newpos + j]     = tmp1;
+			videomem[newpos + j + 1] = tmp2;
+		}
+	}
 }
 

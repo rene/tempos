@@ -13,9 +13,10 @@ SUBDIRS = mm
 all: $(objs-files) $(SUBDIRS)
 
 $(SUBDIRS):
-	$(MAKE) -C $@
+	@$(MAKE) -C $@
 
-.o: .c
-	$(CC) $(CFLAGS) -c $<
+%.o: %.c
+	@echo + CC $<
+	@$(CC) $(CFLAGS) -c $<
 
 

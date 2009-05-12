@@ -22,22 +22,127 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <tempos/mm.h>
+#include <string.h>
 #include <x86/irq.h>
 #include <x86/io.h>
-#include <tempos/kernel.h>
 
+
+/* handlers queue for each IRQ */
+irq_queue_t irq_list[N_IRQ];
+
+
+/**
+ * Start IRQ handler system
+ */
+void init_IRQ(void)
+{
+	uint16_t i;
+
+	for(i=0; i<N_IRQ; i++) {
+		irq_list[i].irqnum = i;
+		irq_list[i].flags  = SA_SHIRQ;
+		llist_create(&irq_list[i].queue);
+	}
+}
+
+
+/**
+ * do_irq
+ *
+ * Manager for IRQ handlers. This function is called
+ * on every IRQ interrupt (see arch/x86/isr.S).
+ */
 void do_irq(uint32_t irqnum, pt_regs regs)
 {
-	uchar8_t key;
+	irq_queue_t *queue;
+	irq_handler_t *handler;
+	llist *tmp;
 
-	if(irqnum == 0)
+	if(irqnum < N_IRQ) {
+		queue = &irq_list[irqnum];
+	} else {
 		return;
-
-	if(irqnum == 1) {
-		key = inb(0x60);
-		//outb(0x20, 0x20);
 	}
-	kprintf("IRQ %d chamada! -- AX = %ld\n", irqnum, regs.eax);
+
+	/* Call each handler */
+	tmp = queue->queue;
+	if(tmp != NULL) {
+		while(tmp != NULL) {
+			handler = (irq_handler_t *)tmp->element;
+			if(handler != NULL)
+				handler->handler(handler->id, &regs);
+
+			tmp = tmp->next;
+		}
+	}
+}
+
+
+/**
+ * Register an IRQ handler
+ *
+ * This function it's used by device drivers
+ */
+int request_irq(uint16_t irq, void (*handler)(int, pt_regs *),
+						uint16_t flags, const char *name)
+{
+	irq_queue_t *queue;
+	irq_handler_t *newh, *htmp;
+	llist *tmp;
+
+	if(irq < N_IRQ) {
+		queue = &irq_list[irq];
+	} else {
+		return(-1);
+	}
+
+	/* Check if IRQ could be shared */
+	if( (flags & SA_SHIRQ) ) {
+		if( !(queue->flags & SA_SHIRQ) )
+			return(-1);
+	} else {
+		if(queue->queue != NULL) {
+			/* IRQ are already used */
+			return(-1);
+		} else {
+			queue->flags &= ~SA_SHIRQ;
+		}
+	}
+
+	/* Create newh */
+	newh = (irq_handler_t *)kmalloc(sizeof(irq_handler_t), GFP_NORMAL_Z);
+	if(newh == NULL)
+		return(-1);
+
+	if(strlen(name) < MAX_IRQH_NAME) {
+		strcpy(newh->name, name);
+	} else {
+		strncpy(newh->name, name, MAX_IRQH_NAME);
+	}
+
+	newh->handler = handler;
+
+	/* Generate a ID */
+	tmp = queue->queue;
+	if(tmp == NULL) {
+		newh->id = 1;
+	} else {
+		while(tmp->next != NULL)
+				tmp = tmp->next;
+
+		htmp = (irq_handler_t *)tmp->element;
+		if(htmp != NULL) {
+			newh->id = htmp->id + 1;
+		} else {
+			return(-1);
+		}
+	}
+
+	/* Install handler */
+	llist_add(&queue->queue, newh);
+
+	return(1);
 }
 
 

@@ -4,16 +4,10 @@
 #
 #
 
-SUBDIRS = x86
+SUBDIRS = char
 
 .PHONY: subdirs $(SUBDIRS)
 
-all: $(SUBDIRS)
-
 $(SUBDIRS):
 	@$(MAKE) -C $@
-
-#.o: .c
-#	$(CC) $(CFLAGS) -c $<
-
 

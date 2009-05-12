@@ -16,7 +16,8 @@ all: $(objs-files)
 #$(SUBDIRS):
 #	$(MAKE) -C $@
 
-.o: .c
-	$(CC) $(CFLAGS) -c $<
+%.o: %.c
+	@echo + CC $<
+	@$(CC) $(CFLAGS) -c $<
 
 

@@ -15,7 +15,7 @@ OBJS_FILE := $(PWD)/objs.list
 
 export ARCH CC CFLAGS OBJS_FILE
 
-SUBDIRS = arch kernel lib
+SUBDIRS = arch kernel lib drivers
 
 .PHONY: subdirs $(SUBDIRS) clean tempos test install
 
@@ -24,7 +24,7 @@ all: tempos
 subdirs: $(SUBDIRS)
 
 $(SUBDIRS):
-	$(MAKE) -C $@
+	@$(MAKE) -s -C $@
 
 
 clean:

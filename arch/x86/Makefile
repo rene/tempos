@@ -4,21 +4,24 @@
 #
 #
 
-objs-files := gdt.o idt.o io.o exceptions.o
+objs-files := gdt.o idt.o io.o exceptions.o isr.o
 
 SUBDIRS = boot kernel mm
 
 .PHONY: subdirs $(SUBDIRS)
 
-all: isr.o $(objs-files) $(SUBDIRS)
+all: $(objs-files) $(SUBDIRS)
 
 $(SUBDIRS):
-	$(MAKE) -C $@
+	@$(MAKE) -C $@
 
 isr.o: isr.S
-	$(CC) $(CFLAGS) -c $<
+	@$(CC) $(CFLAGS) -c $<
+	@echo + CC $<
 
-.o: .c
-	$(CC) $(CFLAGS) -c $<
+%.o: %.c
+	@echo + CC $<
+	@$(CC) $(CFLAGS) -c $<
+
 
 

@@ -26,9 +26,40 @@
 	#define ARCH_X86_IRQ_H
 
 	#include <unistd.h>
+	#include <linkedl.h>
 	#include <x86/x86.h>
 
+
+	#define N_IRQ			  16
+	#define MAX_IRQH_NAME 	 256
+
+	#define SA_SHIRQ		0x01 /* Shared IRQ */
+
+	/* Interrupt handler struct */
+	struct _irq_handler {
+		uint32_t id;
+		char name[MAX_IRQH_NAME];
+		void (*handler)(int, pt_regs *);
+	};
+
+	/* IRQ queue struct */
+	struct _irq_queue {
+		uchar8_t irqnum;
+		uint16_t flags;
+		llist *queue;
+	};
+
+	typedef struct _irq_handler irq_handler_t;
+	typedef struct _irq_queue   irq_queue_t;
+
+
+	void init_IRQ(void);
+
 	void do_irq(uint32_t irqnum, pt_regs regs);
+
+	int request_irq(uint16_t irq, void (*handler)(int, pt_regs *), \
+						uint16_t flags, const char *name);
+
 
 	/* These are implemented in assembly (see isr.S) */
 	 extern void isr_irq0(void);
