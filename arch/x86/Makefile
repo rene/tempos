@@ -16,8 +16,8 @@ $(SUBDIRS):
 	@$(MAKE) -C $@
 
 isr.o: isr.S
+	@echo + AS $<
 	@$(CC) $(CFLAGS) -c $<
-	@echo + CC $<
 
 %.o: %.c
 	@echo + CC $<

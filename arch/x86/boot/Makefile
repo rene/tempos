@@ -8,7 +8,7 @@ objs-files := karch.o video.o
 all: boot.o $(objs-files)
 
 boot.o: boot.S
-	@echo + CC $<
+	@echo + AS $<
 	@$(CC) $(CFLAGS) -c boot.S
 
 %.o: %.c

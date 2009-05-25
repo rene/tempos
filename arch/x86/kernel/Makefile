@@ -4,7 +4,9 @@
 #
 #
 
-objs-files := i8259A.o irq.o
+objs-files := i8259A.o irq.o sys_enter.o
+
+OBJS += $(objs-files)
 
 #SUBDIRS = boot kernel
 
@@ -15,6 +17,10 @@ all: $(objs-files)
 
 #$(SUBDIRS):
 #	$(MAKE) -C $@
+
+sys_enter.o: sys_enter.S
+	@echo + AS $<
+	@$(CC) $(CFLAGS) -c $<
 
 %.o: %.c
 	@echo + CC $<

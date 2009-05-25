@@ -2,8 +2,7 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: error.h
- * Desc: Contain the error codes for TempOS
+ * File: syscall.h
  *
  * This file is part of TempOS.
  *
@@ -22,13 +21,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ERROR_H
+#ifndef SYSCALL_H
 
-	#define ERROR_H
+	#define SYSCALL_H
 
-	#define ENOSYS		1
-	#define ENOMEM		2
+	#define SYSCALL_COUNT 5
 
-#endif /* ERROR_H */
+#ifndef ASM
+	#include <unistd.h>
+
+	int      sys_exit(int status);
+	void     sys_fork(void);
+	int      sys_execve(const char *filename, char *const argv[], char *const envp[]);
+	ssize_t  sys_read(int fd, void *buf, size_t count);
+	ssize_t  sys_write(int fd, const void *buf, size_t count);
+#endif
+
+#endif /* SYSCALL_H */
 
 

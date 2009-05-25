@@ -6,6 +6,8 @@
 
 objs-files := i8042.o
 
+OBJS += $(objs-files)
+
 #SUBDIRS = 
 
 #.PHONY: subdirs $(SUBDIRS)

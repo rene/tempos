@@ -33,11 +33,11 @@
 .extern do_irq
 
 
-.global _ex_div, _ex_debug, _ex_nmi, _ex_break, _ex_overflow, _ex_bounds, \
+.globl  _ex_div, _ex_debug, _ex_nmi, _ex_break, _ex_overflow, _ex_bounds, \
 		_ex_inv_op, _ex_device, _ex_dfault, _ex_coproc, _ex_inv_tss,      \
 		_ex_segnp, _ex_stack, _ex_gp, _ex_pfault, _ex_floatp, _ex_align,  \
 		_ex_machine, _ex_simd
-.global isr_irq0, isr_irq1, isr_irq2, isr_irq3, isr_irq4, isr_irq5,   \
+.globl  isr_irq0, isr_irq1, isr_irq2, isr_irq3, isr_irq4, isr_irq5,   \
 		isr_irq6, isr_irq7, isr_irq8, isr_irq9, isr_irq10, isr_irq11, \
 		isr_irq12, isr_irq13, isr_irq14, isr_irq15, nullisr
 

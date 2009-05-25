@@ -2,8 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: error.h
- * Desc: Contain the error codes for TempOS
+ * File: execve.c
+ * Desc: Syscall execve
  *
  * This file is part of TempOS.
  *
@@ -22,13 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ERROR_H
+#include <tempos/syscall.h>
 
-	#define ERROR_H
-
-	#define ENOSYS		1
-	#define ENOMEM		2
-
-#endif /* ERROR_H */
+int sys_execve(const char *filename, char *const argv[], char *const envp[])
+{
+}
 
 

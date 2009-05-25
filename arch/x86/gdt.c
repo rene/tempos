@@ -135,7 +135,7 @@ void setup_GDT(void)
 	/* TSS_SEG */
 	tssentry = (gdt_tsseg_t *)&gdt_table[5];
 	GDT_SET_BASE(tssentry,  0x00000); /* TODO: add TSS struct  */
-	GDT_SET_LIMIT(tssentry, 0x00067); /* TODO: sizeof(TSS struct) */
+	GDT_SET_LIMIT(tssentry, 0x00064); /* TODO: sizeof(TSS struct) */
 	tssentry->high.type_res0   = 1; /* do NOT change! */
 	tssentry->high.busy        = 0;
 	tssentry->high.type_res1   = 2; /* do NOT change! */

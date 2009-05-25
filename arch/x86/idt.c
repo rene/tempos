@@ -26,6 +26,9 @@
 #include <x86/exceptions.h>
 #include <x86/irq.h>
 
+/* syscall handler (see sys_enter.S)*/
+extern void _sys_enter(void);
+
 
 /* IDT table */
 idt_t idt_table[IDT_TABLE_SIZE];
@@ -167,6 +170,11 @@ void setup_IDT(void)
 		idtentry->high.DPL       = KERNEL_DPL;
 		idtentry->high.present   = 0;
 	}
+
+	/* TempOS syscall interrupt : 0x85 */
+	idtentry = (idt_tpintdesc_t *)&idt_table[133];
+	IDT_SET_OFFSET(idtentry, _sys_enter);
+	idtentry->high.present = 1;
 
 
 	IDTR.table_limit = (IDT_TABLE_SIZE * sizeof(idt_t)) - 1;

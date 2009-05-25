@@ -13,7 +13,9 @@ CFLAGS  := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefa
 
 OBJS_FILE := $(PWD)/objs.list
 
-export ARCH CC CFLAGS OBJS_FILE
+OBJS :=
+
+export ARCH CC CFLAGS OBJS
 
 SUBDIRS = arch kernel lib drivers
 

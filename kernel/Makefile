@@ -4,7 +4,9 @@
 #
 #
 
-objs-files := kernel.o
+objs-files := kernel.o syscall.o exit.o fork.o execve.o read.o write.o
+
+OBJS += $(objs-files)
 
 SUBDIRS = mm
 

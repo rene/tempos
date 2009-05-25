@@ -5,6 +5,8 @@
 
 objs-files := ctype.o printf.o stdlib.o string.o linkedl.o
 
+OBJS += $(objs-files)
+
 all: $(objs-files)
 
 %.o: %.c

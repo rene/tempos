@@ -44,6 +44,8 @@ extern uint32_t *kpagedir;
  */
 void tempos_main(karch_t kinf)
 {
+	char *hello = "Hello World!";
+
 	/* Start the second stage */
 	init_8042();
 
@@ -80,6 +82,13 @@ void tempos_main(karch_t kinf)
 	}
 
 	llist_destroy(&mylist2);
+
+	/* Call a system call */
+	asm volatile("movl $4,  %%eax  \n" // syscall number
+				 "movl $12, %%ebx  \n" // count
+				 "movl %0,  %%ecx  \n" // hello
+				 "movl $0,  %%edx  \n" // fd
+				 "int $0x85" : : "g" (hello) );
 
 	for(;;);
 }

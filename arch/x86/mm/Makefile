@@ -6,6 +6,8 @@
 
 objs-files := mm.o
 
+OBJS += $(objs-files)
+
 #SUBDIRS = boot kernel
 
 #.PHONY: subdirs $(SUBDIRS)

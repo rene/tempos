@@ -2,8 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: error.h
- * Desc: Contain the error codes for TempOS
+ * File: write.c
+ * Desc: Syscall write
  *
  * This file is part of TempOS.
  *
@@ -22,13 +22,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ERROR_H
+#include <tempos/syscall.h>
+#include <tempos/kernel.h>
 
-	#define ERROR_H
+ssize_t sys_write(int fd, const void *buf, size_t count)
+{
+	char buffer[256];
+	char *tmp = (char *)buf;
+	size_t i;
 
-	#define ENOSYS		1
-	#define ENOMEM		2
+	if(count < 256) {
+		for(i=0;i<=count;i++)
+			buffer[i] = tmp[i];
+	}
 
-#endif /* ERROR_H */
+	if(fd == 0) {
+		kprintf("SYSCALL WRITE: %s\n", buffer);
+	}
+
+	return(10);
+}
 
 

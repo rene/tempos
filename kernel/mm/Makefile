@@ -6,6 +6,8 @@
 
 objs-files := init_mm.o kmalloc.o
 
+OBJS += $(objs-files)
+
 #SUBDIRS = boot kernel
 
 #.PHONY: subdirs $(SUBDIRS)
