@@ -32,7 +32,6 @@
 .extern syscall_table;
 
 _sys_enter:
-	cli
 	pushl %esp
 	pushl %ebp
 	pushw %ds
@@ -46,32 +45,33 @@ _sys_enter:
 	movw %dx, %ds
 	movw %dx, %es
 
+	popl %edx
+
+	pushl $exit_syscall
+
 	cmpl SYSCALL_COUNT, %eax
-	jae  sys_error
+	jae  exit_syscall
 
 	/* Push syscall arguments */
-	popl %edx
 	pushl %ebx
 	pushl %ecx
 	pushl %edx
 
 	call *syscall_table(,%eax,4)
+	addl $4*3,%esp
+	ret
 
-	pushl %eax
+exit_syscall:
+	/*pushl %eax*/
+	/**/
+
+	cli
+	popw  %gs
+	popw  %fs
+	popw  %es
+	popw  %ds
+	popl  %ebp
+	popl  %esp
 	sti
 	iret
-
-sys_error:
-	popw %gs
-	popw %fs
-	popw %es
-	popl %ebp
-	popl %esp
-
-	/* Error code */
-	pushl $-ENOSYS
-
-	sti
-	iret
-
 

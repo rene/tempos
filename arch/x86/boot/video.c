@@ -148,7 +148,7 @@ void scroll_screen(void)
 	int i, j, oldpos, newpos;
 	unsigned char tmp1, tmp2;
 
-	for(i=1; i<VIDEO_ROWS; i++) {
+	for(i=1; i<=VIDEO_ROWS; i++) {
 		oldpos = i * VIDEO_COLS * 2;
 		newpos = (i-1) * VIDEO_COLS * 2;
 

@@ -62,9 +62,9 @@ void tempos_main(karch_t kinf)
 	llist_add(&mylist, "Hello");
 	llist_add(&mylist2, "It's amazing");
 	llist_add(&mylist, "World");
-	llist_add(&mylist2, " when you do things ");
+	llist_add(&mylist2, " write ");
 	llist_add(&mylist, "from TempOS !!!");
-	llist_add(&mylist2, "that it's hard to do!\n");
+	llist_add(&mylist2, "an Operating System!\n");
 
 	tmp = mylist;
 	while(tmp != NULL) {
@@ -89,6 +89,8 @@ void tempos_main(karch_t kinf)
 				 "movl %0,  %%ecx  \n" // hello
 				 "movl $0,  %%edx  \n" // fd
 				 "int $0x85" : : "g" (hello) );
+
+	kprintf("\nI'am back from syscall!!\n");
 
 	for(;;);
 }
