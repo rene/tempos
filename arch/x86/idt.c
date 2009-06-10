@@ -188,3 +188,4 @@ inline void load_idt(void)
 	asm("lidtl %0" : : "m" (IDTR));
 }
 
+

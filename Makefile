@@ -1,7 +1,8 @@
 ##
 # Copyright (C) 2009 Renê de Souza Pinto
-# Tempos - Tempos is an Educational and multi purposing Operating System
+# TempOS - Tempos is an Educational and multi purposing Operating System
 #
+# Makefile
 #
 
 PWD     := $(shell pwd)
@@ -11,35 +12,39 @@ CC      := gcc
 INCDIRS := -I$(PWD)/include -I$(PWD)/arch/include
 CFLAGS  := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs
 
-OBJS_FILE := $(PWD)/objs.list
+OBJFILES :=
+OBJDIRS  :=
 
-OBJS :=
+export OBJDIRS OBJFILES CFLAGS CC
 
-export ARCH CC CFLAGS OBJS
+.PHONY: clean tempos test install
 
-SUBDIRS = arch kernel lib drivers
 
-.PHONY: subdirs $(SUBDIRS) clean tempos test install
+include arch/$(ARCH)/Build.mk
+include arch/$(ARCH)/boot/Build.mk
+include arch/$(ARCH)/kernel/Build.mk
+include arch/$(ARCH)/mm/Build.mk
 
-all: tempos
+include drivers/char/Build.mk
 
-subdirs: $(SUBDIRS)
+include lib/Build.mk
 
-$(SUBDIRS):
-	@$(MAKE) -s -C $@
+include kernel/Build.mk
+include kernel/mm/Build.mk
 
+
+
+DFILES := $(OBJFILES:.o=.d)
+
+tempos: $(OBJFILES)
+	@echo Linking...
+	@ld -o tempos.elf -T arch/$(ARCH)/boot/setup.ld $(OBJFILES)
+	@echo done.
 
 clean:
-	@find . -type f -name "*.o" -exec rm {} \;
-	@rm tempos.elf
-	@rm objs.list
-
-tempos: subdirs
-	@echo Generating objects file list
-	@find . -type f -name "*.o" | sort > objs.list
-	@echo Linking...
-	@ld -o tempos.elf -T arch/$(ARCH)/boot/setup.ld @objs.list
-	@echo done.
+	@rm -f $(DFILES)
+	@rm -f $(OBJFILES)
+	@[ -f tempos.elf ] && rm -f tempos.elf || echo "No image found."
 
 test:
 	@qemu -M pc -fda disk.img -boot a

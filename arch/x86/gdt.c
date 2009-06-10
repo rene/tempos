@@ -170,3 +170,4 @@ inline void load_gdt(void)
 			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS) : "eax");
 }
 
+

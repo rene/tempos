@@ -22,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define ASM
 
 #include <x86/x86.h>
 
