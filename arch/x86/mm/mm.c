@@ -188,10 +188,8 @@ void init_pg(karch_t *kinf)
 	for(i=0; i<kinf->mmap_size; i++) {
 		mmap = &(kinf->mmap_table[i]);
 
-		/* Map only memory avaliable and over 1MB */
-		if(mmap->type == MTYPE_AVALIABLE &&
-				mmap->base_addr_low >= 0x100000) {
-
+		/* Map only avaliable memory */
+		if(mmap->type == MTYPE_AVALIABLE) {
 			m_end   = mmap->base_addr_low + mmap->length_low;
 			address = PAGE_ALIGN(mmap->base_addr_low);
 			while(address < m_end && stack_top < stack_max_top) {

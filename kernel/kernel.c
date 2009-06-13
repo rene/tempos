@@ -84,13 +84,13 @@ void tempos_main(karch_t kinf)
 	llist_destroy(&mylist2);
 
 	/* Call a system call */
-	asm volatile("movl $4,  %%eax  \n" // syscall number
+	/*asm volatile("movl $4,  %%eax  \n" // syscall number
 				 "movl $12, %%ebx  \n" // count
 				 "movl %0,  %%ecx  \n" // hello
 				 "movl $0,  %%edx  \n" // fd
 				 "int $0x85" : : "g" (hello) );
 
-	kprintf("\nI'am back from syscall!!\n");
+	kprintf("\nI'am back from syscall!!\n");*/
 
 	for(;;);
 }

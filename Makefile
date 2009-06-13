@@ -32,9 +32,8 @@ include lib/Build.mk
 include kernel/Build.mk
 include kernel/mm/Build.mk
 
-
-
 DFILES := $(OBJFILES:.o=.d)
+
 
 tempos: $(OBJFILES)
 	@echo Linking...
