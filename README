@@ -13,7 +13,7 @@ ABOUT:
 	to be not only another Operating System, but a complete toolkit
 	designed to help students on their O.S. courses.
 
-	TempOS is under a realy development stage, which means that it's
+	TempOS it's under a realy development stage, which means that it's
 	not complete functional yet. The parties currently done are:
 
 		- Multiboot implementation to Boot TempOS with GRUB
@@ -72,7 +72,7 @@ DEVELOPMENT:
 
 	TempOS is currently developed only by Renê de Souza Pinto, but you can change
 	this. Voluntaries are very, very Welcome to help TempOS grow up, any kind of
-	help are wanted:
+	help is wanted:
 
 		- Improve TempOS code
 		- Correct BUGS
