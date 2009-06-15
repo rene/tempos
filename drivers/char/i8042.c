@@ -162,9 +162,9 @@ void init_8042(void)
 		kprintf(KERN_ERROR "Error on initialize i8042\n");
 
 	/* Send test interface command */
-	kbc_sendcomm(ITEST);
-	if(kbc_read() != 0x00)
-		kprintf("Error \n");
+	//kbc_sendcomm(ITEST);
+	//if(kbc_read() != 0x00)
+	//	kprintf("Error \n");
 
 
 
