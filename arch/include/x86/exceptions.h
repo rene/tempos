@@ -1,6 +1,6 @@
 /**
  * Copyright (C); 2009 Renê de Souza Pvoido
- * Tempos - Tempos is an Educational and multi purposing Operating System
+ * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: exceptions.h
  *
