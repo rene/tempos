@@ -14,7 +14,7 @@ ABOUT:
 	designed to help students on their O.S. courses.
 
 	TempOS it's under a realy development stage, which means that it's
-	not complete functional yet. The parties currently done are:
+	not complete functional yet. The parts currently done are:
 
 		- Multiboot implementation to Boot TempOS with GRUB
 		- Page system working with 4Kb pages
