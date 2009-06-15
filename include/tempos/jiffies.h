@@ -2,8 +2,7 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: timer.c
- * Desc: Time system of TempOS
+ * File: jiffies.h
  *
  * This file is part of TempOS.
  *
@@ -22,45 +21,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <tempos/timer.h>
-#include <unistd.h>
-#include <x86/irq.h>
+#ifndef JIFFIES_H
+
+	#define JIFFIES_H
+
+	#include <unistd.h>
 
 
-static void timer_handler(int id, pt_regs *regs);
-
-/**
- * jiffies
- *
- * Contains the number of system clock ticks
- */
-volatile ulong32_t jiffies;
-
-
-/**
- * init_timer
- *
- * Initialize time system
- */
-void init_timer(void)
-{
-	kprintf(KERN_INFO "Initializing timer...\n");
-
-	if( request_irq(TIMER_IRQ, timer_handler, 0, "PIT") < 0 ) {
-		kprintf(KERN_ERROR "Error on initialize PIT\n");
-	}
-
-	jiffies = 0;
-}
+	/**
+	 * These inlines come from Linux and deal with timer wrapping correctly.
+	 * You are strongly encouraged to use them
+	 *
+	 * time_after(a,b) returns true if the time a is after time b.
+	 *
+	 * Do this with "<0" and ">=0" to only test the sign of the result. A
+	 * good compiler would generate better code (and a really good compiler
+	 * wouldn't care). Gcc is currently neither.
+	 */
+	#define time_after(a,b)     \
+				((long32_t)(b) - (long32_t)(a) < 0)
+	#define time_before(a,b)    time_after(b,a)
+	#define time_after_eq(a,b)  \
+				((long32_t)(a) - (long32_t)(b) >= 0)
+	#define time_before_eq(a,b) time_after_eq(b,a)
 
 
-/**
- * timer_handler
- *
- * Interrupt handler
- */
-static void timer_handler(int id, pt_regs *regs)
-{
-	jiffies++;
-}
+	extern volatile ulong32_t jiffies;
+
+#endif /* JIFFIES_H */
 

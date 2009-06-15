@@ -45,11 +45,15 @@ extern uint32_t *kpagedir;
  */
 void tempos_main(karch_t kinf)
 {
-	char *hello = "Hello World!";
+	//char *hello = "Hello World!";
 
 	/* Start the second stage */
-	init_8042();
+
+	/* keep init_timer() in first palce because drivers use timer functions */
 	init_timer();
+
+	/* Keyboard */
+	init_8042();
 
 	/* For test */
 	llist *mylist, *mylist2, *tmp;

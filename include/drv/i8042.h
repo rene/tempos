@@ -46,12 +46,9 @@
 	#define RCV_TMOUT      0x40
 	#define PARITY_EVEN    0x80
 	#define INH_KEYBOARD   0x10
-	#define KBD_ENA        0xAE
-	#define KBD_DIS        0xAD
+	#define KBD_ENABLE     0xAE
+	#define KBD_DISABLE    0xAD
 
-	/**
-	 * Keyboard Commands
-	 */
 	#define KB_MENU        0xF1
 	#define KB_ENABLE      0xF4
 	#define KB_MAKEBREAK   0xF7
@@ -59,10 +56,8 @@
 	#define KB_RESET       0xFF
 	#define KB_LED_CMD     0xED
 
-	/**
-	 * Keyboard responses
-	 */
-	#define KB_OK          0xAA
+	#define KB_SELFTEST    0xAA
+	#define KB_ITEST	   0xAB
 	#define KB_ACK         0xFA
 	#define KB_OVERRUN     0xFF
 	#define KB_RESEND      0xFE

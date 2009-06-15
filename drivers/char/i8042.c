@@ -23,9 +23,15 @@
  */
 
 #include <tempos/kernel.h>
+#include <tempos/timer.h>
+#include <tempos/jiffies.h>
 #include <drv/i8042.h>
 #include <x86/irq.h>
 #include <x86/io.h>
+
+
+#define TIMEOUT		(jiffies + (HZ / 40)) /* timeout in 40ms */
+
 
 static void keyboard_handler(int id, pt_regs *regs);
 
@@ -142,19 +148,30 @@ static uint32_t scan2ascii_table[][8] =
 /**
  * init_8042
  *
- * Initialize the two PICs (Master and Slave):
+ * Initialize keyboard controller
  */
 void init_8042(void)
 {
 	kprintf(KERN_INFO "Initializing i8042 keyboard controller...\n");
 
-	kbc_sendcomm(KB_OK);
+	/* Routines to initialize i8042 */
+
+	/* Send self test command */
+	kbc_sendcomm(KB_SELFTEST);
 	if(kbc_read() != 0x55)
-			kprintf(KERN_ERROR "Error on initialize i8042\n");
+		kprintf(KERN_ERROR "Error on initialize i8042\n");
+
+	/* Send test interface command */
+	kbc_sendcomm(ITEST);
+	if(kbc_read() != 0x00)
+		kprintf("Error \n");
+
+
 
 	if( request_irq(KBD_IRQ, keyboard_handler, 0, "i8042") < 0 ) {
 		kprintf(KERN_ERROR "Error on initialize i8042\n");
 	}
+
 }
 
 
@@ -163,8 +180,16 @@ void init_8042(void)
  */
 static void keyboard_handler(int id, pt_regs *regs)
 {
+	kbc_sendcomm(KBD_DISABLE);
+
 	uchar8_t key = read_key();
-		kprintf( "%c", key );
+
+	if(key >= 0x80)
+		kprintf( "Released: %c", key-0x80 );
+	else
+		kprintf( "Pressed: %c", key );
+
+	kbc_sendcomm(KBD_ENABLE);
 }
 
 
@@ -193,7 +218,9 @@ uchar8_t kbc_read(void)
  */
 void wait_read_8042(void)
 {
-	while( !(inb(STATUS_PORT) & OUT_BUF_FULL) );
+	long32_t timeout = TIMEOUT;
+
+	while( !time_after(jiffies, timeout) && (!(inb(STATUS_PORT) & OUT_BUF_FULL)) );
 	return;
 }
 
@@ -203,7 +230,9 @@ void wait_read_8042(void)
  */
 void wait_write_8042(void)
 {
-	while( (inb(STATUS_PORT) & INPT_BUF_FULL) );
+	long32_t timeout = TIMEOUT;
+
+	while( !time_after(jiffies, timeout) && ((inb(STATUS_PORT) & INPT_BUF_FULL)) );
 	return;
 }
 
