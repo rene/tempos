@@ -6,7 +6,7 @@
 #
 
 CDIR := arch/x86/kernel
-OBJS :=  i8259A.o  irq.o
+OBJS :=  i8259A.o i82C54.o irq.o
 
 OBJFILES += $(CDIR)/sys_enter.o
 OBJA := $(CDIR)/sys_enter.o

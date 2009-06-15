@@ -148,12 +148,12 @@ void init_8042(void)
 {
 	kprintf(KERN_INFO "Initializing i8042 keyboard controller...\n");
 
+	kbc_sendcomm(KB_OK);
+	if(kbc_read() != 0x55)
+			kprintf(KERN_ERROR "Error on initialize i8042\n");
+
 	if( request_irq(KBD_IRQ, keyboard_handler, 0, "i8042") < 0 ) {
 		kprintf(KERN_ERROR "Error on initialize i8042\n");
-	} else {
-		kprintf(KERN_INFO "Self test on i8042...\n");
-
-		//
 	}
 }
 
@@ -163,7 +163,8 @@ void init_8042(void)
  */
 static void keyboard_handler(int id, pt_regs *regs)
 {
-	kprintf( "%c", read_key() );
+	uchar8_t key = read_key();
+		kprintf( "%c", key );
 }
 
 
@@ -173,7 +174,7 @@ static void keyboard_handler(int id, pt_regs *regs)
 void kbc_sendcomm(uchar8_t command)
 {
 	wait_write_8042();
-	outb(command, STATUS_PORT);
+	outb(command, KBD_CMD_BUF);
 	wait_read_8042();
 }
 

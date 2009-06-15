@@ -29,6 +29,7 @@
 #include <x86/multiboot.h>
 #include <x86/idt.h>
 #include <x86/i8259A.h>
+#include <x86/i82C54.h>
 #include <x86/io.h>
 #include <x86/irq.h>
 #include <x86/mm.h>
@@ -116,6 +117,7 @@ void karch(unsigned long magic, unsigned long addr)
 	/* Setup interrupts */
 	setup_IDT();
 	init_PIC();
+	init_PIT();
 	init_IRQ();
 	set_picmask(0x00, PIC_MASTER);
 	set_picmask(0x00, PIC_SLAVE);

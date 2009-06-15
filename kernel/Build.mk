@@ -6,7 +6,7 @@
 #
 
 CDIR := kernel
-OBJS := execve.o  exit.o  fork.o  kernel.o  read.o  syscall.o  write.o
+OBJS := execve.o exit.o fork.o kernel.o read.o syscall.o write.o timer.o
 
 
 #--- DO NOT CHANGE HERE ---#

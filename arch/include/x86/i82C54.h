@@ -2,7 +2,7 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purposing Operating System
  *
- * File: i8259A.h
+ * File: i82C54.h
  *
  * This file is part of TempOS.
  *
@@ -21,47 +21,48 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef  ARCH_X86_PIC
+#ifndef  ARCH_X86_PIT
 
-	#define ARCH_X86_PIC
+	#define ARCH_X86_PIT
 
 	#include <unistd.h>
+	#include <tempos/timer.h>
 
-	#define PIC_MASTER_CMD		0x20
-	#define PIC_MASTER_DATA		0x21
-	#define PIC_SLAVE_CMD		0xA0
-	#define PIC_SLAVE_DATA		0xA1
+	/* i82C54 Frequency */
+	#define PIT82C54_HZ		1193182
+	#define SYSTEM_TIMER	(PIT82C54_HZ / HZ)
 
-	#define PIC_MASTER			PIC_MASTER_DATA /* Do not change this */
-	#define PIC_SLAVE			PIC_SLAVE_DATA  /* Do not change this */
+	/* I/O ports used by PIT */
+	#define CH0_PORT	0x40
+	#define CH2_PORT	0x42
+	#define CM_PORT		0x43
 
-	/* Masks for PIC commands */
-	#define PIC_ICW1_IC4		0x01
-	#define PIC_ICW1_INIT		0x10
+	/* Channels mask */
+	#define CH0_MASK	0x00
+	#define CH2_MASK	0x80
 
-	#define PIC_ICW4_8086		0x01
-	#define PIC_ICW4_AEOI		0x02
-	#define PIC_EOI				0x20
+	/* Access mode */
+	#define AM_LOW		0x10
+	#define AM_HIGH		0x20
+	#define AM_LOW_HIGH	0x30
 
-	#define PIC_ICW3_M_CASCADE  0x04
-	#define PIC_ICW3_S_CASCADE  0x02
+	/* Operation modes */
+	#define MODE_0		0x00
+	#define MODE_1		0x02
+	#define MODE_2		0x04
+	#define MODE_3		0x06
+	#define MODE_4		0x08
 
-	#define IRQ0_VECTOR			0x20
-	#define IRQ8_VECTOR			0x28
-
-	#define PIC_MASTER_MASK		0xFB /* We can't disable IRQ2 because slave it's there */
-	#define PIC_SLAVE_MASK		0xFF
+	/* Data format */
+	#define DATA_BIN	0x00
+	#define DATA_BCD	0x01
 
 
 	/* A simple wait for io operations */
-	#define pic_delay()	asm volatile("nop; nop; nop");
+	#define pit_delay()	asm volatile("nop; nop; nop");
 
 
-	void init_PIC(void);
+	void init_PIT(void);
 
-	uchar8_t get_picmask(uchar8_t pic);
-
-	void set_picmask(uchar8_t mask, uchar8_t pic);
-
-#endif /* ARCH_X86_PIC */
+#endif /* ARCH_X86_PIT */
 

@@ -13,7 +13,7 @@ ABOUT:
 	to be not only another Operating System, but a complete toolkit
 	designed to help students on their O.S. courses.
 
-	TempOS it's under a realy development stage, which means that it's
+	TempOS it's under a true development stage, which means that it's
 	not complete functional yet. The parts currently done are:
 
 		- Multiboot implementation to Boot TempOS with GRUB

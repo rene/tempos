@@ -52,29 +52,31 @@
 	/**
 	 * Keyboard Commands
 	 */
-	#define KB_MENU        0x0F1
-	#define KB_ENABLE      0x0F4
-	#define KB_MAKEBREAK   0x0F7
-	#define KB_ECHO        0x0FE
-	#define KB_RESET       0x0FF
-	#define KB_LED_CMD     0x0ED
+	#define KB_MENU        0xF1
+	#define KB_ENABLE      0xF4
+	#define KB_MAKEBREAK   0xF7
+	#define KB_ECHO        0xEE
+	#define KB_RESET       0xFF
+	#define KB_LED_CMD     0xED
 
 	/**
 	 * Keyboard responses
 	 */
-	#define KB_OK          0x0AA
-	#define KB_ACK         0x0FA
-	#define KB_OVERRUN     0x0FF
-	#define KB_RESEND      0x0FE
-	#define KB_BREAK       0x0F0
-	#define KB_FA          0x010
-	#define KB_FE          0x020
-	#define KB_PR_LED      0x040
+	#define KB_OK          0xAA
+	#define KB_ACK         0xFA
+	#define KB_OVERRUN     0xFF
+	#define KB_RESEND      0xFE
+	#define KB_BREAK       0xF0
+	#define KB_FA          0x10
+	#define KB_FE          0x20
+	#define KB_PR_LED      0x40
 
 
 	void init_8042(void);
 
 	void kbc_sendcomm(uchar8_t command);
+
+	uchar8_t kbc_read(void);
 
 	void wait_read_8042(void);
 

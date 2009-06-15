@@ -24,6 +24,7 @@
 
 #include <tempos/kernel.h>
 #include <tempos/mm.h>
+#include <tempos/timer.h>
 #include <drv/i8042.h>
 #include <string.h>
 #include <stdlib.h>
@@ -48,6 +49,7 @@ void tempos_main(karch_t kinf)
 
 	/* Start the second stage */
 	init_8042();
+	init_timer();
 
 	/* For test */
 	llist *mylist, *mylist2, *tmp;

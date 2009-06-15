@@ -26,6 +26,7 @@
 #include <string.h>
 #include <x86/irq.h>
 #include <x86/io.h>
+#include <x86/i8259A.h>
 
 
 /* handlers queue for each IRQ */
@@ -76,6 +77,14 @@ void do_irq(uint32_t irqnum, pt_regs regs)
 			tmp = tmp->next;
 		}
 	}
+
+
+	/* Send EOI to the slave PIC (when necessary) */
+	if(irqnum > 7)
+		outb(PIC_EOI, PIC_SLAVE_CMD);
+
+	/* Send EOI to the master PIC */
+	outb(PIC_EOI, PIC_MASTER_CMD);
 }
 
 
