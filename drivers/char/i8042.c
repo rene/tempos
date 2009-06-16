@@ -156,22 +156,16 @@ void init_8042(void)
 
 	/* Routines to initialize i8042 */
 
-	/* Send self test command */
-	kbc_sendcomm(KB_SELFTEST);
-	if(kbc_read() != 0x55)
-		kprintf(KERN_ERROR "Error on initialize i8042\n");
+	/* Enable keyboard */
+	kbc_sendcomm(KBD_ENABLE);
 
-	/* Send test interface command */
-	//kbc_sendcomm(ITEST);
-	//if(kbc_read() != 0x00)
-	//	kprintf("Error \n");
-
-
-
+	/* Register IRQ service routine */
 	if( request_irq(KBD_IRQ, keyboard_handler, 0, "i8042") < 0 ) {
 		kprintf(KERN_ERROR "Error on initialize i8042\n");
 	}
 
+	/* Clear the output buffer */
+	inb(KBD_OUT_BUF);
 }
 
 
@@ -180,16 +174,13 @@ void init_8042(void)
  */
 static void keyboard_handler(int id, pt_regs *regs)
 {
-	kbc_sendcomm(KBD_DISABLE);
+	//kbc_sendcomm(KBD_DISABLE);
 
 	uchar8_t key = read_key();
 
-	if(key >= 0x80)
-		kprintf( "Released: %c", key-0x80 );
-	else
-		kprintf( "Pressed: %c", key );
+	kprintf( "%lx ", key );
 
-	kbc_sendcomm(KBD_ENABLE);
+	//kbc_sendcomm(KBD_ENABLE);
 }
 
 
