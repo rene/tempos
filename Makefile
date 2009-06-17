@@ -7,10 +7,15 @@
 
 PWD     := $(shell pwd)
 
+# Architecture compile and link flags
 ARCH    := x86
+ARCH_CF := -m32
+ARCH_LF := -melf_i386
+
+
 CC      := gcc
 INCDIRS := -I$(PWD)/include -I$(PWD)/arch/include
-CFLAGS  := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs
+CFLAGS  := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
 
 OBJFILES :=
 OBJDIRS  :=
@@ -37,7 +42,7 @@ DFILES := $(OBJFILES:.o=.d)
 
 tempos: $(OBJFILES)
 	@echo Linking...
-	@ld -o tempos.elf -T arch/$(ARCH)/boot/setup.ld $(OBJFILES)
+	@ld -o tempos.elf -T arch/$(ARCH)/boot/setup.ld $(OBJFILES) $(ARCH_LF)
 	@echo done.
 
 clean:
