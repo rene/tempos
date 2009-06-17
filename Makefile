@@ -8,10 +8,9 @@
 PWD     := $(shell pwd)
 
 # Architecture compile and link flags
-ARCH    := x86
+ARCH := x86
 ARCH_CF := -m32
 ARCH_LF := -melf_i386
-
 
 CC      := gcc
 INCDIRS := -I$(PWD)/include -I$(PWD)/arch/include
