@@ -85,7 +85,17 @@ uchar8_t llist_remove(llist **list, uint32_t pos)
 			_list = next;
 		} else if(pos < (size - 1)) {
 			/* Element at the middle */
-			//
+			tmp = _list;
+
+			for(i=1; i<pos; i++) {
+				tmp = tmp->next;
+			}
+
+			prev = tmp;
+			if(tmp != NULL) {
+				prev->next = tmp->next;
+				kfree(tmp);
+			}
 		} else {
 			/* Element at the end */
 			tmp = _list;

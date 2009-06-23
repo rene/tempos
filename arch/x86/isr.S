@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2009 Renê de Souza Pinto
- * Tempos - Tempos is an Educational and multi purposing Operating System
+ * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: isr.S
  * Desc: Contains the low level code to call interrupt service routines

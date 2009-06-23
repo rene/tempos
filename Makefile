@@ -28,8 +28,8 @@ export OBJFILES CFLAGS CC
 
 all: tempos
 
-include arch/$(ARCH)/Build.mk
 include arch/$(ARCH)/boot/Build.mk
+include arch/$(ARCH)/Build.mk
 include arch/$(ARCH)/kernel/Build.mk
 include arch/$(ARCH)/mm/Build.mk
 
