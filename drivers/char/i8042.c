@@ -174,13 +174,13 @@ void init_8042(void)
  */
 static void keyboard_handler(int id, pt_regs *regs)
 {
-	//kbc_sendcomm(KBD_DISABLE);
+	kbc_sendcomm(KBD_DISABLE);
 
 	uchar8_t key = read_key();
 
 	kprintf( "%lx ", key );
 
-	//kbc_sendcomm(KBD_ENABLE);
+	kbc_sendcomm(KBD_ENABLE);
 }
 
 

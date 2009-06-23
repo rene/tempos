@@ -5,8 +5,8 @@
 # Makefile
 #
 
-CDIR := arch/x86/mm
-objs := mm.o
+CDIR := drivers/block
+objs := ide_generic.o
 
 OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
 

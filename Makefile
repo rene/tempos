@@ -5,24 +5,28 @@
 # Makefile
 #
 
-PWD     := $(shell pwd)
+PWD      := $(shell pwd)
 
-# Architecture compile and link flags
-ARCH := x86
-ARCH_CF := -m32
-ARCH_LF := -melf_i386
+kimage   := tempos.elf
 
-CC      := gcc
-INCDIRS := -I$(PWD)/include -I$(PWD)/arch/include
-CFLAGS  := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
+# Architecture compiler and link flags
+ARCH     := x86
+ARCH_CF  := -m32
+ARCH_LF  := -melf_i386
+
+CC       := gcc
+INCDIRS  := -I$(PWD)/include -I$(PWD)/arch/include
+CFLAGS   := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
 
 OBJFILES :=
-OBJDIRS  :=
+DEPSDIR  := $(PWD)/.deps
+CMRULES  := $(PWD)/Makefile.rules
 
-export OBJDIRS OBJFILES CFLAGS CC
+export OBJFILES CFLAGS CC
 
 .PHONY: clean tempos test install
 
+all: tempos
 
 include arch/$(ARCH)/Build.mk
 include arch/$(ARCH)/boot/Build.mk
@@ -30,30 +34,49 @@ include arch/$(ARCH)/kernel/Build.mk
 include arch/$(ARCH)/mm/Build.mk
 
 include drivers/char/Build.mk
+include drivers/block/Build.mk
 
 include lib/Build.mk
 
 include kernel/Build.mk
 include kernel/mm/Build.mk
 
-DFILES := $(OBJFILES:.o=.d)
+
+# ---------- Generic rules to build C sources ----------
+
+SRC  := $(OBJFILES:.o=.c)
+DEPS := $(patsubst %.o,$(DEPSDIR)/%.d,$(OBJFILES))
+
+%.o: %.c
+	@echo + CC $<
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(DEPSDIR)/%.d: %.c
+	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+	@$(CC) -MM -MT "$(patsubst $(DEPSDIR)/%.d,%.o,$@)" $(CFLAGS) $< \
+			| sed 's#\($*\)\.o[ :]*#\1.o $@ : #g' > $@; \
+			[ -s $@ ] || rm -f $@
+
+-include $(DEPS)
+
+# ------------------------------------------------------
 
 
 tempos: $(OBJFILES)
 	@echo Linking...
-	@ld -o tempos.elf -T arch/$(ARCH)/boot/setup.ld $(OBJFILES) $(ARCH_LF)
+	@ld -o $(kimage) -T arch/$(ARCH)/boot/setup.ld $(OBJFILES) $(ARCH_LF)
 	@echo done.
 
 clean:
-	@rm -f $(DFILES)
+	@rm -rf $(DEPSDIR)
 	@rm -f $(OBJFILES)
-	@[ -f tempos.elf ] && rm -f tempos.elf || echo "No image found."
+	@[ -f $(kimage) ] && rm -f $(kimage) || echo "No image found."
 
 test:
 	@qemu -M pc -fda disk.img -boot a
 
 install:
 	@sudo mount -o loop disk.img /mnt
-	@sudo cp tempos.elf /mnt/boot
+	@sudo cp $(kimage) /mnt/boot
 	@sudo umount /mnt
 

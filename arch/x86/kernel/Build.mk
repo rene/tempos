@@ -6,38 +6,12 @@
 #
 
 CDIR := arch/x86/kernel
-OBJS :=  i8259A.o i82C54.o irq.o
+objs := i8259A.o i82C54.o irq.o
+
+OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
+
 
 OBJFILES += $(CDIR)/sys_enter.o
-OBJA := $(CDIR)/sys_enter.o
-
-
-#--- DO NOT CHANGE HERE ---#
-
-OBJDIRS += $(CDIR)
-
-OBJS := $(patsubst %.o,$(CDIR)/%.o,$(OBJS))
-SRC  := $(OBJS:.o=.c)
-DEPS := $(OBJS:.o=.d)
-
-OBJFILES += $(OBJS)
-
-all: $(OBJS) $(OBJA)
-
-$(CDIR)/%.o: $(CDIR)/%.c
-	@echo + CC $<
-	@$(CC) $(CFLAGS) -c $< -o $@
-
-%.d: %.c 
-	@$(CC) -MM $(CFLAGS) $< \
-		| sed 's#\(.*\)\.o[ :]*#\1.o $@ : #g' > $@; \
-		[ -s $@ ] || rm -f $@
-
-include $(DEPS)
-
-#--------------------------#
-
-
 $(CDIR)/sys_enter.o: $(CDIR)/sys_enter.S $(CDIR)/../../include/x86/x86.h include/tempos/error.h include/tempos/syscall.h
 	@echo + AS $<
 	@$(CC) $(CFLAGS) -DASM -c $< -o $@
