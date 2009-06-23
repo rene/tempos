@@ -1,6 +1,6 @@
 ##
 # Copyright (C) 2009 Renê de Souza Pinto
-# TempOS - Tempos is an Educational and multi purposing Operating System
+# TempOS - Tempos is an Educational and multi purpose Operating System
 #
 # Makefile
 #
