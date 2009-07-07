@@ -20,7 +20,6 @@ CFLAGS   := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodef
 
 OBJFILES :=
 DEPSDIR  := $(PWD)/.deps
-CMRULES  := $(PWD)/Makefile.rules
 
 export OBJFILES CFLAGS CC
 
