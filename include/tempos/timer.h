@@ -25,12 +25,25 @@
 
 	#define TIMER_H
 
+	#include <unistd.h>
+
 	/* System timer (Hz) */
 	#define HZ	1000
 
 	#define TIMER_IRQ	0
 
+
+	/* Alarm struct */
+	struct _alarm_t {
+		uint32_t expires;
+		void (*handler)(int);
+		uint32_t arg; /* argument to handler */
+	};
+
+	typedef struct _alarm_t alarm_t;
+
 	void init_timer(void);
+	int new_alarm(uint32_t expires, void (*handler)(int), uint32_t arg);
 
 #endif /* TIMER_H */
 

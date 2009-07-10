@@ -23,11 +23,19 @@
  */
 
 #include <tempos/timer.h>
+#include <tempos/jiffies.h>
+#include <linkedl.h>
 #include <unistd.h>
 #include <x86/irq.h>
 
 
+/* Queue of alarms */
+llist *alarm_queue;
+
+
 static void timer_handler(int id, pt_regs *regs);
+static void update_alarms(void);
+
 
 /**
  * jiffies
@@ -48,6 +56,8 @@ void init_timer(void)
 
 	if( request_irq(TIMER_IRQ, timer_handler, 0, "PIT") < 0 ) {
 		kprintf(KERN_ERROR "Error on initialize PIT\n");
+	} else {
+		llist_create(&alarm_queue);
 	}
 
 	jiffies = 0;
@@ -62,5 +72,63 @@ void init_timer(void)
 static void timer_handler(int id, pt_regs *regs)
 {
 	jiffies++;
+
+	update_alarms();
 }
+
+
+/**
+ * update_alarms
+ *
+ * Check and execute handlers of expired alarms
+ */
+static void update_alarms(void)
+{
+	llist *tmp;
+	alarm_t *alarm;
+	uint32_t pos;
+
+	tmp = alarm_queue;
+	pos = 0;
+	while(tmp != NULL) {
+		alarm = (alarm_t*)tmp->element;
+
+		if( time_after(jiffies, alarm->expires) ) {
+			/* Execute handler */
+			alarm->handler(alarm->arg);
+
+			llist_remove(&alarm_queue, pos);
+		}
+		tmp = tmp->next;
+		pos++;
+	}
+}
+
+
+/**
+ * new_alarm
+ *
+ * Create a new alarm
+ */
+int new_alarm(uint32_t expires, void (*handler)(int), uint32_t arg)
+{
+	alarm_t *nalarm;
+
+	if(expires < jiffies) {
+		return(-1);
+	} else {
+		nalarm = (alarm_t*)kmalloc(sizeof(alarm_t), GFP_NORMAL_Z);
+		if(nalarm == NULL) {
+			return(-1);
+		} else {
+			nalarm->expires = expires;
+			nalarm->handler = handler;
+			nalarm->arg     = arg;
+			llist_add(&alarm_queue, nalarm);
+		}
+	}
+
+	return(0);
+}
+
 

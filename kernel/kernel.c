@@ -25,6 +25,7 @@
 #include <tempos/kernel.h>
 #include <tempos/mm.h>
 #include <tempos/timer.h>
+#include <tempos/jiffies.h>
 #include <drv/i8042.h>
 #include <string.h>
 #include <stdlib.h>
@@ -36,6 +37,7 @@ karch_t kinfo;
 
 extern uint32_t *kpagedir;
 
+void test(int a);
 
 /**
  * tempos_main
@@ -89,6 +91,8 @@ void tempos_main(karch_t kinf)
 
 	llist_destroy(&mylist2);
 
+
+	new_alarm(jiffies + (3 * HZ), test, 2);
 	/* Call a system call */
 	/*asm volatile("movl $4,  %%eax  \n" // syscall number
 				 "movl $12, %%ebx  \n" // count
@@ -101,6 +105,10 @@ void tempos_main(karch_t kinf)
 	for(;;);
 }
 
+void test(int a)
+{
+	kprintf("OI from %d\n", a);
+}
 
 void panic(const char *str)
 {
