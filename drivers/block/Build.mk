@@ -6,7 +6,7 @@
 #
 
 CDIR := drivers/block
-objs := ide_generic.o
+objs := ata_generic.o
 
 OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
 

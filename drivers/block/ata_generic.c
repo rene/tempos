@@ -2,8 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: ide_generic.c
- * Desc: Generic driver for IDE controllers
+ * File: ata_generic.c
+ * Desc: Generic driver for ATA controllers
  *
  * This file is part of TempOS.
  *
@@ -33,14 +33,17 @@
 #define TIMEOUT		(jiffies + (HZ / 40)) /* timeout in 40ms */
 
 
+
+
+
 /**
- * init_ide_generic
+ * init_ata_generic
  *
- * Initialize the generic driver for IDE controllers.
+ * Initialize the generic driver for ATA controllers.
  * This function will look for disks connected to the bus
  * and initialize them.
  */
-void init_ide_generic(void)
+void init_ata_generic(void)
 {
 	kprintf(KERN_INFO "Initializing generic IDE controller...\n");
 
