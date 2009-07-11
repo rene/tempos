@@ -112,8 +112,8 @@ error_code:
 	movw $KERNEL_DS, %dx
 	movw %dx, %ds
 	movw %dx, %fs
-	movw %dx, %gs
-	movw %dx, %ss
+	//movw %dx, %gs
+	//movw %dx, %ss
 	movw %dx, %es
 
 	/* Execute the ISR */

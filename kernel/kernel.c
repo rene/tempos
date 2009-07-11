@@ -47,7 +47,7 @@ void test(int a);
  */
 void tempos_main(karch_t kinf)
 {
-	//char *hello = "Hello World!";
+	char *hello = "Hello World!";
 
 	/* Start the second stage */
 
@@ -94,20 +94,20 @@ void tempos_main(karch_t kinf)
 
 	new_alarm(jiffies + (3 * HZ), test, 2);
 	/* Call a system call */
-	/*asm volatile("movl $4,  %%eax  \n" // syscall number
+	asm volatile("movl $4,  %%eax  \n" // syscall number
 				 "movl $12, %%ebx  \n" // count
 				 "movl %0,  %%ecx  \n" // hello
 				 "movl $0,  %%edx  \n" // fd
 				 "int $0x85" : : "g" (hello) );
 
-	kprintf("\nI'am back from syscall!!\n");*/
+	kprintf("\nI'am back from syscall!!\n");
 
 	for(;;);
 }
 
 void test(int a)
 {
-	kprintf("OI from %d\n", a);
+	kprintf("\n\nOI from %d\n\n", a);
 }
 
 void panic(const char *str)
