@@ -52,6 +52,8 @@ volatile ulong32_t jiffies;
  */
 void init_timer(void)
 {
+	jiffies = 0;
+
 	kprintf(KERN_INFO "Initializing timer...\n");
 
 	if( request_irq(TIMER_IRQ, timer_handler, 0, "PIT") < 0 ) {
@@ -59,8 +61,6 @@ void init_timer(void)
 	} else {
 		llist_create(&alarm_queue);
 	}
-
-	jiffies = 0;
 }
 
 

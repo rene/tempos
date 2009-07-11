@@ -26,6 +26,7 @@
 #include <tempos/mm.h>
 #include <tempos/timer.h>
 #include <tempos/jiffies.h>
+#include <tempos/delay.h>
 #include <drv/i8042.h>
 #include <string.h>
 #include <stdlib.h>
@@ -53,6 +54,7 @@ void tempos_main(karch_t kinf)
 
 	/* keep init_timer() in first palce because drivers use timer functions */
 	init_timer();
+	calibrate_delay();
 
 	/* Keyboard */
 	init_8042();
@@ -101,6 +103,14 @@ void tempos_main(karch_t kinf)
 				 "int $0x85" : : "g" (hello) );
 
 	kprintf("\nI'am back from syscall!!\n");
+
+	kprintf("1 ");
+	mdelay(1000);
+	kprintf("2 ");
+	mdelay(1000);
+	kprintf("3 ");
+	mdelay(1000);
+	kprintf("4 ");
 
 	for(;;);
 }

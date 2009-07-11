@@ -6,7 +6,7 @@
 #
 
 CDIR := kernel
-objs := execve.o exit.o fork.o kernel.o read.o syscall.o write.o timer.o
+objs := execve.o exit.o fork.o kernel.o read.o syscall.o write.o timer.o delay.o
 
 OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
 
