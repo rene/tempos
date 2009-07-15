@@ -8,6 +8,7 @@
 PWD      := $(shell pwd)
 
 kimage   := tempos.elf
+fimage   := floppy.img
 
 # Architecture compiler and link flags
 ARCH     := x86
@@ -67,15 +68,22 @@ tempos: $(OBJFILES)
 	@echo done.
 
 clean:
+	@echo Cleaning...
 	@rm -rf $(DEPSDIR)
 	@rm -f $(OBJFILES)
+	@[ -f $(fimage) ] && rm -f $(fimage) || echo "No disk image found."
 	@[ -f $(kimage) ] && rm -f $(kimage) || echo "No image found."
+	@echo done.
 
 test:
-	@qemu -M pc -fda disk.img -boot a
+	@qemu -M pc -fda $(fimage) -boot a
 
-install:
-	@sudo mount -o loop disk.img /mnt
-	@sudo cp $(kimage) /mnt/boot
-	@sudo umount /mnt
+install: $(fimage)
+	@mount -o loop $(fimage) /mnt
+	@cp $(kimage) /mnt/boot
+	@umount /mnt
+
+$(fimage):
+	@./mkdisk_img.sh $(fimage)
+	@$(MAKE) install
 

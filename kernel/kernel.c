@@ -28,6 +28,7 @@
 #include <tempos/jiffies.h>
 #include <tempos/delay.h>
 #include <drv/i8042.h>
+#include <drv/ata_generic.h>
 #include <string.h>
 #include <stdlib.h>
 #include <linkedl.h>
@@ -48,7 +49,7 @@ void test(int a);
  */
 void tempos_main(karch_t kinf)
 {
-	char *hello = "Hello World!";
+	//char *hello = "Hello World!";
 
 	/* Start the second stage */
 
@@ -58,6 +59,9 @@ void tempos_main(karch_t kinf)
 
 	/* Keyboard */
 	init_8042();
+
+	/* ATA controller */
+	init_ata_generic();
 
 	/* For test */
 	llist *mylist, *mylist2, *tmp;
@@ -96,13 +100,13 @@ void tempos_main(karch_t kinf)
 
 	new_alarm(jiffies + (3 * HZ), test, 2);
 	/* Call a system call */
-	asm volatile("movl $4,  %%eax  \n" // syscall number
+	/*asm volatile("movl $4,  %%eax  \n" // syscall number
 				 "movl $12, %%ebx  \n" // count
 				 "movl %0,  %%ecx  \n" // hello
 				 "movl $0,  %%edx  \n" // fd
 				 "int $0x85" : : "g" (hello) );
 
-	kprintf("\nI'am back from syscall!!\n");
+	kprintf("\nI'am back from syscall!!\n");*/
 
 	kprintf("1 ");
 	mdelay(1000);

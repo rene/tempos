@@ -69,21 +69,22 @@ void writechar(char ch, unsigned char attr)
 	unsigned int pos;
 
 	pos = ((VIDEO_COLS * py) + px) * 2;
-	videomem[pos]   = ch;
-	videomem[pos+1] = attr;
 
 	/* Update cursor position */
 	if(px >= VIDEO_COLS) {
 		px = 0;
 		py++;
 
-		if(py > VIDEO_ROWS) {
+		if(py >= VIDEO_ROWS) {
 			scroll_screen();
-			py = VIDEO_ROWS;
+			py = VIDEO_ROWS-1;
 		}
 	} else {
 		px++;
 	}
+
+	videomem[pos]   = ch;
+	videomem[pos+1] = attr;
 }
 
 
@@ -121,7 +122,7 @@ void kprint(char *str)
 								py++;
 								if(py >= VIDEO_ROWS) {
 									scroll_screen();
-									py = VIDEO_ROWS;
+									py = VIDEO_ROWS-1;
 								}
 						}
 						px = 0;
