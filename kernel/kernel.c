@@ -39,7 +39,6 @@ karch_t kinfo;
 
 extern uint32_t *kpagedir;
 
-void test(int a);
 
 /**
  * tempos_main
@@ -49,9 +48,8 @@ void test(int a);
  */
 void tempos_main(karch_t kinf)
 {
-	//char *hello = "Hello World!";
-
 	/* Start the second stage */
+	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
 	/* keep init_timer() in first palce because drivers use timer functions */
 	init_timer();
@@ -64,41 +62,10 @@ void tempos_main(karch_t kinf)
 	init_ata_generic();
 
 	/* For test */
-	llist *mylist, *mylist2, *tmp;
-	memcpy(&kinfo, &kinf, sizeof(karch_t));
-
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 
-	llist_create(&mylist);
-	llist_create(&mylist2);
-
-	llist_add(&mylist, "Hello");
-	llist_add(&mylist2, "It's amazing");
-	llist_add(&mylist, "World");
-	llist_add(&mylist2, " write ");
-	llist_add(&mylist, "from TempOS !!!");
-	llist_add(&mylist2, "an Operating System!\n");
-
-	tmp = mylist;
-	while(tmp != NULL) {
-		kprintf("%s ", tmp->element);
-		tmp = tmp->next;
-	}
-
-	llist_destroy(&mylist);
-
-	kprintf("\n");
-	tmp = mylist2;
-	while(tmp != NULL) {
-		kprintf("%s ", tmp->element);
-		tmp = tmp->next;
-	}
-
-	llist_destroy(&mylist2);
-
-
-	new_alarm(jiffies + (3 * HZ), test, 2);
+	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
 	/*asm volatile("movl $4,  %%eax  \n" // syscall number
 				 "movl $12, %%ebx  \n" // count
@@ -113,16 +80,10 @@ void tempos_main(karch_t kinf)
 	kprintf("2 ");
 	mdelay(1000);
 	kprintf("3 ");
-	mdelay(1000);
-	kprintf("4 ");
 
 	for(;;);
 }
 
-void test(int a)
-{
-	kprintf("\n\nOI from %d\n\n", a);
-}
 
 void panic(const char *str)
 {

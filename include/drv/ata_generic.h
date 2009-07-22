@@ -44,7 +44,6 @@
 		uint16_t minor_ver;
 		uint16_t cmds_supported[6];
 		uint16_t ultra_dma;
-		uint16_t max_lba_addr[3];
 	};
 
 	typedef struct _ata_dev_info ata_dev_info;

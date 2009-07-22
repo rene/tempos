@@ -95,6 +95,9 @@ void init_ata_generic(void)
 	/* Probe primary and secondary bus */
 	/* We use polling just on initialization. Data transfers will use IRQ. */
 
+	/* NOTE: The correct way it's use PCI bus to get the information about
+	   ATA bus (PIO ports and so on), but we don't have PCI support yet :-( */
+
 	/* Device IDENTIFY */
 	bus = PRI_BUS;
 	for(i=0; i<4; i++, drvl++) {
@@ -117,21 +120,37 @@ void init_ata_generic(void)
 		send_cmd(bus, 0xEC);
 		wait_bus(bus);
 
-		if( get_dev_info(bus, &ata_devices[i]) ) {
+		//kprintf("  DEBUG: 0x%x -- 0x%x\n", inb(pio_ports[bus][REG_SADDR2]), inb(pio_ports[bus][REG_SADDR3]));
 
-			if( (ata_devices[i].type & ATA_DEVICE) == 0) {
-				kprintf(" hd%c: Device found\n", drvl);
-				ata_devices[i].present = 1;
+		if(inb(pio_ports[bus][REG_SADDR2]) == 0x14 &&
+					inb(pio_ports[bus][REG_SADDR3]) == 0xEB) {
+
+			kprintf(" hd%c: CD/DVD-ROM detected.\n", drvl);
+
+		} else {
+
+			if( (pio_ports[bus][REG_ASTATUS] & 0x01) == 0 ) {
+
+
+				if( get_dev_info(bus, &ata_devices[i]) ) {
+
+					if( (ata_devices[i].type & ATA_DEVICE) == 0 ) {
+
+						kprintf(" hd%c: Device found\n", drvl);
+						ata_devices[i].present = 1;
+
+						/* Show information */
+						kprintf("       Model: %s\n", ata_devices[i].model);
+					} else {
+						kprintf(" hd%c: Device not found.\n", drvl);
+					}
+				} else {
+					kprintf("Error on get device information\n");
+					return;
+				}
 			} else {
 				kprintf(" hd%c: Device not found.\n", drvl);
-				continue;
 			}
-
-			/* Show information */
-			kprintf("       Model: %s\n", ata_devices[i].model);
-		} else {
-			kprintf("Error on get device information\n");
-			return;
 		}
 	}
 }
@@ -314,14 +333,8 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 		inw(pio_ports[bus][REG_DATA]);
 	}
 
-	/* Maximum user LBA for 48-bit Address feature set */
-	for(i=100; i<=103; i++) {
-		wait_bus(bus);
-		devinfo->max_lba_addr[i - 100] = inw(pio_ports[bus][REG_DATA]);
-	}
-
 	/* Not used */
-	for(i=104; i<=255; i++) {
+	for(i=100; i<=255; i++) {
 		wait_bus(bus);
 		inw(pio_ports[bus][REG_DATA]);
 	}
