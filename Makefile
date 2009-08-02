@@ -78,7 +78,7 @@ clean:
 	@echo done.
 
 test:
-	@qemu -M pc -fda $(fimage) -boot a -hda hdvir.img
+	@qemu -M pc -fda $(fimage) -boot a
 
 install: $(fimage)
 	@mount -o loop $(fimage) /mnt
