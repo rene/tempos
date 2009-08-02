@@ -217,7 +217,7 @@ void init_ata_generic(void)
 		kprintf(KERN_ERROR "Error on register IRQ\n");
 	}
 
-	teste();
+	//teste();
 }
 
 
