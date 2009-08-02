@@ -30,15 +30,32 @@
 	#define ATA_DEVICE	0x8000
 	#define REM_MEDIA	0x00FF
 
+	#define SUPPORT_LBA		0x0300
+	#define SUPPORT_DMA		0x0100
+	#define SUPPORT_LBA48	0x0400
+
+	#define PRESENT			0x01
+	#define LBA48			0x02
+
+
 	/* Device info */
+	/* Flags format:
+	 * 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 
+	 * |   |   |   |   |   |   |   |
+	 * |   |   |   |   |   |   |   |---> PRESENT (0 = NO, 1 = YES)
+	 * |   |   |   |   |   |   |-------> LBA48   (0 = NO, 1 = YES)
+	 * |   |   |   |   |   |
+	 *  --   NOT USED    --
+	 */
 	struct _ata_dev_info {
-		uchar8_t present;
+		uchar8_t flags;
 		uint16_t type;
 		char     serial[20];
 		char     firmware_rev[8];
 		char     model[40];
 		uint16_t maxt_secs;
 		uint16_t capabilities[2];
+		uint16_t mult_sec;
 		uint16_t mword_dma;
 		uint16_t major_ver;
 		uint16_t minor_ver;

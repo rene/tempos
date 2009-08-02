@@ -3,7 +3,8 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: ata_generic.c
- * Desc: Generic driver for ATA controllers
+ * Desc: Generic driver for ATA controllers (and PATA devices)
+ * Note: This driver uses ATA/ATAPI-6 specification.
  *
  * This file is part of TempOS.
  *
@@ -34,6 +35,11 @@
 
 #define TIMEOUT		(jiffies + (HZ / 40)) /* timeout in 40ms */
 
+#define ATA_PRI_IRQ	14
+#define ATA_SEC_IRQ	15
+
+#define LBA_UHIGH(addr)		((addr >> 24) & 0x07)
+#define LBA_BYTE(addr, n)	((addr >> (n * 8)) & 0xFF)
 
 #define PRI_BUS 	0
 #define SEC_BUS 	1
@@ -42,7 +48,7 @@
 #define SLAVE_DEV	1
 
 #define REG_DATA	0
-#define REG_FR		1
+#define REG_FERR	1
 #define REG_SC		2
 #define REG_SADDR1	3
 #define REG_SADDR2	4
@@ -52,7 +58,16 @@
 #define REG_ASTATUS	8
 
 #define BSY_BIT		0x80
+#define DF_BIT		0x20
 #define DRDY_BIT	0x40
+#define ABRT_BIT	0x04
+
+#define CMD_RESET				0x08
+#define CMD_IDENTIFY			0xEC
+#define CMD_READ_SECTORS		0x20
+#define CMD_READ_SECTORS_EXT	0x24
+#define CMD_WRITE_SECTORS		0x30
+#define CMD_WRITE_SECTORS_EXT	0x34
 
 
 /* ATA devices information */
@@ -76,6 +91,11 @@ static void set_device(uchar8_t bus, uchar8_t device);
 
 static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo);
 
+static void ata_handler1(int id, pt_regs *regs);
+
+static void ata_handler2(int id, pt_regs *regs);
+
+static void teste(void);
 
 /**
  * init_ata_generic
@@ -89,8 +109,10 @@ void init_ata_generic(void)
 	int i;
 	char drvl = 'a';
 	uchar8_t dev, bus;
+	uchar8_t sc, saddr1, saddr2, saddr3;
 
 	kprintf(KERN_INFO "Initializing generic ATA controller...\n");
+
 
 	/* Probe primary and secondary bus */
 	/* We use polling just on initialization. Data transfers will use IRQ. */
@@ -101,7 +123,7 @@ void init_ata_generic(void)
 	/* Device IDENTIFY */
 	bus = PRI_BUS;
 	for(i=0; i<4; i++, drvl++) {
-		ata_devices[i].present = 0;
+		ata_devices[i].flags = 0;
 
 		if(i >= 2) {
 			/* Secondary BUS */
@@ -116,43 +138,86 @@ void init_ata_generic(void)
 		}
 		set_device(bus, dev);
 
-		/* Identify */
-		send_cmd(bus, 0xEC);
+		/* Reset */
+		send_cmd(bus, CMD_RESET);
 		wait_bus(bus);
 
-		//kprintf("  DEBUG: 0x%x -- 0x%x\n", inb(pio_ports[bus][REG_SADDR2]), inb(pio_ports[bus][REG_SADDR3]));
+		/* Check driver type */
+		sc     = inb(pio_ports[bus][REG_SC]);
+		saddr1 = inb(pio_ports[bus][REG_SADDR1]);
+		saddr2 = inb(pio_ports[bus][REG_SADDR2]);
+		saddr3 = inb(pio_ports[bus][REG_SADDR3]);
 
-		if(inb(pio_ports[bus][REG_SADDR2]) == 0x14 &&
-					inb(pio_ports[bus][REG_SADDR3]) == 0xEB) {
+		/*if(sc != 0x01 && saddr1 != 0x01) {
+			kprintf(" hd%c: Device not found.\n", drvl);
+			continue;
+		}*/
 
+		if(saddr2 == 0x14 && saddr3 == 0xEB) {
 			kprintf(" hd%c: CD/DVD-ROM detected.\n", drvl);
-
 		} else {
+			/* Identify */
+			send_cmd(bus, CMD_IDENTIFY);
+			wait_bus(bus);
 
-			if( (pio_ports[bus][REG_ASTATUS] & 0x01) == 0 ) {
+			if( (pio_ports[bus][REG_ASTATUS] & 0x01) != 0 ||
+				(pio_ports[bus][REG_FERR] & ABRT_BIT) != 0 ) {
+
+					kprintf(" hd%c: Device not found.\n", drvl);
+					continue;
+			}
 
 
-				if( get_dev_info(bus, &ata_devices[i]) ) {
+			if( get_dev_info(bus, &ata_devices[i]) ) {
 
-					if( (ata_devices[i].type & ATA_DEVICE) == 0 ) {
-
-						kprintf(" hd%c: Device found\n", drvl);
-						ata_devices[i].present = 1;
-
-						/* Show information */
-						kprintf("       Model: %s\n", ata_devices[i].model);
-					} else {
-						kprintf(" hd%c: Device not found.\n", drvl);
-					}
-				} else {
-					kprintf("Error on get device information\n");
-					return;
+				if( (ata_devices[i].type & ATA_DEVICE) != 0 ) {
+					kprintf(" hd%c: Device not found.\n", drvl);
+					continue;
 				}
+
+				kprintf(" hd%c: Device found: ", drvl);
+
+				/* Check for LBA */
+				if( (ata_devices[i].capabilities[0] & SUPPORT_LBA) == 0 ) {
+					kprintf("Does not support LBA. Can't handle. Sorry.\n");
+					continue;
+				} else {
+					/* Check for LBA48 */
+					if( (ata_devices[i].cmds_supported[1] & SUPPORT_LBA48) != 0 ) {
+						kprintf("LBA48");
+						ata_devices[i].flags |= LBA48;
+					} else {
+						kprintf("LBA");
+					}
+				}
+				/* Check for DMA */
+				if( (ata_devices[i].capabilities[0] & SUPPORT_DMA) != 0 ) {
+					kprintf(", DMA");
+				}
+				kprintf("\n");
+
+				ata_devices[i].flags |= PRESENT;
+
+				/* Show information */
+				kprintf("       Model: %s\n", ata_devices[i].model);
 			} else {
-				kprintf(" hd%c: Device not found.\n", drvl);
+				kprintf("Error on get device information\n");
+				continue;
 			}
 		}
 	}
+
+	/**
+	 * Register IRQs
+	 */
+	if( request_irq(ATA_PRI_IRQ, ata_handler1, SA_SHIRQ, "ata-primary") < 0) {
+		kprintf(KERN_ERROR "Error on register IRQ\n");
+	}
+	if( request_irq(ATA_SEC_IRQ, ata_handler2, SA_SHIRQ, "ata-secondary") < 0) {
+		kprintf(KERN_ERROR "Error on register IRQ\n");
+	}
+
+	teste();
 }
 
 
@@ -294,7 +359,17 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 	}
 
 	/* Not used */
-	for(i=51; i<=62; i++) {
+	for(i=51; i<=58; i++) {
+		wait_bus(bus);
+		inw(pio_ports[bus][REG_DATA]);
+	}
+
+	/* Multiple sector setting */
+	wait_bus(bus);
+	devinfo->mult_sec = inw(pio_ports[bus][REG_DATA]);
+
+	/* Not used */
+	for(i=60; i<=62; i++) {
 		wait_bus(bus);
 		inw(pio_ports[bus][REG_DATA]);
 	}
@@ -340,5 +415,86 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 	}
 
 	return(1);
+}
+
+/*
+static void teste(void)
+{
+	int i;
+	int16_t data;
+	uint64_t addr = 0;
+	uchar8_t secs = 1;
+	uchar8_t bus  = PRI_BUS;
+	uchar8_t dc;
+
+	set_device(bus, MASTER_DEV);
+
+	outb(secs, pio_ports[bus][REG_SC]);
+	outb(LBA_BYTE(addr, 1), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR3]);
+
+	dc  = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
+	outb(dc | LBA_UHIGH(addr), pio_ports[bus][REG_DC]);
+
+	send_cmd(bus, CMD_READ_SECTORS);
+	wait_bus(bus);
+
+	if((inb(pio_ports[bus][REG_ASTATUS]) & DF_BIT) != 0 ||
+			inb(pio_ports[bus][REG_FERR] & ABRT_BIT) != 0) {
+		kprintf("Read error\n");
+	}
+}*/
+
+
+void teste(void)
+{
+	int i;
+	uint16_t data;
+	uint64_t addr = 0;
+	uint16_t secs = 1;
+	uchar8_t bus  = PRI_BUS;
+	uchar8_t dc;
+
+	set_device(bus, MASTER_DEV);
+
+	outb(((secs >> 8) & 0xFF), pio_ports[bus][REG_SC]);
+	outb(LBA_BYTE(addr, 4), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(addr, 5), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 6), pio_ports[bus][REG_SADDR3]);
+
+	outb((secs & 0xFF), pio_ports[bus][REG_SC]);
+	outb(LBA_BYTE(addr, 1), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR3]);
+
+	dc  = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
+	outb(dc, pio_ports[bus][REG_DC]);
+
+	send_cmd(bus, CMD_READ_SECTORS_EXT);
+	wait_bus(bus);
+
+	if((inb(pio_ports[bus][REG_ASTATUS]) & DF_BIT) != 0 ||
+			inb(pio_ports[bus][REG_FERR] & ABRT_BIT) != 0) {
+		kprintf("Read error\n");
+	}
+}
+
+
+static void ata_handler1(int id, pt_regs *regs)
+{
+	uint16_t data, i;
+
+	kprintf("PRIM: %d\n", id);
+
+	for(i=0; i<20; i++) {
+		wait_bus(PRI_BUS);
+		data = inw(pio_ports[PRI_BUS][REG_DATA]);
+		kprintf("%c %c ", (char)(data & 0xFF), (char)(data >> 8));
+	}
+}
+static void ata_handler2(int id, pt_regs *regs)
+{
+	kprintf("SEC: %d", id);
 }
 

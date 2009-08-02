@@ -27,6 +27,7 @@
 #include <tempos/timer.h>
 #include <tempos/jiffies.h>
 #include <tempos/delay.h>
+#include <tempos/sched.h>
 #include <drv/i8042.h>
 #include <drv/ata_generic.h>
 #include <string.h>
@@ -60,6 +61,9 @@ void tempos_main(karch_t kinf)
 
 	/* ATA controller */
 	init_ata_generic();
+
+	/* Init scheduler */
+	init_scheduler();
 
 	/* For test */
 	kprintf("We are in TempOS kernel!\n");

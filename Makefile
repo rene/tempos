@@ -38,6 +38,8 @@ include drivers/block/Build.mk
 
 include lib/Build.mk
 
+include fs/Build.mk
+
 include kernel/Build.mk
 include kernel/mm/Build.mk
 
@@ -76,7 +78,7 @@ clean:
 	@echo done.
 
 test:
-	@qemu -M pc -fda $(fimage) -boot a
+	@qemu -M pc -fda $(fimage) -boot a -hda hdvir.img
 
 install: $(fimage)
 	@mount -o loop $(fimage) /mnt

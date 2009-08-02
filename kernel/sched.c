@@ -1,8 +1,9 @@
-/*
+/**
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: unistd.h
+ * File: sched.c
+ * Desc: The TempOS scheduler
  *
  * This file is part of TempOS.
  *
@@ -21,23 +22,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef UNISTD_H
+#include <tempos/sched.h>
+#include <tempos/kernel.h>
+#include <tempos/timer.h>
+#include <tempos/jiffies.h>
 
-	#define UNISTD_H
+/**
+ * TempOS scheduler uses a round robin algorithm.
+ * Yes, I know you are very surprised :-o
+ */
+uint32_t scheduler_quantum = HZ; /* 1 second << FOR TEST */
 
-	typedef char           		char8_t;
-	typedef unsigned char  		uchar8_t;
-	typedef short          		int16_t;
-	typedef unsigned short 		uint16_t;
-	typedef int            		int32_t;
-	typedef unsigned int   		uint32_t;
-	typedef long           		long32_t;
-	typedef unsigned long  		ulong32_t;
-	typedef long long      		int64_t;
-	typedef unsigned long long 	uint64_t;
 
-	typedef ulong32_t size_t;
-	typedef long32_t  ssize_t;
+/**
+ * init_sched
+ *
+ * Initialize the scheduler
+ */
+void init_scheduler(void)
+{
+	/* Register alarm to do task switch */
+	if( !new_alarm((jiffies + scheduler_quantum), schedule, 0) ) {
+		panic("Could not install scheduler alarm.");
+	}
+}
 
-#endif /* UNISTD_H */
+
+/**
+ * schedule
+ *
+ * Do a task switch
+ */
+void schedule(void)
+{
+
+
+	/* Register alarm again */
+	if( !new_alarm((jiffies + scheduler_quantum), schedule, 0) ) {
+		panic("Could not install scheduler alarm.");
+	}
+}
 

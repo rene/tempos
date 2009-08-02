@@ -115,11 +115,11 @@ int new_alarm(uint32_t expires, void (*handler)(int), uint32_t arg)
 	alarm_t *nalarm;
 
 	if(expires < jiffies) {
-		return(-1);
+		return(0);
 	} else {
 		nalarm = (alarm_t*)kmalloc(sizeof(alarm_t), GFP_NORMAL_Z);
 		if(nalarm == NULL) {
-			return(-1);
+			return(0);
 		} else {
 			nalarm->expires = expires;
 			nalarm->handler = handler;
@@ -128,7 +128,7 @@ int new_alarm(uint32_t expires, void (*handler)(int), uint32_t arg)
 		}
 	}
 
-	return(0);
+	return(1);
 }
 
 

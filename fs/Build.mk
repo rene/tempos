@@ -5,9 +5,8 @@
 # Makefile
 #
 
-CDIR := kernel
-objs := sched.o execve.o exit.o fork.o kernel.o read.o \
-		syscall.o write.o timer.o delay.o
+CDIR := fs
+objs := binfmt_elf32.o
 
 OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
 
