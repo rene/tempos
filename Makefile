@@ -78,7 +78,7 @@ clean:
 	@echo done.
 
 test:
-	@qemu -M pc -fda $(fimage) -boot a
+	@qemu -M pc -fda $(fimage) -boot a -hda
 
 install: $(fimage)
 	@mount -o loop $(fimage) /mnt

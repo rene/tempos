@@ -90,16 +90,15 @@ static void update_alarms(void)
 
 	tmp = alarm_queue;
 	pos = 0;
-	while(tmp != NULL) {
+	foreach(alarm_queue, tmp) {
 		alarm = (alarm_t*)tmp->element;
 
 		if( time_after(jiffies, alarm->expires) ) {
-			/* Execute handler */
+			/* Execute handler and remove from list */
 			alarm->handler(alarm->arg);
-
-			llist_remove(&alarm_queue, pos);
+			llist_remove_nth(&alarm_queue, pos);
 		}
-		tmp = tmp->next;
+
 		pos++;
 	}
 }

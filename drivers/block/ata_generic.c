@@ -108,6 +108,7 @@ void init_ata_generic(void)
 {
 	int i;
 	char drvl = 'a';
+	uint64_t size;
 	uchar8_t dev, bus;
 	uchar8_t sc, saddr1, saddr2, saddr3;
 
@@ -186,15 +187,25 @@ void init_ata_generic(void)
 					if( (ata_devices[i].cmds_supported[1] & SUPPORT_LBA48) != 0 ) {
 						kprintf("LBA48");
 						ata_devices[i].flags |= LBA48;
+
+						size  = ata_devices[i].max_lba48[0];
+ 						size |= (ata_devices[i].max_lba48[1] << 16);
+						size |= ((uint64_t)ata_devices[i].max_lba48[2] << 32);
+						size |= ((uint64_t)ata_devices[i].max_lba48[3] << 48);
 					} else {
 						kprintf("LBA");
+
+						size  = ata_devices[i].max_secs[0];
+						size |= (ata_devices[i].max_secs[1] << 16);
 					}
+					ata_devices[i].sectors = size;
 				}
+
 				/* Check for DMA */
 				if( (ata_devices[i].capabilities[0] & SUPPORT_DMA) != 0 ) {
 					kprintf(", DMA");
 				}
-				kprintf("\n");
+				kprintf(", %ld sectors\n", ata_devices[i].sectors);
 
 				ata_devices[i].flags |= PRESENT;
 
@@ -346,7 +357,7 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 	/* Maximum number of sectors that shall be transferred 
 	   per interrupt on READ/WRITE MULTIPLE commands */
 	wait_bus(bus);
-	devinfo->maxt_secs = inw(pio_ports[bus][REG_DATA]);
+	devinfo->mult_secs = inw(pio_ports[bus][REG_DATA]);
 
 	/* Reserved */
 	wait_bus(bus);
@@ -368,11 +379,15 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 	wait_bus(bus);
 	devinfo->mult_sec = inw(pio_ports[bus][REG_DATA]);
 
-	/* Not used */
-	for(i=60; i<=62; i++) {
-		wait_bus(bus);
-		inw(pio_ports[bus][REG_DATA]);
-	}
+	/* Total number of user addressable sectors */
+	wait_bus(bus);
+	devinfo->max_secs[0] = inw(pio_ports[bus][REG_DATA]);
+	wait_bus(bus);
+	devinfo->max_secs[1] = inw(pio_ports[bus][REG_DATA]);
+
+	/* 62: Note used */
+	wait_bus(bus);
+	inw(pio_ports[bus][REG_DATA]);
 
 	/* Multiword DMA */
 	wait_bus(bus);
@@ -408,8 +423,14 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 		inw(pio_ports[bus][REG_DATA]);
 	}
 
+	/* LBA48 max */
+	for(i=100; i<=103; i++) {
+		wait_bus(bus);
+		devinfo->max_lba48[i - 100] = inw(pio_ports[bus][REG_DATA]);
+	}
+
 	/* Not used */
-	for(i=100; i<=255; i++) {
+	for(i=104; i<=255; i++) {
 		wait_bus(bus);
 		inw(pio_ports[bus][REG_DATA]);
 	}

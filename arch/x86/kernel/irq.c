@@ -67,15 +67,10 @@ void do_irq(uint32_t irqnum, pt_regs regs)
 	}
 
 	/* Call each handler */
-	tmp = queue->queue;
-	if(tmp != NULL) {
-		while(tmp != NULL) {
-			handler = (irq_handler_t *)tmp->element;
-			if(handler != NULL)
-				handler->handler(handler->id, &regs);
-
-			tmp = tmp->next;
-		}
+	foreach(queue->queue, tmp) {
+		handler = (irq_handler_t *)tmp->element;
+		if(handler != NULL)
+			handler->handler(handler->id, &regs);
 	}
 
 

@@ -65,7 +65,7 @@ void tempos_main(karch_t kinf)
 	/* Init scheduler */
 	init_scheduler();
 
-	/* For test */
+	/* Test */
 	kprintf("We are in TempOS kernel!\n");
 	kprintf("Command line passed: %s\n", kinfo.cmdline);
 

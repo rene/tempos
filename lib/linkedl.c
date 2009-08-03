@@ -25,121 +25,186 @@
 #include <linkedl.h>
 
 
-uchar8_t llist_create(llist **list)
+int llist_create(llist **list)
 {
-	llist *tmp = *list;
-	tmp   = NULL;
-	*list = tmp;
+	*list = NULL;
 	return(1);
 }
 
 
-uchar8_t llist_add(llist **list, void *element)
+int llist_destroy(llist **list)
 {
-	llist *plist = *list;
-	llist *new_node;
-	llist *tmp;
+	llist *tmp, *aux;
 
-	/* Alloc memory */
-	new_node = (llist *)kmalloc(sizeof(llist), GFP_NORMAL_Z);
-	if(new_node == 0) {
-		return(0);
-	}
-
-	/* Add to list */
-	new_node->element = element;
-	new_node->next    = NULL;
-
-	tmp = plist;
+	tmp = *list;
 	if(tmp != NULL) {
-		/* Add to the end of list */
-		while(tmp->next != NULL)
-			tmp = tmp->next;
-		tmp->next = new_node;
-	} else {
-		/* Head of list */
-		plist = new_node;
+		tmp = tmp->next;
+		foreach(tmp, aux) {
+			kfree(aux);
+		}
+		kfree(tmp);
 	}
 
-	*list = plist;
+	*list = NULL;
 	return(1);
 }
 
 
-uchar8_t llist_remove(llist **list, uint32_t pos)
+int llist_add(llist **list, void *element)
 {
-	llist *_list = *list;
-	llist *prev, *next, *tmp;
-	uint32_t i, size;
+	llist *rlist = *list;
+	llist *new_node, *tmp, *prev;
 
-	size = llist_get_size(_list);
+	new_node = (llist*)kmalloc(sizeof(llist), GFP_NORMAL_Z);
+	if(new_node == NULL) {
+		return(0);
+	} else {
+		new_node->element = element;
+		new_node->next    = NULL;
+	}
 
-	if(pos >= size)
+	if(rlist == NULL) {
+		/* First element */
+		rlist = new_node;
+	} else {
+		/* Add to the end */
+		for(tmp = prev = rlist; tmp != NULL;
+				prev = tmp, tmp = tmp->next);
+
+		if(prev != NULL)
+			prev->next = new_node;
+	}
+
+	*list = rlist;
+	return(1);
+}
+
+
+int llist_remove_nth(llist **list, uint32_t pos)
+{
+	llist *rlist = *list;
+	llist *tmp, *prev;
+	uint32_t p;
+
+	/* Remove first element */
+	if(pos == 0) {
+		tmp   = rlist;
+		rlist = rlist->next;
+		kfree(tmp);
+		*list = rlist;
+		return(1);
+	}
+
+	/* Remove element */
+	for(tmp = prev = rlist, p = 0; tmp != NULL && p < pos;
+			p++, prev = tmp, tmp = tmp->next);
+
+	if(prev != NULL) {
+		if(tmp != NULL) {
+			prev->next = tmp->next;
+			kfree(tmp);
+		} else {
+
+		}
+		*list = rlist;
+		return(1);
+	} else {
+		return(0);
+	}
+}
+
+
+int llist_remove(llist **list, void *element)
+{
+	llist *rlist = *list;
+	llist *tmp, *prev;
+
+	if(rlist == NULL)
 		return(0);
 
-	if(_list != NULL) {
-		if(pos == 0) {
-			/* Element on the top */
-			next  = _list->next;
-			kfree(_list);
-			_list = next;
-		} else if(pos < (size - 1)) {
-			/* Element at the middle */
-			tmp = _list;
+	/* Remove first element */
+	if(rlist->element == element) {
+		tmp   = rlist;
+		rlist = rlist->next;
+		kfree(tmp);
+		*list = rlist;
+		return(1);
+	}
 
-			for(i=1; i<pos; i++) {
-				tmp = tmp->next;
-			}
-
-			prev = tmp;
-			if(tmp != NULL) {
-				prev->next = tmp->next;
-				kfree(tmp);
-			}
-		} else {
-			/* Element at the end */
-			tmp = _list;
-
-			for(i=1; i<pos; i++) {
-				tmp = tmp->next;
-			}
-
-			prev       = tmp;
-			prev->next = NULL;
-			kfree(tmp->next);
+	/* Remove element */
+	for(tmp = prev = rlist; tmp != NULL;
+			prev = tmp, tmp = tmp->next) {
+		if(tmp->element == element) {
+			break;
 		}
 	}
 
-	*list = _list;
-	return(1);
+	if(tmp != NULL && prev != NULL) {
+		prev->next = tmp->next;
+		kfree(tmp);
+		*list = rlist;
+		return(1);
+	} else {
+		return(0);
+	}
 }
 
 
-uint32_t llist_get_size(llist *list)
+void *llist_nth(llist *list, uint32_t index)
 {
-	llist *_list = list;
-	uint32_t size      = 0;
+	llist *tmp = list;
+	uint32_t p;
 
-	while(_list != NULL) {
+	for(tmp = list, p = 0; tmp != NULL && p < index;
+			p++, tmp = tmp->next);
+
+	if(tmp != NULL) {
+		return(tmp->element);
+	} else {
+		return(NULL);
+	}
+}
+
+
+int32_t llist_index(llist *list, void *element)
+{
+	llist *tmp;
+	int32_t p;
+
+	if(list == NULL)
+		return(-1);
+
+	/* First element */
+	if(list->element == element) {
+		return(0);
+	}
+
+	/* Search in list */
+	for(tmp = list, p = 0; tmp != NULL; p++, tmp = tmp->next) {
+		if(tmp->element == element) {
+			break;
+		}
+	}
+
+	if(tmp != NULL) {
+		return(p);
+	} else {
+		return(-1);
+	}
+}
+
+
+int32_t llist_length(llist *list)
+{
+	llist *tmp   = list;
+	int32_t size = 0;
+
+	while(tmp != NULL) {
 		size++;
-		_list = _list->next;
+		tmp = tmp->next;
 	}
 
 	return(size);
 }
 
-
-uchar8_t llist_destroy(llist **list)
-{
-	llist *_list;
-	uint32_t size;
-	uint32_t pos;
-
-	_list = *list;
-	size = llist_get_size(_list);
-	for(pos=0; pos<size; pos++)
-		llist_remove(&_list, 0);
-
-	return(1);
-}
 

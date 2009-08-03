@@ -6,7 +6,7 @@
 #
 
 CDIR := lib
-objs := ctype.o linkedl.o printf.o stdlib.o string.o
+objs := ctype.o linkedl.o clinkedl.o printf.o stdlib.o string.o
 
 OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
 

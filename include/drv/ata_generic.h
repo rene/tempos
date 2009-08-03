@@ -49,11 +49,13 @@
 	 */
 	struct _ata_dev_info {
 		uchar8_t flags;
+		uint64_t sectors;
 		uint16_t type;
 		char     serial[20];
 		char     firmware_rev[8];
 		char     model[40];
-		uint16_t maxt_secs;
+		uint16_t mult_secs;
+		uint16_t max_secs[2];
 		uint16_t capabilities[2];
 		uint16_t mult_sec;
 		uint16_t mword_dma;
@@ -61,6 +63,7 @@
 		uint16_t minor_ver;
 		uint16_t cmds_supported[6];
 		uint16_t ultra_dma;
+		uint16_t max_lba48[4];
 	};
 
 	typedef struct _ata_dev_info ata_dev_info;
