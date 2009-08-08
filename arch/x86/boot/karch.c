@@ -62,7 +62,7 @@ void karch(unsigned long magic, unsigned long addr)
 	if( magic != MULTIBOOT_BOOTLOADER_MAGIC ) {
 		return;
 	}
-	mboot_info = (multiboot_info_t *)VIRADDR((uint32_t)addr);
+	mboot_info = (multiboot_info_t *)VIRADDR((void*)addr);
 
 	/* Memory information */
 	if( !(mboot_info->flags & FLAG_MEM) ) {
@@ -76,7 +76,7 @@ void karch(unsigned long magic, unsigned long addr)
 	if( !(mboot_info->flags & FLAG_MMAP) ) {
 		return;
 	} else {
- 		mmap  = (memory_map_t *)VIRADDR((uint32_t)mboot_info->mmap_addr);
+ 		mmap  = (memory_map_t *)VIRADDR((void*)mboot_info->mmap_addr);
 
 		i = 0;
 		while( (ulong32_t)mmap <
@@ -97,7 +97,7 @@ void karch(unsigned long magic, unsigned long addr)
 
 	/* Command line */
 	if( (mboot_info->flags & FLAG_CMDLINE) ) {
-		strcpy((char *)kinf.cmdline, (const char *)VIRADDR((uint32_t)mboot_info->cmdline));
+		strcpy((char *)kinf.cmdline, (const char *)VIRADDR((void*)mboot_info->cmdline));
 	} else {
 		kinf.cmdline[0] = '\0';
 	}

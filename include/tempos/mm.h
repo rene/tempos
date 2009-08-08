@@ -26,6 +26,7 @@
 	#define MEM_MANAGER_H
 
 	#include <tempos/kernel.h>
+	#include <tempos/error.h>
 	#include <x86/page.h>
 	#include <x86/mm.h>
 

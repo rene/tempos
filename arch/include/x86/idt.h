@@ -95,7 +95,7 @@
 	 */
 	struct _idt_idtr {
 		uint16_t table_limit;
-		uint32_t idt_ptr;
+		void* idt_ptr;
 	} __attribute__ ((packed)) IDTR;
 
 	typedef struct _idt_entry      idt_t;

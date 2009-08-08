@@ -23,11 +23,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <drv/ata_generic.h>
 #include <tempos/kernel.h>
 #include <tempos/timer.h>
 #include <tempos/jiffies.h>
 #include <tempos/delay.h>
+/*#include <tempos/fs/bcache.h>*/
+#include <tempos/fs/dvhash.h>
+#include <drv/ata_generic.h>
 #include <drv/i8042.h>
 #include <x86/irq.h>
 #include <x86/io.h>
@@ -41,8 +43,8 @@
 #define LBA_UHIGH(addr)		((addr >> 24) & 0x07)
 #define LBA_BYTE(addr, n)	((addr >> (n * 8)) & 0xFF)
 
-#define PRI_BUS 	0
-#define SEC_BUS 	1
+#define PRI_BUS		0
+#define SEC_BUS		1
 
 #define MASTER_DEV	0
 #define SLAVE_DEV	1
@@ -189,7 +191,7 @@ void init_ata_generic(void)
 						ata_devices[i].flags |= LBA48;
 
 						size  = ata_devices[i].max_lba48[0];
- 						size |= (ata_devices[i].max_lba48[1] << 16);
+						size |= (ata_devices[i].max_lba48[1] << 16);
 						size |= ((uint64_t)ata_devices[i].max_lba48[2] << 32);
 						size |= ((uint64_t)ata_devices[i].max_lba48[3] << 48);
 					} else {
@@ -228,7 +230,7 @@ void init_ata_generic(void)
 		kprintf(KERN_ERROR "Error on register IRQ\n");
 	}
 
-	//teste();
+	teste();
 }
 
 
@@ -270,18 +272,18 @@ static void set_device(uchar8_t bus, uchar8_t device)
 {
 	switch(bus) {
 		case PRI_BUS:
-				if(device == MASTER_DEV) {
-					outb(0x00, pio_ports[PRI_BUS][REG_DC]);
-				} else if(device == SLAVE_DEV) {
-					outb(0x10, pio_ports[PRI_BUS][REG_DC]);
-				}
+			if(device == MASTER_DEV) {
+				outb(0x00, pio_ports[PRI_BUS][REG_DC]);
+			} else if(device == SLAVE_DEV) {
+				outb(0x10, pio_ports[PRI_BUS][REG_DC]);
+			}
 
 		case SEC_BUS:
-				if(device == MASTER_DEV) {
-					outb(0x00, pio_ports[SEC_BUS][REG_DC]);
-				} else if(device == SLAVE_DEV) {
-					outb(0x10, pio_ports[SEC_BUS][REG_DC]);
-				}
+			if(device == MASTER_DEV) {
+				outb(0x00, pio_ports[SEC_BUS][REG_DC]);
+			} else if(device == SLAVE_DEV) {
+				outb(0x10, pio_ports[SEC_BUS][REG_DC]);
+			}
 
 	}
 	udelay(400);
@@ -470,6 +472,11 @@ static void teste(void)
 
 void teste(void)
 {
+	dvhash_t *hashtable;
+
+	if (!initialize_dvhash(&hashtable, 0, 0, 20, 300) )
+		kprintf("ERROR\n");
+	/*
 	int i;
 	uint16_t data;
 	uint64_t addr = 0;
@@ -485,7 +492,7 @@ void teste(void)
 	outb(LBA_BYTE(addr, 6), pio_ports[bus][REG_SADDR3]);
 
 	outb((secs & 0xFF), pio_ports[bus][REG_SC]);
-	outb(LBA_BYTE(addr, 1), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(addr, 0), pio_ports[bus][REG_SADDR1]);
 	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR2]);
 	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR3]);
 
@@ -498,7 +505,7 @@ void teste(void)
 	if((inb(pio_ports[bus][REG_ASTATUS]) & DF_BIT) != 0 ||
 			inb(pio_ports[bus][REG_FERR] & ABRT_BIT) != 0) {
 		kprintf("Read error\n");
-	}
+	}*/
 }
 
 
@@ -508,7 +515,7 @@ static void ata_handler1(int id, pt_regs *regs)
 
 	kprintf("PRIM: %d\n", id);
 
-	for(i=0; i<20; i++) {
+	for(i=1; i<20; i++) {
 		wait_bus(PRI_BUS);
 		data = inw(pio_ports[PRI_BUS][REG_DATA]);
 		kprintf("%c %c ", (char)(data & 0xFF), (char)(data >> 8));

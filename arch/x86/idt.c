@@ -178,7 +178,7 @@ void setup_IDT(void)
 
 
 	IDTR.table_limit = (IDT_TABLE_SIZE * sizeof(idt_t)) - 1;
-	IDTR.idt_ptr     = (uint32_t)idt_table;
+	IDTR.idt_ptr     = (void*)idt_table;
 	load_idt();
 }
 

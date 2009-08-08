@@ -43,6 +43,7 @@ _start:
 
 	.align 4
 
+
 multiboot_header:
 
 	.long MULTIBOOT_HEADER_MAGIC

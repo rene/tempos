@@ -152,7 +152,7 @@ void init_pg(karch_t *kinf)
 	/** 
 	  * Re-arrange memory map to insert kernel region.
 	  */
-	kpa_start   = KERNEL_PA_START;
+	kpa_start   = (uint32_t)KERNEL_PA_START;
 	kpa_length  = free_phy_addr - kpa_start;
 	kernel_size = kpa_length;
 

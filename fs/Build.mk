@@ -6,7 +6,7 @@
 #
 
 CDIR := fs
-objs := binfmt_elf32.o
+objs := binfmt_elf32.o dvhash.o
 
 OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
 

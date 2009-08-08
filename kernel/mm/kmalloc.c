@@ -145,16 +145,16 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	   function will receive only an address as an argument,
 	   so the trick here is hold an information about the
 	   block just before the block itself. */
-	mem_block              = (uint32_t *)(pstart * PAGE_SIZE);
+	mem_block              = (void*)(pstart * PAGE_SIZE);
 	mem_area               = (mregion *)mem_block;
 	mem_area->memm         = memm;
 	mem_area->initial_addr = pstart;
 	mem_area->size         = npages;
 
-	mem_block = (uint32_t *)((uint32_t)mem_block + sizeof(mregion));
+	mem_block = (void*)((void*)mem_block + sizeof(mregion));
 
 	if( (flags & GFP_ZEROP) ) {
-		for(i=0; i<((size - sizeof(mregion)) / sizeof(uint32_t)); i++) {
+		for(i=0; i<((size - sizeof(mregion)) / sizeof(void*)); i++) {
 			mem_block[i] = 0;
 		}
 	}
@@ -188,7 +188,7 @@ error:
  */
 void kfree(void *ptr)
 {
-	mregion *mem_area = (mregion *)((uint32_t)ptr - sizeof(mregion));
+	mregion *mem_area = (mregion *)((void*)ptr - sizeof(mregion));
 	mem_map *memm     = mem_area->memm;
 	uint32_t index    = mem_area->initial_addr >> TABLE_SHIFT;
 	uint32_t ffpage   = mem_area->initial_addr - (TABLE_SIZE * index);
