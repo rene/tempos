@@ -5,8 +5,5 @@
 # Makefile
 #
 
-CDIR := arch/x86/mm
-objs := mm.o
-
-OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
+obj-y += mm.o
 

@@ -5,8 +5,5 @@
 # Makefile
 #
 
-CDIR := drivers/char
-objs := i8042.o
-
-OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
+obj-y += i8042.o
 

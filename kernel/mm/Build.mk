@@ -5,8 +5,5 @@
 # Makefile
 #
 
-CDIR := kernel/mm
-objs := init_mm.o kmalloc.o
-
-OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
+obj-y += init_mm.o kmalloc.o
 

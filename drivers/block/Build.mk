@@ -5,8 +5,5 @@
 # Makefile
 #
 
-CDIR := drivers/block
-objs := ata_generic.o
-
-OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
+obj-y += ata_generic.o
 

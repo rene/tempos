@@ -1,0 +1,9 @@
+##
+# TempOS - Tempos is an Educational and multi purpose Operating System
+#
+# .config - Kernel build configuration file
+#
+
+CONFIG_ARCH_X86 = y
+#CONFIG_ARCH_X86_64 NOT ENABLE
+

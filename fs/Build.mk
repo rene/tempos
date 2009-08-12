@@ -5,8 +5,5 @@
 # Makefile
 #
 
-CDIR := fs
-objs := binfmt_elf32.o dvhash.o
-
-OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
+obj-y += binfmt_elf32.o dvhash.o
 

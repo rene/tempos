@@ -5,8 +5,5 @@
 # Makefile
 #
 
-CDIR := lib
-objs := ctype.o linkedl.o clinkedl.o printf.o stdlib.o string.o
-
-OBJFILES += $(patsubst %.o,$(CDIR)/%.o,$(objs))
+obj-y += ctype.o linkedl.o clinkedl.o printf.o stdlib.o string.o
 
