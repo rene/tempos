@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Makefile mandatory rule */
-	printf("\nend: $(obj-y)\n\t@echo $(obj-y) >> objs.list\n");
+	printf("\nend: $(obj-y)\n\t@echo $(obj-y) >> $(objlist)\n");
 	printf("\nclean:\n\t@for obj in $(obj-y); do \\\n");
 	printf("\t[ -f $$obj ] && (rm -f $$obj && echo \" - Remove $$obj\") \\\n");
 	printf("\t|| echo \" ! $$obj not found.\"; done\n");

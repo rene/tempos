@@ -31,8 +31,8 @@ bootfile := arch/x86/boot/boot.o
 
 all: x86 portable
 	@echo " * Linking kernel image..."
-	@sed -i "#$(bootfile)#d" $(objlist)
-	@$(LD) $(ARCH_LF) -o $(kimage) -T arch/x86/boot/setup.ld @$(objlist)
+	@sed -i "s#$(bootfile)##g" $(objlist)
+	@$(LD) $(ARCH_LF) -o $(kimage) -T arch/x86/boot/setup.ld $(bootfile) @$(objlist)
 	@rm -f $(objlist)
 	@echo "Build done."
 
