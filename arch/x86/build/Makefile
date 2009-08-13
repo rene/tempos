@@ -36,7 +36,7 @@ all: x86 portable
 	@sed -i "#$(bootfile)#d" $(objlist)
 	@$(LD) $(ARCH_LF) -o $(kimage) -T arch/x86/boot/setup.ld @$(objlist)
 	@rm -f $(objlist)
-	@echo "done."
+	@echo "Build done."
 
 ###
 # Specific rules for architecture
@@ -73,7 +73,7 @@ install: $(fimage)
 	@mount -o loop $(fimage) /mnt
 	@cp $(kimage) /mnt/boot
 	@umount /mnt
-
+	@echo "Installation done."
 
 ##
 # test

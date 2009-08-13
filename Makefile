@@ -89,21 +89,21 @@ $(conffile):
 #
 test: showtitle
 	@echo -n " * Checking architecture..."
-	@$(checkarch) $(conffile) test
+	@[ -f "$(fimage)" ] && $(checkarch) $(conffile) test \
+		|| echo -e "\nYou need to build TempOS and generate the disk image first."; \
+			echo "Try: make install"
 
 
 ##
 # install
 #
-install: showtitle $(fimage)
+install: tempos $(fimage)
 	@echo -n " * Checking architecture..."
 	@$(checkarch) $(conffile) install
 
 
 $(fimage):
 	@scripts/mkdisk_img.sh $(fimage)
-	@$(MAKE) install
-
 
 ##
 # clean

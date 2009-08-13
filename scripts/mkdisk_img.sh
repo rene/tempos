@@ -7,14 +7,14 @@
 # TempOS Build System
 #
 
-execute() {
-
-	$*
+check_result() {
 
 	if [ $? -eq 0 ]; then
 		echo "OK"
 	else
 		echo "ERROR!"
+		echo "Log output:"
+		[ -n "$errorlog" ] && cat $errorlog || echo "No error log avaliable."
 		exit 1
 	fi
 }
@@ -39,18 +39,29 @@ if [ $# -ge 1 ]; then
 	esac
 fi
 
-echo -n "Creating floppy disk image..."
-execute dd if=/dev/zero of=$IMGFILE bs=512 count=2880
+mktemp=$(which mktemp)
+if [ -n $mktemp ]; then
+	errorlog=$($mktemp)
+else
+	errorlog="/tmp/$$"
+fi
 
-echo "Creating ext2 file system..."
-execute yes "" | mkfs.ext2 $IMGFILE
 
-echo "Mouting image..."
-execute mount -o loop $IMGFILE $DIRMNT
+echo -n " + Creating floppy disk image..."
+dd if=/dev/zero of=$IMGFILE bs=512 count=2880 > /dev/null 2>>$errorlog
+check_result
 
-echo "Installing GRUB..."
-execute mkdir -p $DIRMNT/boot/grub
-execute cp /boot/grub/stage* $DIRMNT/boot/grub
+echo -n " + Creating ext2 file system..."
+mkfs.ext2 -F $IMGFILE > /dev/null 2>>$errorlog
+check_result
+
+echo -n " * Mouting disk image..."
+mount -o loop $IMGFILE $DIRMNT > /dev/null 2>>$errorlog
+check_result
+
+echo -n " + Installing GRUB..."
+mkdir -p $DIRMNT/boot/grub
+cp /boot/grub/stage* $DIRMNT/boot/grub
 
 IODEV=$(cat /proc/mounts | grep $DIRMNT | cut -d" " -f1)
 DEVICEMAP=$(mktemp)
@@ -75,12 +86,13 @@ install /boot/grub/stage1 d (fd0) (fd0)/boot/grub/stage2 0x8000 p (fd0)/boot/gru
 quit
 EOF
 
-grep -v ^# $CMDFILE | grub --batch --device-map=$DEVICEMAP
-
+grep -v ^# $CMDFILE | grub --batch --device-map=$DEVICEMAP > /dev/null 2>>$errorlog
+check_result
 
 rm -f $DEVICEMAP
 rm -f $CMDFILE
-umount $DIRMNT
 
-echo "Done."
+echo -n " * Umount image..."
+umount $DIRMNT > /dev/null 2>>$errorlog
+check_result
 
