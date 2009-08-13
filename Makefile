@@ -89,9 +89,9 @@ $(conffile):
 #
 test: showtitle
 	@echo -n " * Checking architecture..."
-	@[ -f "$(fimage)" ] && $(checkarch) $(conffile) test \
-		|| echo -e "\nYou need to build TempOS and generate the disk image first."; \
-			echo "Try: make install"
+	@[ -f "$(fimage)" ] && ($(checkarch) $(conffile) test) \
+		|| (echo -e "\nYou need to build TempOS and generate the disk image first."; \
+			echo "Try: make install")
 
 
 ##
