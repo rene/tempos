@@ -5,7 +5,7 @@
 # Makefile - TempOS Build System
 #
 
-.PHONY: x86 portable clean
+.PHONY: x86 portable
 
 CWD := arch/x86/build
 
@@ -34,7 +34,7 @@ bootfile := arch/x86/boot/boot.o
 all: x86 portable
 	@echo " * Linking kernel image..."
 	@sed -i "#$(bootfile)#d" $(objlist)
-	@$(LD) -o $(kimage) -T arch/x86/boot/setup.ld @$(objlist)
+	@$(LD) $(ARCH_LF) -o $(kimage) -T arch/x86/boot/setup.ld @$(objlist)
 	@rm -f $(objlist)
 	@echo "done."
 

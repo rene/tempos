@@ -34,11 +34,11 @@ CFLAGS = -Wall
 # All object files
 obj-y:=
 
-# Global variables
-export PWD CC CFLAGS obj-y kimage fimage deptool objlist
+# Export all variables
+export
 
 # Pseudo rules
-.PHONY: showtitle buildep config tempos clean
+.PHONY: showtitle clean
 
 
 all: tempos
@@ -53,7 +53,9 @@ buildep:
 
 tempos: showtitle buildep config
 	@[ -f $(objlist) ] && rm -f $(objlist) || echo " * Sanity check"
+	@echo -n " * Checking architecture..."
 	@$(checkarch) $(conffile)
+
 
 ##
 # Read configuration file and generate proper files
@@ -85,15 +87,18 @@ $(conffile):
 ##
 # test
 #
-test:
+test: showtitle
+	@echo -n " * Checking architecture..."
 	@$(checkarch) $(conffile) test
 
 
 ##
 # install
 #
-install: $(fimage)
+install: showtitle $(fimage)
+	@echo -n " * Checking architecture..."
 	@$(checkarch) $(conffile) install
+
 
 $(fimage):
 	@scripts/mkdisk_img.sh $(fimage)
@@ -103,10 +108,12 @@ $(fimage):
 ##
 # clean
 #
-clean:
+clean: showtitle
 	@echo "Cleaning..."
 	@[ -f $(config_mk) ] && (rm -f $(config_mk) && echo " - Remove $(config_mk)") || echo " ! $(config_mk) not found."
 	@[ -f $(config_h) ] && (rm -f $(config_h) && echo " - Remove $(config_h)") || echo " ! $(config_h) not found."
 	@$(MAKE) clean --quiet -C $(btools_dir)
+	@echo -n " * Checking architecture..."
 	@$(checkarch) $(conffile) clean
+	@echo done.
 
