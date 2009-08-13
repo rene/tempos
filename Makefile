@@ -108,12 +108,13 @@ $(fimage):
 ##
 # clean
 #
-clean: showtitle
+clean: showtitle buildep
 	@echo "Cleaning..."
+	@echo -n " * Checking architecture..."
+	@$(checkarch) $(conffile) clean
+# Those rules should stay after architecture clean
 	@[ -f $(config_mk) ] && (rm -f $(config_mk) && echo " - Remove $(config_mk)") || echo " ! $(config_mk) not found."
 	@[ -f $(config_h) ] && (rm -f $(config_h) && echo " - Remove $(config_h)") || echo " ! $(config_h) not found."
 	@$(MAKE) clean --quiet -C $(btools_dir)
-	@echo -n " * Checking architecture..."
-	@$(checkarch) $(conffile) clean
 	@echo done.
 

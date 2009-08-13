@@ -10,15 +10,13 @@
 CWD := arch/x86/build
 
 # Architecture compiler and link flags
-ARCH     := x86
 ARCH_CF  := -m32
 ARCH_LF  := -melf_i386
 INCDIRS  := -I$(PWD)/include -I$(PWD)/arch/include
-CFLAGS_2 := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
+CFLAGS   := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
 
-CFLAGS := $(CFLAGS_2)
 
-export obj-y CFLAGS_2 C_FLAGS
+export CFLAGS
 
 flist_1  := $(CWD)/independent.list
 flist_2  := $(CWD)/dependent.list
@@ -63,7 +61,7 @@ $(mfile_1): $(rules_1) $(flist_1)
 
 
 ####
-# Mandaroty rules for Build System
+# Mandatory rules for Build System
 ####
 
 ##
@@ -74,6 +72,7 @@ install: $(fimage)
 	@cp $(kimage) /mnt/boot
 	@umount /mnt
 	@echo "Installation done."
+
 
 ##
 # test
