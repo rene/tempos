@@ -1,3 +1,0 @@
-arch/x86/Build_x86.mk
-arch/x86/kernel/Build_x86.mk
-arch/x86/boot/Build_x86.mk

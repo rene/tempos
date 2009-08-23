@@ -7,3 +7,5 @@
 
 obj-y += i8259A.o i82C54.o irq.o
 
+obj-x86asm += sys_enter.o
+

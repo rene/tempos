@@ -1,2 +1,0 @@
-	@echo " + AS $<"
-	@$(CC) -DASM $(CFLAGS) -c $< -o $@

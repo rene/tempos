@@ -61,21 +61,21 @@
  *  returned.
  */
 
-int initialize_dvhash(dvhash_t **dvect, uint32_t v1_size, uint32_t v2_size,
-						uint16_t major, uint64_t totalblocks)
+int initialize_dvhash(dvhash_t ** dvect, uint32_t v1_size, uint32_t v2_size,
+		      uint16_t major, uint64_t totalblocks)
 {
 	dvhash_t *dvector;
 	c_llist **vector2;
 	uint32_t i, j, k;
 
 	/* Start DVHASH structure */
-	dvector = (dvhash_t*)kmalloc(sizeof(dvhash_t), GFP_NORMAL_Z);
-	if(dvector == NULL)
-		return(-ENOMEM);
+	dvector = (dvhash_t *) kmalloc(sizeof(dvhash_t), GFP_NORMAL_Z);
+	if (dvector == NULL)
+		return (-ENOMEM);
 
 	dvector->major = major;
 
-	if(v1_size >= MIN_V1SIZE && v2_size >= MIN_V2SIZE) {
+	if (v1_size >= MIN_V1SIZE && v2_size >= MIN_V2SIZE) {
 		dvector->v1_size = v1_size;
 		dvector->v2_size = v2_size;
 	} else {
@@ -83,31 +83,35 @@ int initialize_dvhash(dvhash_t **dvect, uint32_t v1_size, uint32_t v2_size,
 		dvector->v2_size = DEF_V2SIZE;
 	}
 
-	if(totalblocks > 0) {
+	if (totalblocks > 0) {
 		dvector->tblocks = totalblocks;
 	} else {
-		dvector->tblocks = 1; /* Avoid division by zero */
+		dvector->tblocks = 1;	/* Avoid division by zero */
 	}
 
 	/* Start vector 1 */
-	dvector->vector1 = (c_llist***)kmalloc(sizeof(c_llist**) * dvector->v1_size, GFP_NORMAL_Z);
-	if(dvector->vector1 == NULL) {
+	dvector->vector1 =
+	    (c_llist ***) kmalloc(sizeof(c_llist **) * dvector->v1_size,
+				  GFP_NORMAL_Z);
+	if (dvector->vector1 == NULL) {
 		kfree(dvector);
-		return(-ENOMEM);
+		return (-ENOMEM);
 	}
 
 	/* Start each vetor 2 */
-	for(i=0; i<dvector->v1_size; i++) {
+	for (i = 0; i < dvector->v1_size; i++) {
 
-		vector2 = (c_llist**)kmalloc(sizeof(c_llist*) * dvector->v2_size, GFP_NORMAL_Z);
-		if(vector2 == NULL)
+		vector2 =
+		    (c_llist **) kmalloc(sizeof(c_llist *) * dvector->v2_size,
+					 GFP_NORMAL_Z);
+		if (vector2 == NULL)
 			goto error;
 
 		/* Start each linked list */
-		for(j=0; j<dvector->v2_size; j++) {
+		for (j = 0; j < dvector->v2_size; j++) {
 
-			if ( !c_llist_create(&vector2[j]) ) {
-				for(k=0; k<j; k++)
+			if (!c_llist_create(&vector2[j])) {
+				for (k = 0; k < j; k++)
 					c_llist_destroy(&vector2[k]);
 				kfree(vector2);
 				goto error;
@@ -119,19 +123,16 @@ int initialize_dvhash(dvhash_t **dvect, uint32_t v1_size, uint32_t v2_size,
 
 	/* Initialized, return */
 	*dvect = dvector;
-	return(1);
+	return (1);
 
 error:
-	for(j=0; j<i; j++) {
+	for (j = 0; j < i; j++) {
 		vector2 = dvector->vector1[j];
-		for(k=0; k<dvector->v2_size; k++)
+		for (k = 0; k < dvector->v2_size; k++)
 			c_llist_destroy(&vector2[k]);
 		kfree(vector2);
 	}
 	kfree(dvector->vector1);
 	kfree(dvector);
-	return(-ENOMEM);
+	return (-ENOMEM);
 }
-
-
-

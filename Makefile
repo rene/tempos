@@ -11,7 +11,6 @@ PWD := $(shell pwd)
 # Default files and dirs
 kimage     := tempos.elf
 fimage     := floppy.img
-deptool	   := $(PWD)/build/makedeps
 
 conffile   := .config
 config_def := scripts/config.default
@@ -22,14 +21,14 @@ objlist    := objs.list
 
 checkarch  := scripts/checkarch.sh
 
-btools_dir := build
-
 
 # Default values
 CC = gcc
 LD = ld
 CFLAGS = -Wall
 
+# Compilation tools
+DEPTOOL  := scripts/deptool.sh
 
 # All object files
 obj-y:=
@@ -48,10 +47,8 @@ showtitle:
 	@echo "[ TempOS Build System ]"
 	@echo " ===================== "
 
-buildep:
-	@$(MAKE) --quiet -C $(btools_dir)
 
-tempos: showtitle buildep config
+tempos: showtitle config
 	@[ -f $(objlist) ] && rm -f $(objlist) || echo " * Sanity check"
 	@echo -n " * Checking architecture..."
 	@$(checkarch) $(conffile)
@@ -108,13 +105,12 @@ $(fimage):
 ##
 # clean
 #
-clean: showtitle buildep
+clean: showtitle
 	@echo "Cleaning..."
 	@echo -n " * Checking architecture..."
 	@$(checkarch) $(conffile) clean
 # These rules should stay after architecture clean
 	@[ -f $(config_mk) ] && (rm -f $(config_mk) && echo " - Remove $(config_mk)") || echo " ! $(config_mk) not found."
 	@[ -f $(config_h) ] && (rm -f $(config_h) && echo " - Remove $(config_h)") || echo " ! $(config_h) not found."
-	@$(MAKE) clean --quiet -C $(btools_dir)
 	@echo done.
 

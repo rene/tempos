@@ -9,55 +9,58 @@
 
 CWD := arch/x86/build
 
+
 # Architecture compiler and link flags
 ARCH_CF  := -m32
 ARCH_LF  := -melf_i386
 INCDIRS  := -I$(PWD)/include -I$(PWD)/arch/include
 CFLAGS   := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
 
+MAKEGEN  := $(CWD)/MakefileX86.gen
 
-export CFLAGS
+##
+# Specific CFLAGS for each target described in .mk files
+#
+obj-y-CFLAGS    := $(CFLAGS)
+obj-x86asm-CFLAGS := -DASM $(CFLAGS)
 
-flist_1  := $(CWD)/independent.list
-flist_2  := $(CWD)/dependent.list
-rules_1  := $(CWD)/Makefile_c.rules
-rules_2  := $(CWD)/Makefile_asm.rules
+export obj-y-CFLAGS obj-x86asm-CFLAGS
 
-mfile_1  := $(CWD)/Makefile1.gen
-mfile_2  := $(CWD)/Makefile2.gen
+.PHONY: kernel install test clean
 
-bootfile := arch/x86/boot/boot.o
-
-
-all: x86 portable
+##
+# Architecture specific
+#
+all: kernel
 	@echo " * Linking kernel image..."
-	@sed -i "s#$(bootfile)##g" $(objlist)
-	@$(LD) $(ARCH_LF) -o $(kimage) -T arch/x86/boot/setup.ld $(bootfile) @$(objlist)
-	@rm -f $(objlist)
+	@$(LD) $(ARCH_LF) -o $(kimage) -T arch/x86/boot/setup.ld $(obj-x86asm) $(obj-y)
 	@echo "Build done."
 
-###
-# Specific rules for architecture
-###
 
-x86: $(mfile_2)
-	@echo " * Start architecture dependent compilation:"
-	@$(MAKE) --quiet -f $<
-	@echo " * Architecture dependent build finished."
+##
+# Generate Makefile for kernel
+#
+-include $(MAKEGEN)
 
-portable: $(mfile_1)
-	@echo " * Start architecture independent compilation:"
-	@$(MAKE) --quiet -f $<
-	@echo " * Architecture independent build finished."
+kernel: $(MAKEGEN)
+	@echo " * Start kernel compilation:"
 
-
-$(mfile_2): $(rules_2) $(flist_2)
-	@echo -n " + Generating ASM dependencies..."
-	@$(deptool) $(rules_2) $(flist_2) > $@ && echo "OK" || echo "ERROR!"
-
-$(mfile_1): $(rules_1) $(flist_1) 
+$(MAKEGEN): \
+		arch/x86/boot/Build.mk		\
+		arch/x86/Build.mk			\
+		arch/x86/kernel/Build.mk	\
+		arch/x86/mm/Build.mk		\
+		lib/Build.mk				\
+		drivers/char/Build.mk		\
+		drivers/block/Build.mk		\
+		fs/Build.mk					\
+		kernel/Build.mk				\
+		kernel/mm/Build.mk
 	@echo -n " + Generating dependencies..."
-	@$(deptool) $(rules_1) $(flist_1) > $@ && echo "OK" || echo "ERROR!"
+	@for file in $?; do 					 			 \
+		$(DEPTOOL) $$file $(CC) $(CFLAGS) >> $(MAKEGEN); \
+	done && echo "OK" || echo "ERROR"
+
 
 
 ####
@@ -84,11 +87,11 @@ test:
 ##
 # Clean
 #
-clean: $(mfile_1) $(mfile_2)
-	@$(MAKE) --quiet -f $(mfile_1) clean
-	@$(MAKE) --quiet -f $(mfile_2) clean
-	@[ -f $(mfile_1) ] && (rm -f $(mfile_1) && echo " - Remove $(mfile_1)") || echo " ! $(mfile_1) not found."
-	@[ -f $(mfile_2) ] && (rm -f $(mfile_2) && echo " - Remove $(mfile_2)") || echo " ! $(mfile_2) not found."
-	@[ -f $(kimage) ] && (rm -f $(kimage) && echo " - Remove $(kimage)") || echo " ! $(kimage) not found."
-	@[ -f $(fimage) ] && (rm -f $(fimage) && echo " - Remove $(fimage)") || echo " ! $(fimage) not found."
+clean: $(MAKEGEN)
+	@for obj in $(obj-x86asm) $(obj-y); do \
+		[ -f $$obj ] && (rm -f $$obj && echo " - REMOVE $$obj") || echo " ! $$obj not found."; \
+	done
+	@[ -f $(MAKEGEN) ] && (rm -f $(MAKEGEN) && echo " - REMOVE $(MAKEGEN)") || echo " ! $(MAKEGEN) not found."
+	@[ -f $(kimage) ] && (rm -f $(kimage) && echo " - REMOVE $(kimage)") || echo " ! $(kimage) not found."
+	@[ -f $(fimage) ] && (rm -f $(fimage) && echo " - REMOVE $(fimage)") || echo " ! $(fimage) not found."
 

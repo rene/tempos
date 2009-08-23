@@ -1,2 +1,0 @@
-	@echo " + CC $<"
-	@$(CC) $(CFLAGS) -c $< -o $@

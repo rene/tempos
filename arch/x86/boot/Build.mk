@@ -7,3 +7,5 @@
 
 obj-y += karch.o video.o
 
+obj-x86asm += boot.o
+

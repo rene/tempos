@@ -7,3 +7,5 @@
 
 obj-y += exceptions.o  gdt.o  idt.o  io.o
 
+obj-x86asm += isr.o
+
