@@ -70,6 +70,7 @@ config: $(conffile)
 	@sed -n "s/ \{0,\}\(\w\+\) \{0,\}= \{0,\}y/\t#define \1/gp" $(conffile) >> $(config_h)
 	@echo -e "\n#endif /* TEMPOS_CONFIG_H */\n" >> $(config_h)
 
+-include $(config_mk)
 
 ##
 # Use a default configuration file
