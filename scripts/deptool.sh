@@ -29,9 +29,9 @@ fi
 # Base dir of the .mk file
 bdir=$(dirname $mkfile)
 
-targets=$(sed -n -e "/ \{0,\}#.*/d" -e "s#\(\w\+\.o\)#${bdir}/\1#g" -e "/ \{0,\}\(\w\+\) \{0,\}[+:]=.*/p" $mkfile)
+targets=$(sed -e "/ \{0,\}#.*/d" -e "s#\(\w\+\.o\)#${bdir}/\1#g" $mkfile)
 
-deps=$(echo -e "$targets" | sed "s# \{0,\}\(\w\+\) \{0,\}[+:]=.*#\1#g" | uniq | sed "s#\([^ ?]\+\)#\$(\1) #g" | tr -d "\n")
+deps=$(echo -e "$targets" | sed -n "s# \{0,\}\(\w\+\) \{0,\}[+:]=.*#\1#gp" | uniq | sed "s#\([^ ?]\+\)#\$(\1) #g" | tr -d "\n")
 
 echo -e "##\n# This Makefile was automatic generated. Please, do not edit.\n#\n"
 echo -e "\n${targets}\n"
@@ -41,11 +41,18 @@ echo -e "\nall: $deps\n\n"
 OLDIFS=$IFS
 LF=$(echo -en "\n\b")
 IFS=$LF
+
 for line in $targets; do
 
-	target=$(echo $line | sed "s# \{0,\}\(\w\+\) \{0,\}[+:]=.*#\1#")
+	target=$(echo $line | sed -ne "s# \{0,\}\(\w\+\) \{0,\}[+:]=.*#\1#gp")
 
-	objects=$(echo $line | sed "s#\(.*\) \{0,\}[+:]= \{0,\}\(.*\)#\2#g")
+	if [ -z "$target" ]; then
+		target=$oldtarget
+	else
+		oldtarget=$target
+	fi
+
+	objects=$(echo $line | sed -e "# \\[ $]#d" -e "s#\(.*\) \{0,\}[+:]= \{0,\}\(.*\)#\2#g" | tr -d '\\')
 
 	IFS=$OLDIFS
 	for object in $objects; do
