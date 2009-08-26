@@ -30,7 +30,7 @@
 
 	void init_scheduler(void);
 
-	void schedule(void);
+	void schedule(int p);
 
 #endif /* SCHED_H */
 

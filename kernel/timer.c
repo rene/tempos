@@ -34,7 +34,7 @@ llist *alarm_queue;
 
 
 static void timer_handler(int id, pt_regs *regs);
-static void update_alarms(void);
+static void update_alarms(int id, pt_regs *regs);
 
 
 /**
@@ -73,7 +73,7 @@ static void timer_handler(int id, pt_regs *regs)
 {
 	jiffies++;
 
-	update_alarms();
+	update_alarms(id, regs);
 }
 
 
@@ -82,7 +82,7 @@ static void timer_handler(int id, pt_regs *regs)
  *
  * Check and execute handlers of expired alarms
  */
-static void update_alarms(void)
+static void update_alarms(int id, pt_regs *regs)
 {
 	llist *tmp;
 	alarm_t *alarm;

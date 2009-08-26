@@ -53,12 +53,12 @@ void init_scheduler(void)
  *
  * Do a task switch
  */
-void schedule(void)
+void schedule(int p)
 {
 
 
 	/* Register alarm again */
-	if( !new_alarm((jiffies + scheduler_quantum), schedule, 0) ) {
+	if( !new_alarm((jiffies + scheduler_quantum), schedule, p) ) {
 		panic("Could not install scheduler alarm.");
 	}
 }

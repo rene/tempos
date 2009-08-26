@@ -21,7 +21,7 @@ MAKEGEN  := $(CWD)/MakefileX86.gen
 ##
 # Specific CFLAGS for each target described in .mk files
 #
-obj-y-CFLAGS    := $(CFLAGS)
+obj-y-CFLAGS      := $(CFLAGS)
 obj-x86asm-CFLAGS := -DASM $(CFLAGS)
 
 export obj-y-CFLAGS obj-x86asm-CFLAGS
@@ -32,9 +32,9 @@ export obj-y-CFLAGS obj-x86asm-CFLAGS
 # Architecture specific
 #
 all: kernel
-	@echo " * Linking kernel image..."
+	@$(ECHO) " * Linking kernel image..."
 	@$(LD) $(ARCH_LF) -o $(kimage) -T arch/x86/boot/setup.ld $(obj-x86asm) $(obj-y)
-	@echo "Build done."
+	@$(ECHO) "Build done."
 
 
 ##
@@ -43,7 +43,7 @@ all: kernel
 -include $(MAKEGEN)
 
 kernel: $(MAKEGEN)
-	@echo " * Start kernel compilation:"
+	@$(ECHO) " * Start kernel compilation:"
 
 $(MAKEGEN): \
 		arch/x86/boot/Build.mk		\
@@ -56,7 +56,7 @@ $(MAKEGEN): \
 		fs/Build.mk					\
 		kernel/Build.mk				\
 		kernel/mm/Build.mk
-	@echo -n " + Generating dependencies..."
+	@$(ECHO) -n " + Generating dependencies..."
 	@for file in $?; do 					 			 \
 		$(DEPTOOL) $$file $(CC) $(CFLAGS) >> $(MAKEGEN); \
 	done && echo "OK" || echo "ERROR"
@@ -74,7 +74,7 @@ install: $(fimage)
 	@mount -o loop $(fimage) /mnt
 	@cp $(kimage) /mnt/boot
 	@umount /mnt
-	@echo "Installation done."
+	@$(ECHO) "Installation done."
 
 
 ##

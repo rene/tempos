@@ -23,9 +23,13 @@
  */
 
 #include <tempos/syscall.h>
+#include <tempos/kernel.h>
 
 int sys_execve(const char *filename, char *const argv[], char *const envp[])
 {
+
+	kprintf("%s -- %s -- %s\n", filename, argv[0], envp[0]);
+
 	return(-1);
 }
 

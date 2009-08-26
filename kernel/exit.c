@@ -24,9 +24,12 @@
 
 #include <tempos/syscall.h>
 #include <tempos/error.h>
+#include <tempos/kernel.h>
 
 int sys_exit(int status)
 {
+	kprintf("sys_exit %d\n", status);
+
 	return(-ENOSYS);
 }
 
