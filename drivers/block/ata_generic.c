@@ -513,7 +513,7 @@ static void ata_handler1(int id, pt_regs *regs)
 {
 	uint16_t data, i;
 
-	kprintf("PRIM: %d\n", id);
+	kprintf("PRIM: %d -- %d\n", id, regs->ds);
 
 	for(i=1; i<20; i++) {
 		wait_bus(PRI_BUS);
@@ -523,6 +523,6 @@ static void ata_handler1(int id, pt_regs *regs)
 }
 static void ata_handler2(int id, pt_regs *regs)
 {
-	kprintf("SEC: %d", id);
+	kprintf("SEC: %d -- %d\n", id, regs->ds);
 }
 

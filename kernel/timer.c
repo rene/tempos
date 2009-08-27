@@ -33,8 +33,8 @@
 llist *alarm_queue;
 
 
-static void timer_handler(int id, pt_regs *regs);
-static void update_alarms(int id, pt_regs *regs);
+static void timer_handler(void);//int id, pt_regs *regs);
+static void update_alarms(void);//int id, pt_regs *regs);
 
 
 /**
@@ -56,7 +56,7 @@ void init_timer(void)
 
 	kprintf(KERN_INFO "Initializing timer...\n");
 
-	if( request_irq(TIMER_IRQ, timer_handler, 0, "PIT") < 0 ) {
+	if( request_irq(TIMER_IRQ, (void(*)(int, pt_regs *))timer_handler, 0, "PIT") < 0 ) {
 		kprintf(KERN_ERROR "Error on initialize PIT\n");
 	} else {
 		llist_create(&alarm_queue);
@@ -69,11 +69,11 @@ void init_timer(void)
  *
  * Interrupt handler
  */
-static void timer_handler(int id, pt_regs *regs)
+static void timer_handler(void)
 {
 	jiffies++;
 
-	update_alarms(id, regs);
+	update_alarms();//id, regs);
 }
 
 
@@ -82,7 +82,7 @@ static void timer_handler(int id, pt_regs *regs)
  *
  * Check and execute handlers of expired alarms
  */
-static void update_alarms(int id, pt_regs *regs)
+static void update_alarms(void)
 {
 	llist *tmp;
 	alarm_t *alarm;
