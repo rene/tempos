@@ -2,7 +2,7 @@
 # Copyright (C) 2009 Renê de Souza Pinto
 # TempOS - Tempos is an Educational and multi purpose Operating System
 #
-# Makefile
+# TBS - Build configuration file
 #
 
 obj-y += i8259A.o i82C54.o irq.o
