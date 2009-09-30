@@ -178,13 +178,13 @@ void init_ata_generic(void)
 					continue;
 				}
 
-				kprintf(" hd%c: Device found: ", drvl);
-
 				/* Check for LBA */
 				if( (ata_devices[i].capabilities[0] & SUPPORT_LBA) == 0 ) {
-					kprintf("Does not support LBA. Can't handle. Sorry.\n");
+					kprintf(" hd%c: Device not found.\n", drvl);
 					continue;
 				} else {
+					kprintf(" hd%c: Device found: ", drvl);
+
 					/* Check for LBA48 */
 					if( (ata_devices[i].cmds_supported[1] & SUPPORT_LBA48) != 0 ) {
 						kprintf("LBA48");
