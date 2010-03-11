@@ -65,11 +65,11 @@
 	#define MTYPE_ACPI_NVS		0x04
 
 	struct _mmap_tentry {
-  		ulong32_t base_addr_low;
-  		ulong32_t base_addr_high;
-  		ulong32_t length_low;
-  		ulong32_t length_high;
-  		ulong32_t type;
+  		uint32_t base_addr_low;
+  		uint32_t base_addr_high;
+  		uint32_t length_low;
+  		uint32_t length_high;
+  		uint32_t type;
 	};
 
 

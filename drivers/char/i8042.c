@@ -205,7 +205,7 @@ uchar8_t kbc_read(void)
  */
 void wait_read_8042(void)
 {
-	long32_t timeout = TIMEOUT;
+	int32_t timeout = TIMEOUT;
 
 	while( !time_after(jiffies, timeout) && (!(inb(STATUS_PORT) & OUT_BUF_FULL)) );
 	return;
@@ -217,7 +217,7 @@ void wait_read_8042(void)
  */
 void wait_write_8042(void)
 {
-	long32_t timeout = TIMEOUT;
+	int32_t timeout = TIMEOUT;
 
 	while( !time_after(jiffies, timeout) && ((inb(STATUS_PORT) & INPT_BUF_FULL)) );
 	return;

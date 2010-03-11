@@ -31,13 +31,11 @@
 	typedef unsigned short 		uint16_t;
 	typedef int            		int32_t;
 	typedef unsigned int   		uint32_t;
-	typedef long           		long32_t;
-	typedef unsigned long  		ulong32_t;
 	typedef long long      		int64_t;
 	typedef unsigned long long 	uint64_t;
 
-	typedef ulong32_t size_t;
-	typedef long32_t  ssize_t;
+	typedef unsigned long size_t;
+	typedef long ssize_t;
 
 #endif /* UNISTD_H */
 

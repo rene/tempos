@@ -79,8 +79,8 @@ void karch(unsigned long magic, unsigned long addr)
  		mmap  = (memory_map_t *)VIRADDR((void*)mboot_info->mmap_addr);
 
 		i = 0;
-		while( (ulong32_t)mmap <
-					(ulong32_t)VIRADDR(mboot_info->mmap_addr + mboot_info->mmap_length) ) {
+		while( (uint32_t)mmap <
+					(uint32_t)VIRADDR(mboot_info->mmap_addr + mboot_info->mmap_length) ) {
 
 			kinf.mmap_table[i].base_addr_low  = mmap->base_addr_low;
 			kinf.mmap_table[i].base_addr_high = mmap->base_addr_high;
@@ -88,7 +88,7 @@ void karch(unsigned long magic, unsigned long addr)
 			kinf.mmap_table[i].length_high    = mmap->length_high;
 			kinf.mmap_table[i].type           = mmap->type;
 
-			mmap = (memory_map_t *)((ulong32_t)mmap +
+			mmap = (memory_map_t *)((uint32_t)mmap +
 						mmap->size + sizeof(mmap->size));
 			i++;
 		}

@@ -42,7 +42,7 @@ static void update_alarms(void);//int id, pt_regs *regs);
  *
  * Contains the number of system clock ticks
  */
-volatile ulong32_t jiffies;
+volatile uint32_t jiffies;
 
 
 /**

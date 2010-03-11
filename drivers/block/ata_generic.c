@@ -256,7 +256,7 @@ static void send_cmd(uchar8_t bus, uchar8_t command)
  */
 static void wait_bus(uchar8_t bus)
 {
-	long32_t timeout = TIMEOUT;
+	int32_t timeout = TIMEOUT;
 
 	while( (inb(pio_ports[bus][REG_CMD]) & BSY_BIT) &&
 					!time_after(jiffies, timeout) );
