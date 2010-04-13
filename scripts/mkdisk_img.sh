@@ -45,12 +45,15 @@ echo -n " + Creating floppy root directory..."
 TMPDIR=$($mktemp -d)
 if [ $? != 0 ]; then
 	TMPDIR=/tmp/$$-dir
+	mkdir $TMPDIR 2>>$errorlog
 fi
+check_result
 
-echo -n " + Copying files..."
+echo -n " + Copying TempOS kernel image..."
 mkdir -p $TMPDIR/boot/grub
 cp $TEMPOSFILE $TMPDIR/boot 2>>$errorlog
 check_result
+echo -n " + Copying GRUB files..."
 cp /boot/grub/stage* $TMPDIR/boot/grub 2>>$errorlog
 check_result
 
