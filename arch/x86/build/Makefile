@@ -70,10 +70,8 @@ $(MAKEGEN): \
 ##
 # install
 #
-install: $(fimage)
-	@mount -o loop $(fimage) /mnt
-	@cp $(kimage) /mnt/boot
-	@umount /mnt
+install:
+	@scripts/do_mkdisk.sh $(PWD)/$(kimage) $(PWD)/$(fimage)
 	@$(ECHO) "Installation done."
 
 

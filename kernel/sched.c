@@ -53,6 +53,7 @@ void init_scheduler(void)
  *
  * Do a task switch
  */
+/*int pg = 0;*/
 void schedule(int p)
 {
 
@@ -60,6 +61,8 @@ void schedule(int p)
 	/* Register alarm again */
 	if( !new_alarm((jiffies + scheduler_quantum), schedule, p) ) {
 		panic("Could not install scheduler alarm.");
+	/*} else {
+		kprintf("HELLO! %d\n", pg++);*/
 	}
 }
 

@@ -95,13 +95,10 @@ test: showtitle
 ##
 # install
 #
-install: tempos $(fimage)
+install: tempos
 	@$(ECHO) -n " * Checking architecture..."
 	@$(checkarch) $(conffile) install
 
-
-$(fimage):
-	@scripts/mkdisk_img.sh $(fimage)
 
 ##
 # clean

@@ -56,14 +56,15 @@ BUILD AND INSTALL:
 
 	To build and test TempOS simple type:
 
-		# make tempos
-		# sudo make install
-		# make test
+		$ make tempos
+		$ make install
+		$ make test
 
 	The following dependencies are necessary to build and test TempOS:
 
 		- An POSIX operating system (TempOS was written and tested with Linux)
 		- Build tools: gcc, make, gnu assembler (provided by binutils package)
+		- genext2fs: To create floppy image as non root user
 		- QEMU (for testing)
 
 	Of course you can write disk.img at your pendrive, floppy disk, etc and boot

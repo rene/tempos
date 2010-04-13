@@ -1,0 +1,5 @@
+April, 13, 2010:
+	- Eliminate the dependecy of root user to execute command 'make install'.
+	  However, the genext2fs tool is necessary. If not present, the old method
+	  should be used: 'sudo make install'.
+

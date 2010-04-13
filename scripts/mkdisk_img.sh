@@ -20,24 +20,18 @@ check_result() {
 }
 
 
-IMGFILE=floppy.img
-DIRMNT=/mnt
-
-if [ $# -ge 1 ]; then
-	case $1 in
-	
-		"-h" | "--help")
-			echo "Use:"
-			echo "      $0 <image_file>"
-			echo "      $0               -- For default file name ($IMGFILE)"
-			exit 0
-		;;
-
-		*)
-			IMGFILE=$1
-		;;
-	esac
+if [ $# != 3 ]; then
+	echo "Use:"
+	echo "$0 <tempos_kernel_image> <floppy_disk_image> <path to genext2fs>"
+	echo
+	exit 1
+else
+	TEMPOSFILE=$1
+	IMGFILE=$2
+	GENEXT2FS=$3
 fi
+
+GRUB=$(whereis -b grub | cut -d" " -f2)
 
 mktemp=$(which mktemp)
 if [ -n $mktemp ]; then
@@ -47,27 +41,23 @@ else
 fi
 
 
-echo -n " + Creating floppy disk image..."
-dd if=/dev/zero of=$IMGFILE bs=512 count=2880 > /dev/null 2>>$errorlog
+echo -n " + Creating floppy root directory..."
+TMPDIR=$($mktemp -d)
+if [ $? != 0 ]; then
+	TMPDIR=/tmp/$$-dir
+fi
+
+echo -n " + Copying files..."
+mkdir -p $TMPDIR/boot/grub
+cp $TEMPOSFILE $TMPDIR/boot 2>>$errorlog
+check_result
+cp /boot/grub/stage* $TMPDIR/boot/grub 2>>$errorlog
 check_result
 
-echo -n " + Creating ext2 file system..."
-mkfs.ext2 -F $IMGFILE > /dev/null 2>>$errorlog
-check_result
-
-echo -n " * Mouting disk image..."
-mount -o loop $IMGFILE $DIRMNT > /dev/null 2>>$errorlog
-check_result
-
-echo -n " + Installing GRUB..."
-mkdir -p $DIRMNT/boot/grub
-cp /boot/grub/stage* $DIRMNT/boot/grub
-
-IODEV=$(cat /proc/mounts | grep $DIRMNT | cut -d" " -f1)
 DEVICEMAP=$(mktemp)
 CMDFILE=$(mktemp)
 
-cat > $DIRMNT/boot/grub/menu.lst << EOF
+cat > $TMPDIR/boot/grub/menu.lst << EOF
 ##
 # TempOS
 #
@@ -79,20 +69,23 @@ root    (fd0)
 kernel  /boot/tempos.elf
 EOF
 
-echo "(fd0)		$IODEV" > $DEVICEMAP
+echo "(fd0)		$IMGFILE" > $DEVICEMAP
 cat > $CMDFILE << EOF
 root (fd0)
 install /boot/grub/stage1 d (fd0) (fd0)/boot/grub/stage2 0x8000 p (fd0)/boot/grub/menu.lst
 quit
 EOF
 
-grep -v ^# $CMDFILE | grub --batch --device-map=$DEVICEMAP > /dev/null 2>>$errorlog
+echo -n " + Creating ext2 file system image..."
+$GENEXT2FS -d $TMPDIR -b1536 $IMGFILE >>$errorlog 2>&1
+check_result
+
+echo -n " + Installing GRUB..."
+
+grep -v ^# $CMDFILE | $GRUB --batch --device-map=$DEVICEMAP > /dev/null 2>>$errorlog
 check_result
 
 rm -f $DEVICEMAP
 rm -f $CMDFILE
-
-echo -n " * Umount image..."
-umount $DIRMNT > /dev/null 2>>$errorlog
-check_result
+rm -rf $TMPDIR
 

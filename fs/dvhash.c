@@ -49,13 +49,13 @@
  * 		A = TOTAL_BLOCKS / VECTOR1_SIZE
  * 		B = A / VECTOR2_SIZE
  *
- * To find an block on the hash, DVHASH will do the follow calculation:
+ * To find an block on the hash, DVHASH does the following calculation:
  *
  * 		FINDEX = BLOCK_ADDR / A
  * 		SINDEX = (BLOCK_ADDR - (FINDEX * A)) / B
  *
  *  FINDEX is the position at first vector and SINDEX is the position
- *  at the second. Than, DVHASH will just look at the circular linked
+ *  at the second. Then, DVHASH will just look at the circular linked
  *  list present at VECTOR2[SINDEX] and search for the block. If the
  *  block was not found, NULL is returned, otherwise the block is
  *  returned.
