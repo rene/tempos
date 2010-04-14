@@ -19,12 +19,18 @@ ARCH=$(sed -n "s/^ \\{0,\\}CONFIG_ARCH_\\(\\w\\+\\).*/\1/gp" $conffile)
 MKFILE=$(sed -n "s#^ \\{0,\\}CONFIG_${ARCH}_MAKEFILE \\{0,\\}= \\{0,\\}\\(.*\\)#\1#gp" $conffile)
 
 if [ -f "$MKFILE" ]; then
-	echo "$ARCH"
-	make --quiet -f $MKFILE $target
-else
-	echo "Unknow"
-	echo "***********************************"
-	echo "* ERROR: Unsupported architecture *"
-	echo "***********************************"
+	case $ARCH in
+		"X86")
+			echo "IA32 (x86 32 bits)"
+			make --quiet -f $MKFILE $target
+			;;
+
+		*)
+			echo "Unknow"
+			echo "***********************************"
+			echo "* ERROR: Unsupported architecture *"
+			echo "***********************************"
+			;;
+	esac
 fi
 
