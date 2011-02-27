@@ -72,7 +72,7 @@ for line in $targets; do
 		$cc -MM ${filename}.${ext} -MT $object $* || exit 1
 
 		# Compile rules
-		echo -e "\t@echo ' + COMPILE ' \$<"
+		echo -e "\t@echo ' + COMPILING ' \$<"
 		echo -e "\t\$(CC) -c \$< -o \$@ \$(${target}-CFLAGS)\n"
 
 	done

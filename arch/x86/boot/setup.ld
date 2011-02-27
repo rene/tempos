@@ -38,11 +38,11 @@ SECTIONS {
 	_KERNEL_PA_START = . ;
 
 	/**
-	 * With paging system, Kernel will be reallocated to (3GB+1MB)
+	 * With paging system, Kernel will be reallocated to 3GB
 	 * of virtual address space.
 	 */
 	. = 0xC0100000;
-	_KERNEL_START = . ; /* (3GB+1MB) */
+	_KERNEL_START = . ; /* 3GB */
 
 	.text _KERNEL_START : AT(ADDR(.text) - 0xC0000000) {
 		*(.text)

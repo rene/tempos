@@ -63,7 +63,8 @@ bootentry:
 	 * Bootloader leave us at 1MB of memory, but Kernel was
 	 * linked at 3GB of virtual address, so we need to ajust
 	 * the base at GDT table to translate the virtual address
-	 * (3GB) to the physical address (1MB).
+	 * (3GB) to the physical address (1MB). This is done by
+	 * using 1GB as segment base for GDT entries.
 	 * After enabling paging system, we can reload GDT with
 	 * base 0, because the address translation will be done
 	 * by paging system.
@@ -112,8 +113,8 @@ boot_gdt_desc:
 
 gdt:
 	.long 0, 0				  		// Null descriptor
-	.quad 0x40CF9A000000FFFF  		// 0x08 - Code selector: Base 0x40000000, Limit 0xFFFF
-	.quad 0x40CF92000000FFFF  		// 0x10 - Data selector: Base 0x40000000, Limit 0xFFFF
+	.quad 0x40CF9A000000FFFF  		// 0x08 - Code selector: Base 0x40000400, Limit 0xFFFF
+	.quad 0x40CF92000000FFFF  		// 0x10 - Data selector: Base 0x40000400, Limit 0xFFFF
 
 /**
  * BSS Section, our stack goes here
