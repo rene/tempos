@@ -41,22 +41,22 @@ SECTIONS {
 	 * With paging system, Kernel will be reallocated to 3GB
 	 * of virtual address space.
 	 */
-	. = 0xC0100000;
+	. = 0xC0000000;
 	_KERNEL_START = . ; /* 3GB */
 
-	.text _KERNEL_START : AT(ADDR(.text) - 0xC0000000) {
+	.text _KERNEL_START : AT(_KERNEL_PA_START) { /*AT(ADDR(.text) - 0xC0000000) {*/
 		*(.text)
 	}
 
-	.rodata ALIGN(0x1000) : AT(ADDR(.rodata) - 0xC0000000) {
+	.rodata ALIGN(0x1000) : AT(ADDR(.rodata) - _KERNEL_START + _KERNEL_PA_START) {
 		*(.rodata)
 	}
 
-	.data ALIGN(0x1000) : AT(ADDR(.data) - 0xC0000000) {
+	.data ALIGN(0x1000) : AT(ADDR(.data) - _KERNEL_START + _KERNEL_PA_START) {
 		*(.data)
 	}
 
-	.bss ALIGN(0x1000) : AT(ADDR(.bss) - 0xC0000000) {
+	.bss ALIGN(0x1000) : AT(ADDR(.bss) - _KERNEL_START + _KERNEL_PA_START) {
 		*(.bss)
 		*(COMMON) /* This puts all uninitialized data here */
 	}

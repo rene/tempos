@@ -102,14 +102,13 @@ void karch(unsigned long magic, unsigned long addr)
 		kinf.cmdline[0] = '\0';
 	}
 
-
 	/**
 	 * Still here we use the GDT trick to translate the virtual
 	 * into physical address, now the first thing to do it's
 	 * enable the paging system and reload de GDT with
 	 * base 0, after that, we can continue to load the kernel
 	 */
-	init_pg(VIRADDR(&kinf));
+	init_pg(&kinf);
 
 	/* Init the Memory Manager */
 	init_mm();

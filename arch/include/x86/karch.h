@@ -29,7 +29,7 @@
 	/* Stack size */
 	#define STACK_SIZE			0x4000 /* 16Kb */
 
-	#define KERNEL_ADDR_OFFSET  0xC0000000
+	#define KERNEL_ADDR_OFFSET  0xBFF00000 /* 3GB-1MB */
 	#define PHYADDR(x)			((x) - KERNEL_ADDR_OFFSET)
 	#define VIRADDR(x)			((x) + KERNEL_ADDR_OFFSET)
 

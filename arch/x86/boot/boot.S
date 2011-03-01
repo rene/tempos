@@ -64,7 +64,7 @@ bootentry:
 	 * linked at 3GB of virtual address, so we need to ajust
 	 * the base at GDT table to translate the virtual address
 	 * (3GB) to the physical address (1MB). This is done by
-	 * using 1GB as segment base for GDT entries.
+	 * using 1GB+1MB as segment base for GDT entries.
 	 * After enabling paging system, we can reload GDT with
 	 * base 0, because the address translation will be done
 	 * by paging system.
@@ -109,12 +109,12 @@ error:
 	.word 0							// 32 bit align boot_gdt_desc
 boot_gdt_desc:
 	.word BOOT_GDT_ENTRIES*8-1		// Size of GDT table
-	.long gdt - KERNEL_ADDR_OFFSET	// Linear address of GDT
+	.long PHYADDR(gdt)				// Linear address of GDT
 
 gdt:
 	.long 0, 0				  		// Null descriptor
-	.quad 0x40CF9A000000FFFF  		// 0x08 - Code selector: Base 0x40000400, Limit 0xFFFF
-	.quad 0x40CF92000000FFFF  		// 0x10 - Data selector: Base 0x40000400, Limit 0xFFFF
+	.quad 0x40CF9A100000FFFF  		// 0x08 - Code selector: Base 0x40100000, Limit 0xFFFF
+	.quad 0x40CF92100000FFFF  		// 0x10 - Data selector: Base 0x40100000, Limit 0xFFFF
 
 /**
  * BSS Section, our stack goes here

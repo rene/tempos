@@ -77,7 +77,6 @@
 #include <x86/karch.h>
 #include <tempos/kernel.h>
 
-
 /* Address used by kmalloc_e */
 static uint32_t free_phy_addr;
 
@@ -107,9 +106,9 @@ void init_pg(karch_t *kinf)
 	uint32_t m_end, index;
 	uint32_t address, *table1, *table2;
 	mmap_tentry *mmap;
-	uint32_t i, j;
+	uint32_t i, j, k, l, oldk, oldl, kpages;
 
-	/* Initialize free_phy_addr. We use "virtual address" because
+	/* Initialize free_phy_addr. We use virtual address because
 	   translation are done by GDT trick */
 	free_phy_addr = (uint32_t)KERNEL_END_ADDR;
 
@@ -126,34 +125,69 @@ void init_pg(karch_t *kinf)
 
 	stack_pages = (uint32_t *)kmalloc_e(stack_sz);
 
-
-	/* Map kernel memory */
-	address        = 0;
-	free_phy_addr -= KERNEL_ADDR_OFFSET;
-	table1         = kerneldir->tables[0];
-	table2         = kerneldir->tables[KERNEL_PDIR_SPACE];
-	i = j = 0;
-	while(address <= free_phy_addr) {
-
+	/* Map First 1MB Virtual = Real address */
+	address = 0;
+	table1  = kerneldir->tables[0];
+	i = 0;
+	while(address < 0x100000) {
 		table1[i] = MAKE_ENTRY(address, (PAGE_WRITABLE | PAGE_PRESENT));
-		table2[i] = table1[i];
 		address  += PAGE_SIZE;
+		i++;
+	}
+
+	/* Map kernel memory
+	 * NOTE: Here we also map the phisical kernel pages 
+	 *       to the same real address, why?
+	 *       Simple, because here we are still using
+	 *       GDT trick, even when we enable the paging system
+	 *       GDT remains configured with 1GB+1MB as segment base,
+	 *       which means that processor will sum 1GB+1MB on
+	 *       each address, so, only after reload of GDT, we can
+	 *       safetly "unmap" the virtual phisical addresses of kernel 
+	 *       pages.
+	 *
+	 *   PS: If you understood this comment, you realy knows what
+	 *       is happening here, so you can go ahead and change
+	 *       the code whatever you want. Otherwise, DO NOT touch
+	 *       in this code! */
+	address = (uint32_t)KERNEL_PA_START;
+	table1  = kerneldir->tables[KERNEL_PDIR_SPACE];
+	i = j = 0;
+
+	oldk = k = (address / (PAGE_SIZE * TABLE_SIZE));
+	oldl = l = (address - (k * (PAGE_SIZE * TABLE_SIZE))) / PAGE_SIZE;
+	kpages = 0;
+	table2 = kerneldir->tables[k];
+
+	while(address < GET_PHYADDR(free_phy_addr)) {
+		
+		table1[i] = MAKE_ENTRY(address, (PAGE_WRITABLE | PAGE_PRESENT));
+		table2[l] = MAKE_ENTRY(address, (PAGE_WRITABLE | PAGE_PRESENT));
+		address  += PAGE_SIZE;
+		kpages++;
+
+		if (l < TABLE_SIZE) {
+			l++;
+		} else {
+			l = 0;
+			k++;
+			table2 = kerneldir->tables[k];
+		}
 
 		if(i < TABLE_SIZE) {
 			i++;
 		} else {
 			i = 0;
 			j++;
-			table1 = kerneldir->tables[0 + j];
-			table2 = kerneldir->tables[KERNEL_PDIR_SPACE + j];
+			table1 = kerneldir->tables[KERNEL_PDIR_SPACE + j];
 		}
 	}
-
+	
 	/** 
 	  * Re-arrange memory map to insert kernel region.
 	  */
 	kpa_start   = (uint32_t)KERNEL_PA_START;
-	kpa_length  = free_phy_addr - kpa_start;
+	kpa_length  = GET_PHYADDR(free_phy_addr) - kpa_start;
 	kernel_size = kpa_length;
 
 	for(i=0; i<kinf->mmap_size; i++) {
@@ -206,6 +240,16 @@ void init_pg(karch_t *kinf)
 
 	/* Reload GDT */
 	setup_GDT();
+
+	/* Unmap the phisical addresses kernel pages from virtual address
+	 * because kernel is mapped to 3GB :)*/
+	for (i = oldk; i < (kpages / TABLE_SIZE); i++) {
+		table2 = kerneldir->tables[i];
+		for (j = oldl; j < TABLE_SIZE; j++) {
+			table2[j] = 0x00000000;
+		}
+		oldl = 0;
+	}
 }
 
 
@@ -302,8 +346,8 @@ void free_page(uint32_t page_e)
  */
 void *kmalloc_e(uint32_t size)
 {
-	uint32_t tmp   = free_phy_addr;
-	free_phy_addr  = PAGE_ALIGN(free_phy_addr + size);
+	unsigned long tmp = free_phy_addr;
+	free_phy_addr = PAGE_ALIGN(free_phy_addr + size);
 	return((void *)tmp);
 }
 
