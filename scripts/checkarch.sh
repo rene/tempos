@@ -21,7 +21,7 @@ MKFILE=$(sed -n "s#^ \\{0,\\}CONFIG_${ARCH}_MAKEFILE \\{0,\\}= \\{0,\\}\\(.*\\)#
 if [ -f "$MKFILE" ]; then
 	case $ARCH in
 		"X86")
-			echo "IA32 (x86 32 bits)"
+			echo "IA-32 (x86 32 bits)"
 			make --quiet -f $MKFILE $target
 			;;
 
