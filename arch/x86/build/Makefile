@@ -14,7 +14,7 @@ CWD := arch/x86/build
 ARCH_CF  := -m32
 ARCH_LF  := -melf_i386
 INCDIRS  := -I$(PWD)/include -I$(PWD)/arch/include
-CFLAGS   := $(INCDIRS) -fno-builtin -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
+CFLAGS   := $(INCDIRS) -fno-builtin -Wall -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
 
 MAKEGEN  := $(CWD)/MakefileX86.gen
 
