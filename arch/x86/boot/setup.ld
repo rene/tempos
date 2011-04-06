@@ -44,7 +44,7 @@ SECTIONS {
 	. = 0xC0000000;
 	_KERNEL_START = . ; /* 3GB */
 
-	.text _KERNEL_START : AT(_KERNEL_PA_START) { /*AT(ADDR(.text) - 0xC0000000) {*/
+	.text _KERNEL_START : AT(_KERNEL_PA_START) {
 		*(.text)
 	}
 

@@ -28,7 +28,6 @@
 #include <tempos/jiffies.h>
 #include <tempos/delay.h>
 /*#include <tempos/fs/bcache.h>*/
-#include <tempos/fs/dvhash.h>
 #include <drv/ata_generic.h>
 #include <drv/i8042.h>
 #include <x86/irq.h>
@@ -472,10 +471,10 @@ static void teste(void)
 
 void teste(void)
 {
-	dvhash_t *hashtable;
+	//dvhash_t *hashtable;
 
-	if (!initialize_dvhash(&hashtable, 0, 0, 20, 300) )
-		kprintf("ERROR\n");
+	//if (!initialize_dvhash(&hashtable, 0, 0, 20, 300) )
+	//	kprintf("ERROR\n");
 	/*
 	int i;
 	uint16_t data;

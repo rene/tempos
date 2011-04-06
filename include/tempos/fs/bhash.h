@@ -2,7 +2,7 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: dvhash.h
+ * File: bhash.h
  *
  * This file is part of TempOS.
  *
@@ -21,32 +21,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef DVHASH_H
+#ifndef BHASH_H
 
-	#define DVHASH_H
+	#define BHASH_H
 
 	#include <linkedl.h>
 	#include <tempos/mm.h>
 	#include <unistd.h>
 
-	#define DEF_V1SIZE 4
-	#define DEF_V2SIZE 4
-	#define MIN_V1SIZE 1
-	#define MIN_V2SIZE 1
-
-	struct _dvhash_t {
-		c_llist ***vector1;
-		uint16_t major;
-		uint64_t tblocks;
-		uint32_t v1_size;
-		uint32_t v2_size;
+	/* Block buffer: possible status */
+	#define BUFF_ST_LOCKED  0x01 /* Buffer is locked (busy) */
+	#define BUFF_ST_VALID   0x02 /* The buffer contains valid data */
+	#define BUFF_ST_FLUSH   0x04 /* Must be flushed to device */
+	#define BUFF_ST_INUSE   0x08 /* Kernel is reading or writing to device */
+	#define BUFF_ST_WAITING 0x0F /* A process is currently waiting for the buffer to become free */
+	
+	/* Buffer structure */
+	struct _buffer_header_t {
+		uint64_t block_num;
+		int status;
+		char *data;
 	};
 
-	typedef struct _dvhash_t dvhash_t;
+	struct _hash_queue_t {
+		uint64_t size;
+		int device;
+		c_llist *blocks;
+	};
 
 
-	int initialize_dvhash(dvhash_t **dvect, uint32_t v1_size, uint32_t v2_size,
-						uint16_t major, uint64_t totalblocks);
-
-#endif /* DVHASH_H */
+#endif /* BHASH_H */
 

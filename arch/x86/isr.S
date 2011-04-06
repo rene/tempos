@@ -108,12 +108,11 @@ error_code:
 	pushl %eax /* Error code */
 
 	/* Move to kernel mode */
-
 	movw $KERNEL_DS, %dx
 	movw %dx, %ds
 	movw %dx, %fs
-	//movw %dx, %gs
-	//movw %dx, %ss
+	movw %dx, %gs
+	movw %dx, %ss
 	movw %dx, %es
 
 	/* Execute the ISR */
