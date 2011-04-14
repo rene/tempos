@@ -127,7 +127,7 @@ void setup_IDT(void)
 	}
 
 	/* IRQs */
-	for(pos=32; pos<=46; pos++) {
+	for(pos=32; pos<=47; pos++) {
 		idtentry = (idt_tpintdesc_t *)&idt_table[pos];
 		IDT_SET_OFFSET(idtentry, nullisr);
 		idtentry->seg_selector   = KERNEL_CS;

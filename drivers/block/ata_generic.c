@@ -28,11 +28,14 @@
 #include <tempos/jiffies.h>
 #include <tempos/delay.h>
 /*#include <tempos/fs/bcache.h>*/
+#include <tempos/fs/devices.h>
 #include <drv/ata_generic.h>
 #include <drv/i8042.h>
 #include <x86/irq.h>
 #include <x86/io.h>
 
+#define SECTOR_SIZE      512
+#define SECTOR_HALF_SIZE (SECTOR_SIZE / 2)
 
 #define TIMEOUT		(jiffies + (HZ / 40)) /* timeout in 40ms */
 
@@ -69,11 +72,14 @@
 #define CMD_READ_SECTORS_EXT	0x24
 #define CMD_WRITE_SECTORS		0x30
 #define CMD_WRITE_SECTORS_EXT	0x34
+#define CMD_CACHE_FLUSH			0xE7
 
 
 /* ATA devices information */
-ata_dev_info ata_devices[4];
+static ata_dev_info ata_devices[4];
 
+/* Linked list to blocks request */
+//static 
 
 /* Default I/O ports for ATA controller */
 static uint16_t pio_ports[2][9] = {
@@ -96,7 +102,11 @@ static void ata_handler1(int id, pt_regs *regs);
 
 static void ata_handler2(int id, pt_regs *regs);
 
-static void teste(void);
+int read_hd_sector(int major, int device, uint64_t addr);
+int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector);
+
+uint16_t setor[256];
+char read_done;
 
 /**
  * init_ata_generic
@@ -213,7 +223,7 @@ void init_ata_generic(void)
 				/* Show information */
 				kprintf("       Model: %s\n", ata_devices[i].model);
 			} else {
-				kprintf("Error on get device information\n");
+				kprintf(KERN_ERROR "Error on get device information\n");
 				continue;
 			}
 		}
@@ -229,7 +239,10 @@ void init_ata_generic(void)
 		kprintf(KERN_ERROR "Error on register IRQ\n");
 	}
 
-	teste();
+	read_done = 0;
+	read_hd_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, 0);
+	while(!read_done);
+	write_hd_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, 1, setor);
 }
 
 
@@ -272,17 +285,19 @@ static void set_device(uchar8_t bus, uchar8_t device)
 	switch(bus) {
 		case PRI_BUS:
 			if(device == MASTER_DEV) {
-				outb(0x00, pio_ports[PRI_BUS][REG_DC]);
+				outb(0x40, pio_ports[PRI_BUS][REG_DC]);
 			} else if(device == SLAVE_DEV) {
-				outb(0x10, pio_ports[PRI_BUS][REG_DC]);
+				outb(0x50, pio_ports[PRI_BUS][REG_DC]);
 			}
+		break;
 
 		case SEC_BUS:
 			if(device == MASTER_DEV) {
-				outb(0x00, pio_ports[SEC_BUS][REG_DC]);
+				outb(0x40, pio_ports[SEC_BUS][REG_DC]);
 			} else if(device == SLAVE_DEV) {
-				outb(0x10, pio_ports[SEC_BUS][REG_DC]);
+				outb(0x50, pio_ports[SEC_BUS][REG_DC]);
 			}
+		break;
 
 	}
 	udelay(400);
@@ -439,63 +454,69 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 	return(1);
 }
 
-/*
-static void teste(void)
+
+/**
+ * read a sector from device
+ *
+ * major: Bus - Primary or Secondary IDE
+ * device: Master or Slave
+ * addr: LBA 48bit sector address
+ *
+ * This function will just request to read the sector.
+ * ATA controller will generate a interrupt when it's done.
+ */
+int read_hd_sector(int major, int device, uint64_t addr)
 {
-	int i;
-	int16_t data;
-	uint64_t addr = 0;
-	uchar8_t secs = 1;
-	uchar8_t bus  = PRI_BUS;
 	uchar8_t dc;
+	uchar8_t bus, dev;
 
-	set_device(bus, MASTER_DEV);
+	if (major == DEVMAJOR_ATA_PRI) {
+		bus = PRI_BUS;
 
-	outb(secs, pio_ports[bus][REG_SC]);
-	outb(LBA_BYTE(addr, 1), pio_ports[bus][REG_SADDR1]);
-	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR2]);
-	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR3]);
+		switch(device) {
+			case DEVNUM_HDA:
+				dev = MASTER_DEV;
+				break;
 
-	dc  = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
-	outb(dc | LBA_UHIGH(addr), pio_ports[bus][REG_DC]);
+			case DEVNUM_HDB:
+				dev = SLAVE_DEV;
+				break;
 
-	send_cmd(bus, CMD_READ_SECTORS);
-	wait_bus(bus);
+			default:
+				return -1;
+		}
+	} else if(major == DEVMAJOR_ATA_SEC) {
+		bus = SEC_BUS;
 
-	if((inb(pio_ports[bus][REG_ASTATUS]) & DF_BIT) != 0 ||
-			inb(pio_ports[bus][REG_FERR] & ABRT_BIT) != 0) {
-		kprintf("Read error\n");
+		switch(device) {
+			case DEVNUM_HDC:
+				dev = MASTER_DEV;
+				break;
+
+			case DEVNUM_HDD:
+				dev = SLAVE_DEV;
+				break;
+
+			default:
+				return -1;
+		}
+	} else {
+		return -1;
 	}
-}*/
 
+	set_device(bus, dev);
 
-void teste(void)
-{
-	//dvhash_t *hashtable;
-
-	//if (!initialize_dvhash(&hashtable, 0, 0, 20, 300) )
-	//	kprintf("ERROR\n");
-	/*
-	int i;
-	uint16_t data;
-	uint64_t addr = 0;
-	uint16_t secs = 1;
-	uchar8_t bus  = PRI_BUS;
-	uchar8_t dc;
-
-	set_device(bus, MASTER_DEV);
-
-	outb(((secs >> 8) & 0xFF), pio_ports[bus][REG_SC]);
+	outb(0x00, pio_ports[bus][REG_SC]);
 	outb(LBA_BYTE(addr, 4), pio_ports[bus][REG_SADDR1]);
 	outb(LBA_BYTE(addr, 5), pio_ports[bus][REG_SADDR2]);
 	outb(LBA_BYTE(addr, 6), pio_ports[bus][REG_SADDR3]);
 
-	outb((secs & 0xFF), pio_ports[bus][REG_SC]);
+	outb(0x01, pio_ports[bus][REG_SC]);
 	outb(LBA_BYTE(addr, 0), pio_ports[bus][REG_SADDR1]);
 	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR2]);
 	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR3]);
 
-	dc  = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
+	dc = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
 	outb(dc, pio_ports[bus][REG_DC]);
 
 	send_cmd(bus, CMD_READ_SECTORS_EXT);
@@ -503,8 +524,96 @@ void teste(void)
 
 	if((inb(pio_ports[bus][REG_ASTATUS]) & DF_BIT) != 0 ||
 			inb(pio_ports[bus][REG_FERR] & ABRT_BIT) != 0) {
-		kprintf("Read error\n");
-	}*/
+		kprintf(KERN_ERROR "ATA_DRIVER ERROR: Could not read sectors\n");
+	}
+
+	return 0;
+}
+
+
+/**
+ * write sectors to device
+ *
+ * major: Bus - Primary or Secondary IDE
+ * device: Master or Slave
+ * addr: LBA 48bit sector address
+ *
+ * This function write a sector to device.
+ */
+int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector)
+{
+	int i;
+	uchar8_t dc;
+	uchar8_t bus, dev;
+
+	if (major == DEVMAJOR_ATA_PRI) {
+		bus = PRI_BUS;
+
+		switch(device) {
+			case DEVNUM_HDA:
+				dev = MASTER_DEV;
+				break;
+
+			case DEVNUM_HDB:
+				dev = SLAVE_DEV;
+				break;
+
+			default:
+				return -1;
+		}
+	} else if(major == DEVMAJOR_ATA_SEC) {
+		bus = SEC_BUS;
+
+		switch(device) {
+			case DEVNUM_HDC:
+				dev = MASTER_DEV;
+				break;
+
+			case DEVNUM_HDD:
+				dev = SLAVE_DEV;
+				break;
+
+			default:
+				return -1;
+		}
+	} else {
+		return -1;
+	}
+
+	set_device(bus, dev);
+
+	outb(0x00, pio_ports[bus][REG_SC]);
+	outb(LBA_BYTE(addr, 4), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(addr, 5), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 6), pio_ports[bus][REG_SADDR3]);
+
+	outb(0x01, pio_ports[bus][REG_SC]);
+	outb(LBA_BYTE(addr, 0), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR3]);
+
+	dc = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
+	outb(dc, pio_ports[bus][REG_DC]);
+
+	send_cmd(bus, CMD_WRITE_SECTORS_EXT);
+	wait_bus(bus);
+
+	if((inb(pio_ports[bus][REG_ASTATUS]) & DF_BIT) != 0 ||
+			inb(pio_ports[bus][REG_FERR] & ABRT_BIT) != 0) {
+		kprintf(KERN_ERROR "ATA_DRIVER ERROR: Could not write sectors\n");
+		return -1;
+	}
+	
+	for(i=0; i<SECTOR_HALF_SIZE; i++) {
+		wait_bus(SEC_BUS);
+		kprintf("%x %x ", (setor[i] & 0xFF), (setor[i] >> 8));
+		outw(setor[i], pio_ports[SEC_BUS][REG_DATA]);
+		udelay(1);
+	}
+	send_cmd(SEC_BUS, CMD_CACHE_FLUSH);
+	wait_bus(SEC_BUS);
+
+	return 0;
 }
 
 
@@ -514,14 +623,30 @@ static void ata_handler1(int id, pt_regs *regs)
 
 	kprintf("PRIM: %d -- %d\n", id, regs->ds);
 
-	for(i=1; i<20; i++) {
+	for(i=0; i<SECTOR_HALF_SIZE; i++) {
 		wait_bus(PRI_BUS);
 		data = inw(pio_ports[PRI_BUS][REG_DATA]);
-		kprintf("%c %c ", (char)(data & 0xFF), (char)(data >> 8));
+		//kprintf("%x %x ", (data & 0xFF), (data >> 8));
+		setor[i] = data;
 	}
+
+	read_done = 1;
 }
+
 static void ata_handler2(int id, pt_regs *regs)
 {
+	//uint16_t i, p;
+
 	kprintf("SEC: %d -- %d\n", id, regs->ds);
+
+	/*for(i=1, p=1; i<=256; i++, p+=2) {
+		wait_bus(SEC_BUS);
+		kprintf("%x %x ", setor[p], setor[p+1]);
+		outw(((setor[p] << 8) & setor[p+1]), pio_ports[SEC_BUS][REG_DATA]);
+		udelay(1);
+	}
+
+	send_cmd(SEC_BUS, CMD_CACHE_FLUSH);
+	wait_bus(SEC_BUS);*/
 }
 

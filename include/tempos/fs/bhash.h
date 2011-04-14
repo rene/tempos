@@ -33,7 +33,7 @@
 	#define BUFF_ST_LOCKED  0x01 /* Buffer is locked (busy) */
 	#define BUFF_ST_VALID   0x02 /* The buffer contains valid data */
 	#define BUFF_ST_FLUSH   0x04 /* Must be flushed to device */
-	#define BUFF_ST_INUSE   0x08 /* Kernel is reading or writing to device */
+	#define BUFF_ST_BUSY    0x08 /* Kernel is reading or writing to device */
 	#define BUFF_ST_WAITING 0x0F /* A process is currently waiting for the buffer to become free */
 	
 	/* Buffer structure */
@@ -49,6 +49,7 @@
 		c_llist *blocks;
 	};
 
+	//typedef struct buffer
 
 #endif /* BHASH_H */
 
