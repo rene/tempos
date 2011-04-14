@@ -239,10 +239,10 @@ void init_ata_generic(void)
 		kprintf(KERN_ERROR "Error on register IRQ\n");
 	}
 
-	read_done = 0;
+	/*read_done = 0;
 	read_hd_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, 0);
 	while(!read_done);
-	write_hd_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, 1, setor);
+	write_hd_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, 1, setor);*/
 }
 
 
