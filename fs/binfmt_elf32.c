@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <tempos/fs/elf32.h>
+#include <fs/elf32.h>
 
 /* TODO */
 

@@ -1,9 +1,8 @@
 /**
- * Copyright (C) 2011 Renê de Souza Pinto
+ * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: bhash.c
- * Desc: Implement the buffer hash queue for device blocks
+ * File: bhash.h
  *
  * This file is part of TempOS.
  *
@@ -22,15 +21,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <fs/bhash.h>
+#ifndef BHASH_H
 
+	#define BHASH_H
 
-/**
- * Function to init the hash queue. Size will be:
- * LAST_DEVICE_BLOC % 4
- */
-int init_hash_queue(int device, uint64_t size)
-{
-	return(-1);
-}
+	#include <linkedl.h>
+	#include <tempos/mm.h>
+	#include <unistd.h>
+
+	/* Block buffer: possible status */
+	#define BUFF_ST_LOCKED  0x01 /* Buffer is locked (busy) */
+	#define BUFF_ST_VALID   0x02 /* The buffer contains valid data */
+	#define BUFF_ST_FLUSH   0x04 /* Must be flushed to device */
+	#define BUFF_ST_BUSY    0x08 /* Kernel is reading or writing to device */
+	#define BUFF_ST_WAITING 0x0F /* A process is currently waiting for the buffer to become free */
+	
+	/* Buffer structure */
+	struct _buffer_header_t {
+		uint64_t block_num;
+		int status;
+		char *data;
+	};
+
+	struct _hash_queue_t {
+		uint64_t size;
+		int device;
+		c_llist *blocks;
+	};
+
+	//typedef struct buffer
+
+#endif /* BHASH_H */
 

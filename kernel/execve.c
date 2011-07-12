@@ -28,7 +28,7 @@
 int sys_execve(const char *filename, char *const argv[], char *const envp[])
 {
 
-	kprintf("%s -- %s -- %s\n", filename, argv[0], envp[0]);
+	kprintf(KERN_DEBUG "%s -- %s -- %s\n", filename, argv[0], envp[0]);
 
 	return(-1);
 }

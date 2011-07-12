@@ -37,7 +37,7 @@ ssize_t sys_write(int fd, const void *buf, size_t count)
 	}
 
 	if(fd == 0) {
-		kprintf("SYSCALL WRITE: %s\n", buffer);
+		kprintf(KERN_DEBUG "SYSCALL WRITE: %s\n", buffer);
 	}
 
 	return(10);

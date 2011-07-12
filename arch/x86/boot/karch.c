@@ -127,7 +127,7 @@ void karch(unsigned long magic, unsigned long addr)
 	setattr(LIGHT_GRAY);
 
 	/* This is the first message from kernel =:) */
-	kprintf("TempOS\n");
+	kprintf(KERN_INFO "TempOS\n");
 
 	for(i=0; i<kinf.mmap_size; i++) {
 		type = kinf.mmap_table[i].type - 1;
@@ -135,13 +135,13 @@ void karch(unsigned long magic, unsigned long addr)
 		if(type > 4)
 			type = 4;
 
-		kprintf("%0.9x:%0.9x - %s\n", kinf.mmap_table[i].base_addr_low,
+		kprintf(KERN_INFO "%0.9x:%0.9x - %s\n", kinf.mmap_table[i].base_addr_low,
 					kinf.mmap_table[i].base_addr_low +
 					kinf.mmap_table[i].length_low,
 					mtypes[type]);
 	}
 
-	kprintf(">> First stage done.\n");
+	kprintf(KERN_INFO ">> First stage done.\n");
 
 	/* Call the TempOS kernel */
 	tempos_main(kinf);

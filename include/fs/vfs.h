@@ -2,8 +2,7 @@
  * Copyright (C) 2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: bhash.c
- * Desc: Implement the buffer hash queue for device blocks
+ * File: vfs.h
  *
  * This file is part of TempOS.
  *
@@ -22,15 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <fs/bhash.h>
+#ifndef VFS_H
 
+	#define VFS_H
 
-/**
- * Function to init the hash queue. Size will be:
- * LAST_DEVICE_BLOC % 4
- */
-int init_hash_queue(int device, uint64_t size)
-{
-	return(-1);
-}
+	/* Register all know File System types */
+	void register_all_fs_types(void);
+
+#endif /* VFS_H */
 

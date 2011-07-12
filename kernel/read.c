@@ -27,7 +27,7 @@
 
 ssize_t sys_read(int fd, void *buf, size_t count)
 {
-	kprintf("read: %d -- %s -- %d", fd, buf, count);
+	kprintf(KERN_DEBUG "read: %d -- %s -- %d", fd, buf, count);
 
 	return(-1);
 }

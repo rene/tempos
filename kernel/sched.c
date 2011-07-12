@@ -43,7 +43,7 @@ void init_scheduler(void)
 {
 	/* Register alarm to do task switch */
 	if( !new_alarm((jiffies + scheduler_quantum), schedule, 0) ) {
-		panic("Could not install scheduler alarm.");
+		panic(KERN_CRIT "Could not install scheduler alarm.");
 	}
 }
 
@@ -56,13 +56,11 @@ void init_scheduler(void)
 /*int pg = 0;*/
 void schedule(int p)
 {
-
-
 	/* Register alarm again */
 	if( !new_alarm((jiffies + scheduler_quantum), schedule, p) ) {
-		panic("Could not install scheduler alarm.");
+		panic(KERN_CRIT "Could not install scheduler alarm.");
 	/*} else {
-		kprintf("HELLO! %d\n", pg++);*/
+		kprintf(KERN_CRITIC "HELLO! %d\n", pg++);*/
 	}
 }
 

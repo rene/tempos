@@ -44,14 +44,14 @@ void calibrate_delay(void)
 
 	/* TODO: */
 
-	kprintf("Calibrating delay...");
+	kprintf(KERN_INFO "Calibrating delay...");
 	timeout = jiffies + (HZ / 1000);
 	while( !time_after(jiffies, timeout) )
 			bogomips++;
 
 	bogomips = bogomips / 1000; /* microsecond precision */
 
-	kprintf("%d BogoMIPS\n", bogomips);
+	kprintf(KERN_INFO "%d BogoMIPS\n", bogomips);
 }
 
 

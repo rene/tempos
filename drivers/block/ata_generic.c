@@ -28,7 +28,7 @@
 #include <tempos/jiffies.h>
 #include <tempos/delay.h>
 /*#include <tempos/fs/bcache.h>*/
-#include <tempos/fs/devices.h>
+#include <fs/devices.h>
 #include <drv/ata_generic.h>
 #include <drv/i8042.h>
 #include <arch/irq.h>
@@ -166,7 +166,7 @@ void init_ata_generic(void)
 		}*/
 
 		if(saddr2 == 0x14 && saddr3 == 0xEB) {
-			kprintf(" hd%c: CD/DVD-ROM detected.\n", drvl);
+			kprintf(KERN_INFO " hd%c: CD/DVD-ROM detected.\n", drvl);
 		} else {
 			/* Identify */
 			send_cmd(bus, CMD_IDENTIFY);
@@ -175,7 +175,7 @@ void init_ata_generic(void)
 			if( (pio_ports[bus][REG_ASTATUS] & 0x01) != 0 ||
 				(pio_ports[bus][REG_FERR] & ABRT_BIT) != 0 ) {
 
-					kprintf(" hd%c: Device not found.\n", drvl);
+					kprintf(KERN_INFO " hd%c: Device not found.\n", drvl);
 					continue;
 			}
 
@@ -183,20 +183,20 @@ void init_ata_generic(void)
 			if( get_dev_info(bus, &ata_devices[i]) ) {
 
 				if( (ata_devices[i].type & ATA_DEVICE) != 0 ) {
-					kprintf(" hd%c: Device not found.\n", drvl);
+					kprintf(KERN_INFO " hd%c: Device not found.\n", drvl);
 					continue;
 				}
 
 				/* Check for LBA */
 				if( (ata_devices[i].capabilities[0] & SUPPORT_LBA) == 0 ) {
-					kprintf(" hd%c: Device not found.\n", drvl);
+					kprintf(KERN_INFO " hd%c: Device not found.\n", drvl);
 					continue;
 				} else {
-					kprintf(" hd%c: Device found: ", drvl);
+					kprintf(KERN_INFO " hd%c: Device found: ", drvl);
 
 					/* Check for LBA48 */
 					if( (ata_devices[i].cmds_supported[1] & SUPPORT_LBA48) != 0 ) {
-						kprintf("LBA48");
+						kprintf(KERN_INFO "LBA48");
 						ata_devices[i].flags |= LBA48;
 
 						size  = ata_devices[i].max_lba48[0];
@@ -204,7 +204,7 @@ void init_ata_generic(void)
 						size |= ((uint64_t)ata_devices[i].max_lba48[2] << 32);
 						size |= ((uint64_t)ata_devices[i].max_lba48[3] << 48);
 					} else {
-						kprintf("LBA");
+						kprintf(KERN_INFO "LBA");
 
 						size  = ata_devices[i].max_secs[0];
 						size |= (ata_devices[i].max_secs[1] << 16);
@@ -214,16 +214,16 @@ void init_ata_generic(void)
 
 				/* Check for DMA */
 				if( (ata_devices[i].capabilities[0] & SUPPORT_DMA) != 0 ) {
-					kprintf(", DMA");
+					kprintf(KERN_INFO ", DMA");
 				}
-				kprintf(", %ld sectors\n", ata_devices[i].sectors);
+				kprintf(KERN_INFO ", %ld sectors\n", ata_devices[i].sectors);
 
 				ata_devices[i].flags |= PRESENT;
 
 				/* Show information */
-				kprintf("       Model: %s\n", ata_devices[i].model);
+				kprintf(KERN_INFO "       Model: %s\n", ata_devices[i].model);
 			} else {
-				kprintf(KERN_ERROR "Error on get device information\n");
+				kprintf(KERN_WARNING "Error on get device information\n");
 				continue;
 			}
 		}

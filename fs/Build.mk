@@ -5,5 +5,5 @@
 # TBS - Build configuration file
 #
 
-obj-y += binfmt_elf32.o bhash.o
+obj-y += binfmt_elf32.o bhash.o vfs.o
 

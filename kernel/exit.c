@@ -28,7 +28,7 @@
 
 int sys_exit(int status)
 {
-	kprintf("sys_exit %d\n", status);
+	kprintf(KERN_DEBUG "sys_exit %d\n", status);
 
 	return(-ENOSYS);
 }

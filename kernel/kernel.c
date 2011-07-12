@@ -30,6 +30,7 @@
 #include <tempos/sched.h>
 #include <drv/i8042.h>
 #include <drv/ata_generic.h>
+#include <fs/vfs.h>
 #include <string.h>
 #include <stdlib.h>
 #include <linkedl.h>
@@ -65,9 +66,12 @@ void tempos_main(karch_t kinf)
 	/* Init scheduler */
 	init_scheduler();
 
+	/* Init Virtual File System */
+	register_all_fs_types();
+
 	/* Test */
-	kprintf("We are in TempOS kernel!\n");
-	kprintf("Command line passed: %s\n", kinfo.cmdline);
+	kprintf(KERN_INFO "We are in TempOS kernel!\n");
+	kprintf(KERN_INFO "Command line passed: %s\n", kinfo.cmdline);
 
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
@@ -77,13 +81,13 @@ void tempos_main(karch_t kinf)
 				 "movl $0,  %%edx  \n" // fd
 				 "int $0x85" : : "g" (hello) );
 
-	kprintf("\nI'am back from syscall!!\n");*/
+	kprintf(KERN_INFO "\nI'am back from syscall!!\n");*/
 
-	kprintf("1 ");
+	kprintf(KERN_INFO "1 ");
 	mdelay(1000);
-	kprintf("2 ");
+	kprintf(KERN_INFO "2 ");
 	mdelay(1000);
-	kprintf("3 ");
+	kprintf(KERN_INFO "3 ");
 
 	for(;;);
 }

@@ -28,8 +28,7 @@
 
 void ex_div()
 {
-	kprintf("Divisao por 0 detectada!\n");
-	while(1);
+	panic("Division by ZERO! :(!\n");
 }
 
 
