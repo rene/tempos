@@ -31,8 +31,8 @@
 #include <tempos/fs/devices.h>
 #include <drv/ata_generic.h>
 #include <drv/i8042.h>
-#include <x86/irq.h>
-#include <x86/io.h>
+#include <arch/irq.h>
+#include <arch/io.h>
 
 #define SECTOR_SIZE      512
 #define SECTOR_HALF_SIZE (SECTOR_SIZE / 2)

@@ -26,8 +26,8 @@
 #include <tempos/timer.h>
 #include <tempos/jiffies.h>
 #include <drv/i8042.h>
-#include <x86/irq.h>
-#include <x86/io.h>
+#include <arch/irq.h>
+#include <arch/io.h>
 
 
 #define TIMEOUT		(jiffies + (HZ / 40)) /* timeout in 40ms */

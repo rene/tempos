@@ -26,7 +26,7 @@
 #include <tempos/jiffies.h>
 #include <linkedl.h>
 #include <unistd.h>
-#include <x86/irq.h>
+#include <arch/irq.h>
 
 
 /* Queue of alarms */
