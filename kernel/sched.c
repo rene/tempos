@@ -31,7 +31,7 @@
  * TempOS scheduler uses a round robin algorithm.
  * Yes, I know you are very surprised :-o
  */
-uint32_t scheduler_quantum = HZ; /* 1 second << FOR TEST */
+uint32_t scheduler_quantum = HZ; /* 1 second << JUST FOR TEST */
 
 
 /**
@@ -53,14 +53,13 @@ void init_scheduler(void)
  *
  * Do a task switch
  */
-/*int pg = 0;*/
 void schedule(int p)
 {
 	/* Register alarm again */
 	if( !new_alarm((jiffies + scheduler_quantum), schedule, p) ) {
 		panic(KERN_CRIT "Could not install scheduler alarm.");
-	/*} else {
-		kprintf(KERN_CRITIC "HELLO! %d\n", pg++);*/
 	}
+
+	/* do schedule */
 }
 

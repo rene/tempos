@@ -26,11 +26,14 @@
 	#define TIMER_H
 
 	#include <unistd.h>
+	#include <config.h>
 
 	/* System timer (Hz) */
-	#define HZ	1000
-
-	#define TIMER_IRQ	0
+	#ifdef CONFIG_ARCH_X86
+		#include <x86/i82C54.h>
+		
+		#define TIMER_IRQ	0
+	#endif
 
 
 	/* Alarm struct */

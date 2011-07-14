@@ -35,9 +35,9 @@ void init_PIT(void)
 {
 	outb((CH0_MASK | AM_LOW_HIGH | MODE_2 | DATA_BIN), CM_PORT);
 	pit_delay();
-	outb((uchar8_t)(SYSTEM_TIMER & 0xFF), CH0_PORT);
+	outb((uchar8_t)(PIT_DIVIDER & 0xFF), CH0_PORT);
 	pit_delay();
-	outb((uchar8_t)((SYSTEM_TIMER >> 0x08) & 0xFF), CH0_PORT);
+	outb((uchar8_t)((PIT_DIVIDER >> 0x08) & 0xFF), CH0_PORT);
 	pit_delay();
 }
 

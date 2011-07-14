@@ -33,8 +33,8 @@
 llist *alarm_queue;
 
 
-static void timer_handler(void);//int id, pt_regs *regs);
-static void update_alarms(void);//int id, pt_regs *regs);
+static void timer_handler(void);
+static void update_alarms(void);
 
 
 /**
@@ -72,8 +72,7 @@ void init_timer(void)
 static void timer_handler(void)
 {
 	jiffies++;
-
-	update_alarms();//id, regs);
+	update_alarms();
 }
 
 

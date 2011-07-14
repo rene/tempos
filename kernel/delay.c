@@ -42,8 +42,6 @@ void calibrate_delay(void)
 	uint32_t timeout;
 	bogomips = 0;
 
-	/* TODO: */
-
 	kprintf(KERN_INFO "Calibrating delay...");
 	timeout = jiffies + (HZ / 1000);
 	while( !time_after(jiffies, timeout) )

@@ -87,9 +87,9 @@ test:
 #
 clean: $(MAKEGEN)
 	@for obj in $(obj-x86asm) $(obj-y); do \
-		[ -f $$obj ] && (rm -f $$obj && echo " - REMOVE $$obj") || echo " ! $$obj not found."; \
+		[ -f $$obj ] && (rm -f $$obj && echo " - REMOVING $$obj") || echo " ! $$obj not found."; \
 	done
-	@[ -f $(MAKEGEN) ] && (rm -f $(MAKEGEN) && echo " - REMOVE $(MAKEGEN)") || echo " ! $(MAKEGEN) not found."
-	@[ -f $(kimage) ] && (rm -f $(kimage) && echo " - REMOVE $(kimage)") || echo " ! $(kimage) not found."
-	@[ -f $(fimage) ] && (rm -f $(fimage) && echo " - REMOVE $(fimage)") || echo " ! $(fimage) not found."
+	@[ -f $(MAKEGEN) ] && (rm -f $(MAKEGEN) && echo " - REMOVING $(MAKEGEN)") || echo " ! $(MAKEGEN) not found."
+	@[ -f $(kimage) ] && (rm -f $(kimage) && echo " - REMOVING $(kimage)") || echo " ! $(kimage) not found."
+	@[ -f $(fimage) ] && (rm -f $(fimage) && echo " - REMOVING $(fimage)") || echo " ! $(fimage) not found."
 
