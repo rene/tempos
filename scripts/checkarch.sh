@@ -16,7 +16,7 @@ else
 fi
 
 ARCH=$(sed -n "s/^ \\{0,\\}CONFIG_ARCH_\\(\\w\\+\\).*/\1/gp" $conffile)
-MKFILE=$(sed -n "s#^ \\{0,\\}CONFIG_${ARCH}_MAKEFILE \\{0,\\}= \\{0,\\}\\(.*\\)#\1#gp" $conffile)
+MKFILE=$(sed -n "s#^ \\{0,\\}CONFIG_${ARCH}_MAKEFILE \\{0,\\}= \\{0,\\}\"\\(.*\\)\"#\1#gp" $conffile)
 
 if [ -f "$MKFILE" ]; then
 	case $ARCH in

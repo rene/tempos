@@ -27,11 +27,11 @@
 
 	#include <unistd.h>
 	#include <tempos/timer.h>
+	#include <config.h>
 
 	/* i82C54 Frequency */
-	#define HZ				100
 	#define PIT82C54_HZ		1193182L
-	#define PIT_DIVIDER		(PIT82C54_HZ / HZ)
+	#define PIT_DIVIDER		(PIT82C54_HZ / CONFIG_SYSTEM_HZ)
 
 	/* I/O ports used by PIT */
 	#define CH0_PORT	0x40

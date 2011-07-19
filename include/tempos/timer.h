@@ -35,6 +35,11 @@
 		#define TIMER_IRQ	0
 	#endif
 
+	#ifdef CONFIG_SYSTEM_HZ
+		#define HZ CONFIG_SYSTEM_HZ
+	#else
+		#error "CONFIG_SYSTEM_HZ it's not defined. It should be defined at configuration file."
+	#endif
 
 	/* Alarm struct */
 	struct _alarm_t {
