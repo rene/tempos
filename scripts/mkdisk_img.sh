@@ -69,7 +69,7 @@ color white/blue light-green/black
 
 title   TempOS
 root    (fd0)
-kernel  /boot/tempos.elf
+kernel  /boot/tempos.elf root=3:1
 EOF
 
 echo "(fd0)		$IMGFILE" > $DEVICEMAP
