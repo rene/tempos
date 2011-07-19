@@ -29,8 +29,8 @@
 	#include <tempos/timer.h>
 
 	/* i82C54 Frequency */
-	#define HZ				500
-	#define PIT82C54_HZ		1193182
+	#define HZ				100
+	#define PIT82C54_HZ		1193182L
 	#define PIT_DIVIDER		(PIT82C54_HZ / HZ)
 
 	/* I/O ports used by PIT */

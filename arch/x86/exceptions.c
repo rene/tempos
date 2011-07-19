@@ -28,98 +28,116 @@
 
 void ex_div()
 {
-	panic("Division by ZERO! :(!\n");
+	panic("EXCEP: Division by ZERO! :(!\n");
 }
 
 
 void ex_debug()
 {
+	kprintf("EXCEP: DEBUG\n");
 }
 
 
 void ex_nmi()
 {
+	kprintf("EXCEP: NMI\n");
 }
 
 
 void ex_break()
 {
+	kprintf("EXCEP: BRK\n");
 }
 
 
 void ex_overflow()
 {
+	kprintf("EXCEP: OVERFLOW\n");
 }
 
 
 void ex_bounds()
 {
+	kprintf("EXCEP: BOUNDS\n");
 }
 
 
 void ex_inv_op()
 {
+	kprintf("EXCEP: INVALID OP\n");
 }
 
 
 void ex_device()
 {
+	kprintf("EXCEP: DEVICE\n");
 }
 
 
 void ex_dfault()
 {
+	kprintf("EXCEP: DEFAULT\n");
 }
 
 
 void ex_coproc()
 {
+	kprintf("EXCEP: COPROC\n");
 }
 
 
 void ex_inv_tss()
 {
+	kprintf("EXCEP: INVALID TSS\n");
 }
 
 
 void ex_segnp()
 {
+	kprintf("EXCEP: SEGNP\n");
 }
 
 
 void ex_stack()
 {
+	kprintf("EXCEP: STACK\n");
 }
 
 
 void ex_gp()
 {
+	kprintf("EXCEP: GP\n");
 }
 
 
 /* Page fault - This fault is handle by mm */
 void ex_pfault()
 {
+	kprintf("EXCEP: PAGE FAULT\n");
 }
 
 
 void ex_floatp()
 {
+	kprintf("EXCEP: FLOATP\n");
 }
 
 
 void ex_align()
 {
+	kprintf("EXCEP: ALIGN\n");
 }
 
 
 void ex_machine()
 {
+	kprintf("EXCEP: MACHINE\n");
 }
 
 
 void ex_simd()
 {
+	kprintf("EXCEP: SIMD\n");
 }
 
 

@@ -43,7 +43,7 @@ void calibrate_delay(void)
 	bogomips = 0;
 
 	kprintf(KERN_INFO "Calibrating delay...");
-	timeout = jiffies + (HZ / 1000);
+	timeout = jiffies + ((HZ / 1000)); /* Calibration takes 1ms */
 	while( !time_after(jiffies, timeout) )
 			bogomips++;
 
@@ -73,9 +73,7 @@ void udelay(uint32_t usecs)
  */
 void mdelay(uint32_t msecs)
 {
-	uint32_t steps = msecs * bogomips * 1000;
-
-	while( steps-- );
+	udelay(msecs * 1000);
 }
 
 

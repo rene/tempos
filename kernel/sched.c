@@ -56,7 +56,7 @@ void init_scheduler(void)
 void schedule(int p)
 {
 	/* Register alarm again */
-	if( !new_alarm((jiffies + scheduler_quantum), schedule, p) ) {
+	if( !new_alarm((jiffies + scheduler_quantum - 1), schedule, p) ) {
 		panic(KERN_CRIT "Could not install scheduler alarm.");
 	}
 

@@ -606,7 +606,7 @@ int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector)
 	
 	for(i=0; i<SECTOR_HALF_SIZE; i++) {
 		wait_bus(SEC_BUS);
-		kprintf("%x %x ", (setor[i] & 0xFF), (setor[i] >> 8));
+		kprintf("ata: %x %x ", (setor[i] & 0xFF), (setor[i] >> 8));
 		outw(setor[i], pio_ports[SEC_BUS][REG_DATA]);
 		udelay(1);
 	}
@@ -641,7 +641,7 @@ static void ata_handler2(int id, pt_regs *regs)
 
 	/*for(i=1, p=1; i<=256; i++, p+=2) {
 		wait_bus(SEC_BUS);
-		kprintf("%x %x ", setor[p], setor[p+1]);
+		kprintf("ata: %x %x ", setor[p], setor[p+1]);
 		outw(((setor[p] << 8) & setor[p+1]), pio_ports[SEC_BUS][REG_DATA]);
 		udelay(1);
 	}

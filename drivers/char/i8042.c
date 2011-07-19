@@ -176,7 +176,7 @@ static void keyboard_handler(void)
 {
 	uchar8_t key = read_key();
 
-	kprintf( "%lx ", key );
+	kprintf( "K: %lx ", key );
 }
 
 

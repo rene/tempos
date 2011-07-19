@@ -116,8 +116,8 @@ void karch(unsigned long magic, unsigned long addr)
 	/* Setup interrupts */
 	setup_IDT();
 	init_PIC();
-	init_PIT();
 	init_IRQ();
+	init_PIT();
 	set_picmask(0x00, PIC_MASTER);
 	set_picmask(0x00, PIC_SLAVE);
 	sti();
