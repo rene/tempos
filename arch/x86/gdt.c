@@ -23,11 +23,15 @@
  */
 
 #include <x86/gdt.h>
+#include <x86/tss.h>
 
 
 /* GDT table */
 gdt_t gdt_table[GDT_TABLE_SIZE];
 
+
+/* Global Task Struct */
+tss_t task_tss;
 
 /**
  * setup_GDT
@@ -134,8 +138,8 @@ void setup_GDT(void)
 
 	/* TSS_SEG */
 	tssentry = (gdt_tsseg_t *)&gdt_table[5];
-	GDT_SET_BASE(tssentry,  0x00000); /* TODO: add TSS struct  */
-	GDT_SET_LIMIT(tssentry, 0x00064); /* TODO: sizeof(TSS struct) */
+	GDT_SET_BASE(tssentry,  (size_t)&task_tss);
+	GDT_SET_LIMIT(tssentry, sizeof(tss_t));
 	tssentry->high.type_res0   = 1; /* do NOT change! */
 	tssentry->high.busy        = 0;
 	tssentry->high.type_res1   = 2; /* do NOT change! */
