@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: string.c
- * Desc: Implement strings C functions
+ * Desc: Implements strings C functions
  *
  * This file is part of TempOS.
  *

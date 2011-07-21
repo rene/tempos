@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: vfs.c
- * Desc: Implement the Virtual File System Layer
+ * Desc: Implements the Virtual File System Layer
  *
  * This file is part of TempOS.
  *

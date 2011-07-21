@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: karch.c
- * Desc: First Stage: Implement the architecture dependent functions to 
+ * Desc: First Stage: Implements the architecture dependent functions to 
  *       start the TempOS kernel.
  *
  * This file is part of TempOS.

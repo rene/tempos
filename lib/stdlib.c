@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: stdlib.c
- * Desc: Implement C functions from stdlib.h
+ * Desc: Implements C functions from stdlib.h
  *
  * This file is part of TempOS.
  *

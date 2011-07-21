@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: binfmt_elf32.c
- * Desc: Implement the ELF (32 bits) structure and loader
+ * Desc: Implements the ELF (32 bits) structure and loader
  *
  * This file is part of TempOS.
  *

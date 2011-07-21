@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: bhash.c
- * Desc: Implement the buffer hash queue for device blocks
+ * Desc: Implements the buffer hash queue for device blocks
  *
  * This file is part of TempOS.
  *

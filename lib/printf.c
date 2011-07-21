@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: printf.c
- * Desc: Implement the printf family C functions
+ * Desc: Implements the printf family C functions
  *
  * This file is part of TempOS.
  *

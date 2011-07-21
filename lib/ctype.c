@@ -3,7 +3,7 @@
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: ctype.c
- * Desc: Implement C functions from ctype.h
+ * Desc: Implements C functions from ctype.h
  *
  * This file is part of TempOS.
  *
