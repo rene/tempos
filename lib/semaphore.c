@@ -2,7 +2,8 @@
  * Copyright (C) 2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: sched.h
+ * File: semaphore.c
+ * Desc: Implements semaphore functions.
  *
  * This file is part of TempOS.
  *
@@ -21,32 +22,68 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SCHED_H
-
-	#define SCHED_H
-
-	#include <sys/types.h>
-	#include <unistd.h>
-	#include <arch/task.h>
-
-	struct _task_struct {
-		/** Process state */
-		int state;
-		/** Process priority */
-		int priority;
-		/** Process ID */
-		pid_t pid;
-
-		/** architecture dependent */
-		arch_tss_t arch_tss;
-	};
-
-	typedef struct _task_struct task_st;
+#include <semaphore.h>
+#include <stdlib.h>
+#include <arch/io.h>
 
 
-	void init_scheduler(void);
+/**
+ * Init a mutex semaphore.
+ * @param mutex Pointer to sem_t mutex.
+ * @return int 0 if mutex was started, -1 otherwise.
+ */
+int mutex_init(sem_t *mutex)
+{
+	if (mutex == NULL) {
+		return -1;
+	} else {
+		*mutex = 1;
+		return 0;
+	}
+}
 
-	void schedule(int p);
 
-#endif /* SCHED_H */
+/**
+ * Lock a mutex semaphore.
+ * @param mutex Semaphore to lock.
+ */
+void mutex_lock(sem_t *mutex)
+{
+	cli();
+	(*mutex)--;
+	sti();
+}
+
+
+/**
+ * Unlock a mutex semaphore.
+ * @param mutex Semaphore to unlock.
+ */
+void mutex_unlock(sem_t *mutex)
+{
+	cli();
+	(*mutex)++;
+	sti();
+}
+
+
+/**
+ * Get the state of a mutex
+ * @param mutex
+ * @return int 1 if mutex is locked, 0 otherwise.
+ */
+int mutex_is_locked(sem_t mutex)
+{
+	int ret;
+
+	cli();
+	if (mutex != 0) {
+		ret = 0;
+	} else {
+		ret = 1;
+	}
+	sti();
+
+	return ret;
+}
 

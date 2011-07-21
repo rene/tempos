@@ -5,5 +5,5 @@
 # TBS - Build configuration file
 #
 
-obj-y += ctype.o linkedl.o clinkedl.o printf.o stdlib.o string.o
+obj-y += ctype.o linkedl.o clinkedl.o printf.o stdlib.o string.o semaphore.o
 

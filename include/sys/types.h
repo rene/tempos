@@ -1,8 +1,8 @@
-/**
+/*
  * Copyright (C) 2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: sched.h
+ * File: types.h
  *
  * This file is part of TempOS.
  *
@@ -21,32 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SCHED_H
+#ifndef TYPES_H
 
-	#define SCHED_H
+	#define TYPES_H
 
-	#include <sys/types.h>
 	#include <unistd.h>
-	#include <arch/task.h>
 
-	struct _task_struct {
-		/** Process state */
-		int state;
-		/** Process priority */
-		int priority;
-		/** Process ID */
-		pid_t pid;
+	/** Process ID */
+	typedef size_t pid_t;
 
-		/** architecture dependent */
-		arch_tss_t arch_tss;
-	};
-
-	typedef struct _task_struct task_st;
-
-
-	void init_scheduler(void);
-
-	void schedule(int p);
-
-#endif /* SCHED_H */
+#endif /* TYPES_H */
 

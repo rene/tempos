@@ -34,6 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <linkedl.h>
+#include <semaphore.h>
 
 
 /* information passed from first stage */
@@ -43,14 +44,13 @@ extern uint32_t *kpagedir;
 
 
 /**
- * tempos_main
+ * tempos_main : Second stage
  *
  * This is the function called when first stage is done, which means that
  * all dependent machine boot code was executed. See arch/$ARCH/boot/karch.c
  */
 void tempos_main(karch_t kinf)
 {
-	/* Start the second stage */
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
 	/* keep init_timer() in first palce because drivers use timer functions */
@@ -69,9 +69,21 @@ void tempos_main(karch_t kinf)
 	/* Init Virtual File System */
 	register_all_fs_types();
 
-	/* Test */
+	/* Show command line */
+	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
+
+	/* Test *
+	sem_t mt;
+	mutex_init(&mt);
+	kprintf(KERN_DEBUG "Value of mutex: %d\n", (int)mt);
+	mutex_lock(&mt);
+	if ( mutex_is_locked(mt) ) {
+		kprintf(KERN_DEBUG "MUTEX LOCKED!: %d\n", (int)mt);
+	}
 	kprintf(KERN_INFO "We are in TempOS kernel!\n");
-	kprintf(KERN_INFO "Command line passed: %s\n", kinfo.cmdline);
+	mutex_unlock(&mt);
+	kprintf(KERN_DEBUG "Value of mutex: %d\n", (int)mt);*/
+
 
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
