@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 Renê de Souza Pinto
+ * Copyright (C) 2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: sched.h
@@ -26,6 +26,19 @@
 	#define SCHED_H
 
 	#include <unistd.h>
+	#include <arch/task.h>
+
+	struct _task_struct {
+		/** Process state */
+		int state;
+		/** Process priority */
+		int priority;
+
+		/** architecture dependent */
+		arch_tss_t arch_tss;
+	};
+
+	typedef struct _task_struct task_st;
 
 
 	void init_scheduler(void);

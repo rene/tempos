@@ -1,5 +1,5 @@
 /**
- * Copyright (C); 2009 Renê de Souza Pvoido
+ * Copyright (C); 2011 Renê de Souza Pvoido
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: irq.h

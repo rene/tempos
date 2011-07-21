@@ -2,7 +2,7 @@
  * Copyright (C); 2011 Renê de Souza Pvoido
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: irq.h
+ * File: task.h
  *
  * This file is part of TempOS.
  *
@@ -21,19 +21,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ARCH_IO_H
+#ifndef ARCH_TASK_H
 
-	#define ARCH_IO_H
+	#define ARCH_TASK_H
 
 	#include <config.h>
 
-	/* This file makes drivers include files more portable 
+	/* This file makes include files more portable 
 	 * including the correct headers for each architecture. */
 	
 	/* IA-32 (x86 32 bits) */
 	#ifdef CONFIG_ARCH_X86
-		#include <x86/io.h>
+		#include <x86/tss.h>
+
+		typedef tss_t arch_tss_t;
 	#endif
 
-#endif /* ARCH_IO_H */
+#endif /* ARCH_TASK_H */
 

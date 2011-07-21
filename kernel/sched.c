@@ -31,7 +31,12 @@
  * TempOS scheduler uses a round robin algorithm.
  * Yes, I know you are very surprised :-o
  */
-uint32_t scheduler_quantum = HZ; /* 1 second << JUST FOR TEST */
+static uint32_t scheduler_quantum = HZ; /* 1 second << JUST FOR TEST */
+
+/**
+ * Pointer to the current task running
+ */
+task_st *current_task = NULL;
 
 
 /**
