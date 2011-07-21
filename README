@@ -24,7 +24,8 @@ ABOUT:
 		- IRQ system with shared IRQs support
 		- Alarm timers
 		- A poor video (text mode) driver
-		- System calls support development started
+		- System calls support
+		- Generic ATA driver
 
 
 HISTORY:
