@@ -40,24 +40,25 @@ export
 .PHONY: showtitle clean
 
 
-all: tempos
+all: showtitle tempos
 
 showtitle:
 	@$(ECHO) " ===================== "
 	@$(ECHO) "[ TempOS Build System ]"
 	@$(ECHO) " ===================== "
 
-
-tempos: showtitle config
+tempos: $(config_mk)
 	@[ -f $(objlist) ] && rm -f $(objlist) || echo " * Sanity check"
 	@$(ECHO) -n " * Checking architecture..."
 	@$(checkarch) $(conffile)
 
-
 ##
 # Read configuration file and generate proper files
 #
-config: $(conffile)
+$(config_mk): $(conffile)
+	@$(ECHO) " ====================== "
+	@$(ECHO) "[ TempOS Configuration ]"
+	@$(ECHO) " ====================== "
 	@$(ECHO) " + READING $(conffile)"
 	 
 	@$(ECHO) " + WRITING $(config_mk)"

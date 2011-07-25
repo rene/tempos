@@ -233,10 +233,10 @@ void init_ata_generic(void)
 	 * Register IRQs
 	 */
 	if( request_irq(ATA_PRI_IRQ, ata_handler1, SA_SHIRQ, "ata-primary") < 0) {
-		kprintf(KERN_ERROR "Error on register IRQ\n");
+		kprintf(KERN_ERROR "Error on register IRQ %d\n", ATA_PRI_IRQ);
 	}
 	if( request_irq(ATA_SEC_IRQ, ata_handler2, SA_SHIRQ, "ata-secondary") < 0) {
-		kprintf(KERN_ERROR "Error on register IRQ\n");
+		kprintf(KERN_ERROR "Error on register IRQ %d\n", ATA_SEC_IRQ);
 	}
 
 	/*read_done = 0;
