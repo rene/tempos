@@ -26,7 +26,7 @@ if [ -f "$MKFILE" ]; then
 			;;
 
 		*)
-			echo "Unknow"
+			echo "Unknown"
 			echo "***********************************"
 			echo "* ERROR: Unsupported architecture *"
 			echo "***********************************"
