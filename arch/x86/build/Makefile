@@ -31,7 +31,7 @@ export obj-y-CFLAGS obj-x86asm-CFLAGS
 ##
 # Architecture specific
 #
-all: kernel
+all: $(kimage)
 	@$(ECHO) " * Linking kernel image..."
 	@$(LD) $(ARCH_LF) -o $(kimage) -T arch/x86/boot/setup.ld $(obj-x86asm) $(obj-y)
 	@$(ECHO) "Build done."
@@ -42,7 +42,7 @@ all: kernel
 #
 -include $(MAKEGEN)
 
-kernel: $(MAKEGEN)
+$(kimage): $(MAKEGEN)
 	@$(ECHO) " * Start kernel compilation:"
 
 $(MAKEGEN): \

@@ -40,12 +40,14 @@ export
 .PHONY: showtitle clean
 
 
-all: showtitle tempos
+all: showtitle $(kimage)
 
 showtitle:
 	@$(ECHO) " ===================== "
 	@$(ECHO) "[ TempOS Build System ]"
 	@$(ECHO) " ===================== "
+
+$(kimage): tempos
 
 tempos: $(config_mk)
 	@[ -f $(objlist) ] && rm -f $(objlist) || echo " * Sanity check"
@@ -71,7 +73,6 @@ $(config_mk): $(conffile)
 	@sed -n "s/ \{0,\}\(\w\+\) \{0,\}= \{0,\}\(.*\)/\t#define \1 \2/gp" $(conffile) >> $(config_h)
 	@$(ECHO) -e "\n#endif /* TEMPOS_CONFIG_H */\n" >> $(config_h)
 
-#$(config_mk): config
 -include $(config_mk)
 
 ##
@@ -87,7 +88,7 @@ $(conffile):
 ##
 # test
 #
-test: showtitle
+test: showtitle $(kimage)
 	@$(ECHO) -n " * Checking architecture..."
 	@[ -f "$(fimage)" ] && ($(checkarch) $(conffile) test) \
 		|| ($(ECHO) -e "!\n * Running make..."; $(MAKE) --quiet install && $(MAKE) --quiet test)
@@ -96,7 +97,7 @@ test: showtitle
 ##
 # install
 #
-install: showtitle tempos
+install: showtitle $(kimage)
 	@$(ECHO) -n " * Checking architecture..."
 	@$(checkarch) $(conffile) install
 
