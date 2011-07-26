@@ -96,7 +96,7 @@ test: showtitle
 ##
 # install
 #
-install: tempos
+install: showtitle tempos
 	@$(ECHO) -n " * Checking architecture..."
 	@$(checkarch) $(conffile) install
 
