@@ -1,4 +1,4 @@
-/**
+/*
  * A simple video driver
  * Author: Renê de Souza Pinto
  */
@@ -14,9 +14,7 @@
 	#define VIDEO_ROWS     25
 	#define VIDEO_MEM_SIZE VIDEO_COLS * VIDEO_ROWS * 2
 
-	/**
-	 * Video color attributes
-	 */
+	/* Video color attributes */
 	#define BLACK          0x00
 	#define BLUE           0x01
 	#define GREEN          0x02

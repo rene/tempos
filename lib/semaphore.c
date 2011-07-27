@@ -29,8 +29,8 @@
 
 /**
  * Init a mutex semaphore.
- * @param mutex Pointer to sem_t mutex.
- * @return int 0 if mutex was started, -1 otherwise.
+ * \param mutex Pointer to sem_t mutex.
+ * \return int 0 if mutex was started, -1 otherwise.
  */
 int mutex_init(sem_t *mutex)
 {
@@ -45,7 +45,7 @@ int mutex_init(sem_t *mutex)
 
 /**
  * Lock a mutex semaphore.
- * @param mutex Semaphore to lock.
+ * \param mutex Semaphore to lock.
  */
 void mutex_lock(sem_t *mutex)
 {
@@ -57,7 +57,7 @@ void mutex_lock(sem_t *mutex)
 
 /**
  * Unlock a mutex semaphore.
- * @param mutex Semaphore to unlock.
+ * \param mutex Semaphore to unlock.
  */
 void mutex_unlock(sem_t *mutex)
 {
@@ -69,8 +69,8 @@ void mutex_unlock(sem_t *mutex)
 
 /**
  * Get the state of a mutex
- * @param mutex
- * @return int 1 if mutex is locked, 0 otherwise.
+ * \param mutex
+ * \return int 1 if mutex is locked, 0 otherwise.
  */
 int mutex_is_locked(sem_t mutex)
 {

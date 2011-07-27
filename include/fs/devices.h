@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009-2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -26,15 +26,18 @@
 	#define DEVICES_H
 
 	/**
-	 * This file contains the list of device numbers.
-	 * All numbers placed here follows the LINUX ALLOCATED DEVICES
-	 * list, revised at 6th April 2009. For more information, please
-	 * see http://www.kernel.org
-	 **/
+	 \file
+	 \verbatim
+	   This file contains the list of device numbers.
+	   All numbers placed here follows the LINUX ALLOCATED DEVICES
+	   list, revised at 6th April 2009. For more information, please
+	   see http://www.kernel.org.
 
-	/* TempOS device numbers declaration: DEVNUM_<NAME>
-	 * Where <NAME>, usually (it's not a rule), is the same as 
-	 * used in device file name (e.g. /dev/<NAME>) */
+	   TempOS device numbers declaration: DEVNUM_<NAME>
+	   Where <NAME>, usually (it's not a rule), is the same as 
+	   used in device file name (e.g. /dev/<NAME>)
+	 \endverbatim
+	 */
 
 	/* 1 char - Memory Devices */
 	#define DEVNUM_NULL          3

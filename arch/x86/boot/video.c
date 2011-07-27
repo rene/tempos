@@ -1,4 +1,4 @@
-/**
+/*
  * A simple video driver
  * Author: Renê de Souza Pinto
  */
@@ -28,11 +28,10 @@ void clrscr(void)
 
 
 /**
- * gotoxy
  * Move the cursor to x and y position
  *
- * @param x Column cursor position
- * @param y Line cursor position
+ * \param x Column cursor position
+ * \param y Line cursor position
  */
 void gotoxy(unsigned char x, unsigned char y)
 {
@@ -45,10 +44,9 @@ void gotoxy(unsigned char x, unsigned char y)
 
 
 /**
- * setattr
  * Set character attribute
  *
- * @param attr Character attribute (see video.h)
+ * \param attr Character attribute (see video.h)
  */
 void setattr(unsigned char attr)
 {
@@ -58,11 +56,10 @@ void setattr(unsigned char attr)
 
 
 /**
- * writechar
  * Write a character on screen
  *
- * @param ch Character
- * @param attr Character attribute (color)
+ * \param ch Character
+ * \param attr Character attribute (color)
  */
 void writechar(char ch, unsigned char attr)
 {
@@ -89,13 +86,12 @@ void writechar(char ch, unsigned char attr)
 
 
 /**
- * writechar_xy
  * Write a character on screen in x, y position
  *
- * @param ch Character
- * @param attr Character attribute (color)
- * @param x Column cursor position
- * @param y Line cursor position
+ * \param ch Character
+ * \param attr Character attribute (color)
+ * \param x Column cursor position
+ * \param y Line cursor position
  */
 void writechar_xy(char ch, unsigned char attr, unsigned char x, unsigned char y)
 {
@@ -105,10 +101,9 @@ void writechar_xy(char ch, unsigned char attr, unsigned char x, unsigned char y)
 
 
 /**
- * kprint
  * Write a string on screen
  *
- * @param str String
+ * \param str String
  */
 void kprint(char *str)
 {

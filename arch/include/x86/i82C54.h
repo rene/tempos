@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -29,7 +29,7 @@
 	#include <tempos/timer.h>
 	#include <config.h>
 
-	/* i82C54 Frequency */
+	/** i82C54 Frequency */
 	#define PIT82C54_HZ		1193182L
 	#define PIT_DIVIDER		(PIT82C54_HZ / CONFIG_SYSTEM_HZ)
 

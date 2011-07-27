@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -75,13 +75,13 @@
 #define CMD_CACHE_FLUSH			0xE7
 
 
-/* ATA devices information */
+/** ATA devices information */
 static ata_dev_info ata_devices[4];
 
 /* Linked list to blocks request */
 //static 
 
-/* Default I/O ports for ATA controller */
+/** Default I/O ports for ATA controller */
 static uint16_t pio_ports[2][9] = {
 		/* Primary Bus */
 		{0x1F0, 0x1F1, 0x1F2, 0x1F3, 0x1F4, 0x1F5, 0x1F6, 0x1F7, 0x3F6},
@@ -109,8 +109,6 @@ uint16_t setor[256];
 char read_done;
 
 /**
- * init_ata_generic
- *
  * Initialize the generic driver for ATA controllers.
  * This function will look for disks connected to the bus
  * and initialize them.
@@ -229,9 +227,7 @@ void init_ata_generic(void)
 		}
 	}
 
-	/**
-	 * Register IRQs
-	 */
+	/* Register IRQs */
 	if( request_irq(ATA_PRI_IRQ, ata_handler1, SA_SHIRQ, "ata-primary") < 0) {
 		kprintf(KERN_ERROR "Error on register IRQ %d\n", ATA_PRI_IRQ);
 	}
@@ -247,8 +243,6 @@ void init_ata_generic(void)
 
 
 /**
- * send_cmd
- *
  * Send a command
  */
 static void send_cmd(uchar8_t bus, uchar8_t command)
@@ -262,8 +256,6 @@ static void send_cmd(uchar8_t bus, uchar8_t command)
 
 
 /**
- * wait_bus
- *
  * Wait while bus is busy (polling)
  */
 static void wait_bus(uchar8_t bus)
@@ -276,8 +268,6 @@ static void wait_bus(uchar8_t bus)
 
 
 /**
- * set_device
- *
  * Select active device (master or slave) on the bus (doing the proper delay)
  */
 static void set_device(uchar8_t bus, uchar8_t device)
@@ -305,8 +295,6 @@ static void set_device(uchar8_t bus, uchar8_t device)
 
 
 /**
- * get_dev_info
- *
  * Get and parse device information
  */
 static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
@@ -456,13 +444,13 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 
 
 /**
- * read a sector from device
+ * Read a sector from device
  *
- * major: Bus - Primary or Secondary IDE
- * device: Master or Slave
- * addr: LBA 48bit sector address
+ * \param major Bus - Primary or Secondary IDE
+ * \param device Master or Slave
+ * \param addr LBA 48bit sector address
  *
- * This function will just request to read the sector.
+ * \note This function will just request to read the sector.
  * ATA controller will generate a interrupt when it's done.
  */
 int read_hd_sector(int major, int device, uint64_t addr)
@@ -532,13 +520,13 @@ int read_hd_sector(int major, int device, uint64_t addr)
 
 
 /**
- * write sectors to device
+ * Write sectors to device
  *
- * major: Bus - Primary or Secondary IDE
- * device: Master or Slave
- * addr: LBA 48bit sector address
+ * \param major Bus - Primary or Secondary IDE
+ * \param device Master or Slave
+ * \param addr LBA 48bit sector address
  *
- * This function write a sector to device.
+ * \note This function write a sector to device.
  */
 int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector)
 {

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -26,42 +26,40 @@
 #include <x86/tss.h>
 
 
-/* GDT table */
+/** GDT table */
 gdt_t gdt_table[GDT_TABLE_SIZE];
 
 
-/* Global Task Struct */
+/** Global Task Struct */
 tss_t task_tss;
 
 /**
- * setup_GDT
- *
- * TempOS use a Protected Flat Model with paging for memory organization
- * and protection. The GDT have five entries:
- * 		
- * 		KERNEL_CS (Code Segment, Ring 0) <-- For kernel code
- * 		KERNEL_DS (Data Segment, Ring 0) <-- For kernel data and stack
- * 		USER_CS   (Code Segment, Ring 3) <-- For user code
- * 		USER_DS   (Data Segment, Ring 3) <-- For user data and stack
- * 		TSS_SEG   (TSS Descriptor)       <-- For Task switch
- *
- * A null descriptor at 0 position is mandatory, so the final GDT layout is:
- *
- *           =====================
- *          |   NULL Descriptor   |
- *          |---------------------|
- *          |      KERNEL_CS      |    
- *          |---------------------|
- *          |      KERNEL_DS      |
- *          |---------------------|
- *          |       USER_CS       |
- *          |---------------------|
- *          |       USER_DS       |
- *          |---------------------|
- *          |       TSS_SEG       |
- *           =====================
- *
- *
+\verbatim
+  TempOS use a Protected Flat Model with paging for memory organization
+  and protection. The GDT have five entries:
+  		
+  		KERNEL_CS (Code Segment, Ring 0) <-- For kernel code
+  		KERNEL_DS (Data Segment, Ring 0) <-- For kernel data and stack
+  		USER_CS   (Code Segment, Ring 3) <-- For user code
+  		USER_DS   (Data Segment, Ring 3) <-- For user data and stack
+  		TSS_SEG   (TSS Descriptor)       <-- For Task switch
+ 
+  A null descriptor at 0 position is mandatory, so the final GDT layout is:
+ 
+            =====================
+           |   NULL Descriptor   |
+           |---------------------|
+           |      KERNEL_CS      |    
+           |---------------------|
+           |      KERNEL_DS      |
+           |---------------------|
+           |       USER_CS       |
+           |---------------------|
+           |       USER_DS       |
+           |---------------------|
+           |       TSS_SEG       |
+            =====================
+\endverbatim
  */
 void setup_GDT(void)
 {
@@ -158,6 +156,9 @@ void setup_GDT(void)
 }
 
 
+/**
+ * Load GDT
+ */
 inline void load_gdt(void)
 {
 	asm("lgdtl %0           \n"
@@ -173,5 +174,4 @@ inline void load_gdt(void)
 		"reloadCS:            "
 			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS) : "eax");
 }
-
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -28,7 +28,7 @@
 /**
  * This function initializes all File System types recognized
  * by TempOS.
- * NOTE: If you are going to implement a new File System type for TempOS,
+ * \note If you are going to implement a new File System type for TempOS,
  *       your init function should be called from here.
  */
 void register_all_fs_types(void)

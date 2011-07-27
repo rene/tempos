@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C); 2011 Renê de Souza Pvoido
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -28,7 +28,7 @@
 	#include <config.h>
 
 	/* This file makes include files more portable 
-	 * including the correct headers for each architecture. */
+	   including the correct headers for each architecture. */
 	
 	/* IA-32 (x86 32 bits) */
 	#ifdef CONFIG_ARCH_X86

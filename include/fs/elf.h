@@ -191,6 +191,4 @@ typedef struct {
     Elf32_Word	p_align;
 } __attribute__ ((packed)) Elf32_Phdr;
 
-
-
 #endif

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -30,7 +30,7 @@
 	
 	/**
 	 * This is the Task-State Segment (TSS).
-	 * TODO: Document this struct.
+	 * \todo Document this struct.
 	 */
 	struct _tss_struct {
 		uint16_t prev_task_link;

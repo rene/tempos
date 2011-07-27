@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -48,8 +48,10 @@
 	#define KERNEL_DPL 0x00
 	#define USER_DPL   0x03
 
-	#define KERNEL_CS	0x08	/* Position 1 on GDT */
-	#define KERNEL_DS	0x10	/* Position 2 on GDT */
+	/** Position 1 on GDT */
+	#define KERNEL_CS	0x08
+	/** Position 2 on GDT */
+	#define KERNEL_DS	0x10
 
 #endif /* ARCH_X86_H */
 

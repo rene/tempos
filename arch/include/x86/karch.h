@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -26,7 +26,7 @@
 
 	#define ARCH_X86_KARCH_H
 
-	/* Stack size */
+	/** Kernel stack size */
 	#define STACK_SIZE			0x4000 /* 16Kb */
 
 	#define KERNEL_ADDR_OFFSET  0xBFF00000 /* 3GB-1MB */
@@ -41,8 +41,10 @@
 	extern uint32_t _KERNEL_START;
 	extern uint32_t _KERNEL_END;
 
-	/* Kernel memory addresses
-	   See arch/x86/boot/setup.ld */
+	/** 
+	 * Kernel memory addresses.
+	 * See arch/x86/boot/setup.ld
+	 */
 	#define KERNEL_PA_START		 (void*)&_KERNEL_PA_START
 	#define KERNEL_START_ADDR	 (void*)&_KERNEL_START
 	#define KERNEL_END_ADDR		 (void*)&_KERNEL_END

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -27,8 +27,6 @@
 
 
 /**
- * init_PIT
- *
  * Init the PIT controller
  */
 void init_PIT(void)

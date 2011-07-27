@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -110,7 +110,9 @@ void ex_gp()
 }
 
 
-/* Page fault - This fault is handle by mm */
+/**
+ * Page fault - This fault should be handle by mm 
+ */
 void ex_pfault()
 {
 	kprintf("EXCEP: PAGE FAULT\n");

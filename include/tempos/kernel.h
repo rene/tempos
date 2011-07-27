@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -57,8 +57,7 @@
 	   		0x01 - Avaliable
 			0x02 - Reserved
 			0x03 - ACPI
-			0x04 - ACPI NVS
-	 */
+			0x04 - ACPI NVS */
 	#define MTYPE_AVALIABLE		0x01
 	#define MTYPE_RESERVED		0x02
 	#define MTYPE_ACPI			0x03
@@ -73,7 +72,7 @@
 	};
 
 
-	/* Information passed from first stage (karch) */
+	/** Information passed from first stage (karch) */
 	struct _karch_t {
 		uchar8_t            cmdline[CMDLINE_MAX];
 		uint32_t            mem_lower;

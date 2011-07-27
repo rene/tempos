@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -26,39 +26,39 @@
 #include <x86/exceptions.h>
 #include <x86/irq.h>
 
-/* syscall handler (see sys_enter.S)*/
+/** syscall handler (see arch/x86/sys_enter.S)*/
 extern void _sys_enter(void);
 
 
-/* IDT table */
+/** IDT table */
 idt_t idt_table[IDT_TABLE_SIZE];
 
 
 /**
- * setup_IDT
- *
- * Setup the IDT table, but not enable interrupts yet. Interrupts will be
- * enable after PIC initialization. See arch/x86/kernel/i8259A.c and 
- * arch/x86/boot/karch.c.
- *
- * As you should know, x86 architecture permits three types of gate
- * descriptors in IDT: Task-gate, Interrupt-gate and Trap-gate descriptors.
- * TempOS uses only Interrupt-gate descritors, that has this format:
- *
- *
- * 31                  16 15 14 13 12        8  7     5 4       0
- * |------------------------------------------------------------|
- * |  Offset 31..16      | P | DPL | 0 D 1 1 0 | 0 0 0 | UNUSED | 4
- * |---------------------|--------------------------------------|
- * |  Segment Selector   |           Offset 15..0               | 0
- * |------------------------------------------------------------|
- * 31                                                           0
- *
- * Offset is the address of the ISR (Interrupt Service Routine) and
- * Segment Selector is the point to descritor in GDT table, in our case,
- * KERNEL_CS.
- *
- * For complete understand, see Intel Manual vol.3, chapter 5.
+\verbatim
+  Setup the IDT table, but not enable interrupts yet. Interrupts will be
+  enable after PIC initialization. See arch/x86/kernel/i8259A.c and 
+  arch/x86/boot/karch.c.
+ 
+  As you should know, x86 architecture permits three types of gate
+  descriptors in IDT: Task-gate, Interrupt-gate and Trap-gate descriptors.
+  TempOS uses only Interrupt-gate descritors, that has this format:
+ 
+ 
+  31                  16 15 14 13 12        8  7     5 4       0
+  |------------------------------------------------------------|
+  |  Offset 31..16      | P | DPL | 0 D 1 1 0 | 0 0 0 | UNUSED | 4
+  |---------------------|--------------------------------------|
+  |  Segment Selector   |           Offset 15..0               | 0
+  |------------------------------------------------------------|
+  31                                                           0
+ 
+  Offset is the address of the ISR (Interrupt Service Routine) and
+  Segment Selector is the point to descritor in GDT table, in our case,
+  KERNEL_CS.
+ 
+  For complete understand, see Intel Manual vol.3, chapter 5.
+\endverbatim
  */
 void setup_IDT(void)
 {
@@ -182,7 +182,9 @@ void setup_IDT(void)
 	load_idt();
 }
 
-
+/**
+ * Load IDT
+ */
 inline void load_idt(void)
 {
 	asm("lidtl %0" : : "m" (IDTR));

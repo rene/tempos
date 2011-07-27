@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -39,8 +39,6 @@
 
 
 /**
- * karch
- *
  * First Stage: Called from Boot Stage.
  */
 void karch(unsigned long magic, unsigned long addr)
@@ -52,11 +50,9 @@ void karch(unsigned long magic, unsigned long addr)
 	char8_t *mtypes[] = { "Avaliable", "Reserved", "ACPI", "ACPI NVS", "Unknown" };
 
 
-	/**
-	 * Here the address translation it's done by GDT trick, we need to
-	 * take care about addresses passed by multiboot structures (physical)
-	 * and translate them to virtual address
-	 */
+	/* Here the address translation it's done by GDT trick, we need to
+	   take care about addresses passed by multiboot structures (physical)
+	   and translate them to virtual address */
 
 	/* Multiboot data */
 	if( magic != MULTIBOOT_BOOTLOADER_MAGIC ) {
@@ -102,12 +98,10 @@ void karch(unsigned long magic, unsigned long addr)
 		kinf.cmdline[0] = '\0';
 	}
 
-	/**
-	 * Still here we use the GDT trick to translate the virtual
-	 * into physical address, now the first thing to do it's
-	 * enable the paging system and reload de GDT with
-	 * base 0, after that, we can continue to load the kernel
-	 */
+	/* Still here we use the GDT trick to translate the virtual
+	   into physical address, now the first thing to do it's
+	   enable the paging system and reload de GDT with
+	   base 0, after that, we can continue to load the kernel */
 	init_pg(&kinf);
 
 	/* Init the Memory Manager */

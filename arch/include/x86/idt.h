@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -42,20 +42,20 @@
 
 	/**
 	 * idt_entry
-	 *
-	 * Each entry of IDT stores a Gate Descriptor. A gate descriptor in IDT
-	 * should describe any of follow gates below:
-	 *
-	 * 		TSS_DESC  - Task-gate descriptor
-	 * 		INT_DESC  - Interrupt-gate descriptor
-	 * 		TRAP_DESC - Trap-gate descriptor
-	 * 		  ^              ^
-	 *        |              |
-	 *        |              |
-	 *        |              [---- Intel terminology
-	 *        |
-	 *        [---- TempOS terminology
-	 *
+	\verbatim
+	  Each entry of IDT stores a Gate Descriptor. A gate descriptor in IDT
+	  should describe any of follow gates below:
+	 
+	  		TSS_DESC  - Task-gate descriptor
+	  		INT_DESC  - Interrupt-gate descriptor
+	  		TRAP_DESC - Trap-gate descriptor
+	  		  ^              ^
+	         |              |
+	         |              |
+	         |              [---- Intel terminology
+	         |
+	         [---- TempOS terminology
+	\endverbatim 
 	 */
 	struct _idt_entry {
 		uint32_t lower;

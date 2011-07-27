@@ -26,8 +26,8 @@
 
 /**
  * Create a new linked list
- * @param list New list
- * @return int Always return true
+ * \param list New list
+ * \return int Always return true
  */
 int llist_create(llist **list)
 {

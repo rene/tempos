@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C); 2009 Renê de Souza Pvoido
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -35,14 +35,14 @@
 
 	#define SA_SHIRQ		0x01 /* Shared IRQ */
 
-	/* Interrupt handler struct */
+	/** Interrupt handler struct */
 	struct _irq_handler {
 		uint32_t id;
 		char name[MAX_IRQH_NAME];
 		void (*handler)(int, pt_regs *);
 	};
 
-	/* IRQ queue struct */
+	/** IRQ queue struct */
 	struct _irq_queue {
 		uchar8_t irqnum;
 		uint16_t flags;
@@ -51,8 +51,6 @@
 
 	typedef struct _irq_handler irq_handler_t;
 	typedef struct _irq_queue   irq_queue_t;
-
-
 	void init_IRQ(void);
 
 	void do_irq(uint32_t irqnum, pt_regs regs);

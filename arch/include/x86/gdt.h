@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -49,20 +49,21 @@
 	/**
 	 * gdt_entry
 	 *
-	 * Each entry of GDT stores a Segment Descriptor. A segment descriptor in GDT
-	 * should describe any of follow segments below:
-	 *
-	 * 		CD_SEG    - Code/Data segment
-	 * 		TSS_SEG   - Task-state segment
-	 * 		CGATE_SEG - Call gate segment
-	 * 		LDT_SEG   - Local decriptor-table (LDT) segment
-	 * 		  ^              ^
-	 *        |              |
-	 * 		  |              |
-	 * 		  |              [---- Intel terminology
-	 * 		  |
-	 * 		  [---- TempOS terminology
-	 *
+	 \verbatim
+	  Each entry of GDT stores a Segment Descriptor. A segment descriptor in GDT
+	  should describe any of follow segments below:
+	 
+	  		CD_SEG    - Code/Data segment
+	  		TSS_SEG   - Task-state segment
+	  		CGATE_SEG - Call gate segment
+	  		LDT_SEG   - Local decriptor-table (LDT) segment
+	  		  ^              ^
+			  |              |
+	  		  |              |
+	  		  |              [---- Intel terminology
+	  		  |
+	  		  [---- TempOS terminology
+	 \endverbatim
 	 */
 	struct _gdt_entry {
 		uint32_t lower;

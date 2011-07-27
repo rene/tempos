@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -36,7 +36,7 @@
 	#define BUFF_ST_BUSY    0x08 /* Kernel is reading or writing to device */
 	#define BUFF_ST_WAITING 0x0F /* A process is currently waiting for the buffer to become free */
 	
-	/* Buffer structure */
+	/** Buffer structure */
 	struct _buffer_header_t {
 		uint64_t block_num;
 		int status;

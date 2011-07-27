@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -23,52 +23,54 @@
  */
 
 /**
- * This is the low level memory manager system of TempOS
- *
- * TempOS uses a reallocable kernel, which means that kernel
- * are mapped to 3GB of virtual address space. This is done
- * using GDT trick while paging system is not enable (in boot
- * stage). When paging system are working, GDT are reloaded with
- * base 0, since translation will be done by paging system.
- *
- *  \/\/\/\/\/\/\ VIRTUAL ADDRESS SPACE MAP \/\/\/\/\/\/\
- *
- *                   ----------------4GB
- *                  |     Kernel     |
- *                  |                |
- *                  |   3GB to 4GB   |
- *                  |----------------3GB
- *                  |                |
- *                  |                |
- *                  |                |
- *                  |                |
- *                  |      User      |
- *                  |                |
- *                  |   0  to  3GB   |
- *                  |                |
- *                   ----------------0
- *
- *  \/\/\/\/\/\/\/\/ KERNEL MEMORY MAP /\/\/\/\/\/\/\/\/\
- *
- *                
- *                  |      ...       |
- *                  |                |
- *       ---------> |----------------End of memory used by Kernel
- *      |           |     .....      |
- *      |           |                |
- *    Kernel        |   stack_pages  |
- *    Block2        |     .....      |
- *      |           |                |
- *      |           |    kerneldir   |
- *       ---------->|----------------KERNEL_END_ADDR
- *      |           |                |
- *    Kernel        |     Kernel     |
- *    Block1        |  Code + Data   |
- *      |           |    Sections    |
- *       ---------->|----------------KERNEL_START_ADDR
- *                  |                |
- *                  |      ...       |
- *
+ \file
+ \verbatim
+  This is the low level memory manager system of TempOS
+ 
+  TempOS uses a reallocable kernel, which means that kernel
+  are mapped to 3GB of virtual address space. This is done
+  using GDT trick while paging system is not enable (in boot
+  stage). When paging system are working, GDT are reloaded with
+  base 0, since translation will be done by paging system.
+ 
+   \/\/\/\/\/\/\ VIRTUAL ADDRESS SPACE MAP \/\/\/\/\/\/\
+ 
+                    ----------------4GB
+                   |     Kernel     |
+                   |                |
+                   |   3GB to 4GB   |
+                   |----------------3GB
+                   |                |
+                   |                |
+                   |                |
+                   |                |
+                   |      User      |
+                   |                |
+                   |   0  to  3GB   |
+                   |                |
+                    ----------------0
+ 
+   \/\/\/\/\/\/\/\/ KERNEL MEMORY MAP /\/\/\/\/\/\/\/\/\
+ 
+                 
+                   |      ...       |
+                   |                |
+        ---------> |----------------End of memory used by Kernel
+       |           |     .....      |
+       |           |                |
+     Kernel        |   stack_pages  |
+     Block2        |     .....      |
+       |           |                |
+       |           |    kerneldir   |
+        ---------->|----------------KERNEL_END_ADDR
+       |           |                |
+     Kernel        |     Kernel     |
+     Block1        |  Code + Data   |
+       |           |    Sections    |
+        ---------->|----------------KERNEL_START_ADDR
+                   |                |
+                   |      ...       |
+ \endverbatim
  */
 
 #include <x86/mm.h>
@@ -77,7 +79,7 @@
 #include <x86/karch.h>
 #include <tempos/kernel.h>
 
-/* Address used by kmalloc_e */
+/** Address used by kmalloc_e */
 static uint32_t free_phy_addr;
 
 /* Stack pages */
@@ -85,15 +87,13 @@ static uint32_t *stack_pages;
 static uint32_t stack_top;
 static uint32_t stack_max_top;
 
-/* Kernel pages directory */
+/** Kernel pages directory */
 volatile pagedir_t *kerneldir;
 
-/* Kernel size: Block1 + Block2 */
+/** Kernel size: Block1 + Block2 */
 static uint32_t kernel_size;
 
 /**
- * init_pg
- *
  * This function starts the low level Memory Manager, configure
  * 4Kb pages, allocate and map correct memory to the kernel, prepare
  * pages stacks and so on.
@@ -112,14 +112,10 @@ void init_pg(karch_t *kinf)
 	   translation are done by GDT trick */
 	free_phy_addr = (uint32_t)KERNEL_END_ADDR;
 
-	/**
-	 * Start Kernel pages directory
-	 */
+	/* Start Kernel pages directory */
 	kerneldir = make_kerneldir();
 
-	/**
-	 * Alloc space for stack pages
-	 */
+	/* Alloc space for stack pages */
 	totalmem = (kinf->mem_upper << 10);
 	stack_sz = (totalmem / PAGE_SIZE) * sizeof(uint32_t);
 
@@ -136,20 +132,20 @@ void init_pg(karch_t *kinf)
 	}
 
 	/* Map kernel memory
-	 * NOTE: Here we also map the phisical kernel pages 
-	 *       to the same real address, why?
-	 *       Simple, because here we are still using
-	 *       GDT trick, even when we enable the paging system
-	 *       GDT remains configured with 1GB+1MB as segment base,
-	 *       which means that processor will sum 1GB+1MB on
-	 *       each address, so, only after reload of GDT, we can
-	 *       safetly "unmap" the virtual phisical addresses of kernel 
-	 *       pages.
-	 *
-	 *   PS: If you understood this comment, you realy knows what
-	 *       is happening here, so you can go ahead and change
-	 *       the code whatever you want. Otherwise, DO NOT touch
-	 *       in this code! */
+	  NOTE: Here we also map the phisical kernel pages 
+	        to the same real address, why?
+	        Simple, because here we are still using
+	        GDT trick, even when we enable the paging system
+	        GDT remains configured with 1GB+1MB as segment base,
+	        which means that processor will sum 1GB+1MB on
+	        each address, so, only after reload of GDT, we can
+	        safetly "unmap" the virtual phisical addresses of kernel 
+	        pages.
+	 
+	    PS: If you understood this comment, you realy knows what
+	        is happening here, so you can go ahead and change
+	        the code whatever you want. Otherwise, DO NOT touch
+	        in this code! */
 	address = (uint32_t)KERNEL_PA_START;
 	table1  = kerneldir->tables[KERNEL_PDIR_SPACE];
 	i = j = 0;
@@ -183,9 +179,7 @@ void init_pg(karch_t *kinf)
 		}
 	}
 	
-	/** 
-	  * Re-arrange memory map to insert kernel region.
-	  */
+	/* Re-arrange memory map to insert kernel region. */
 	kpa_start   = (uint32_t)KERNEL_PA_START;
 	kpa_length  = GET_PHYADDR(free_phy_addr) - kpa_start;
 	kernel_size = kpa_length;
@@ -242,7 +236,7 @@ void init_pg(karch_t *kinf)
 	setup_GDT();
 
 	/* Unmap the phisical addresses kernel pages from virtual address
-	 * because kernel is mapped to 3GB :)*/
+	   because kernel is mapped to 3GB :)*/
 	for (i = oldk; i < (kpages / TABLE_SIZE); i++) {
 		table2 = kerneldir->tables[i];
 		for (j = oldl; j < TABLE_SIZE; j++) {
@@ -254,8 +248,6 @@ void init_pg(karch_t *kinf)
 
 
 /**
- * make_kerneldir
- *
  * Start new kernel pages directory. This functions will
  * alloc all tables used by directory (yes, I know this waste
  * memory space, on x86 each directory will get 4MB of memory
@@ -293,8 +285,6 @@ pagedir_t *make_kerneldir(void)
 
 
 /**
- * get_kernel_size
- *
  * Return the number of bytes used by Kernel
  */
 uint32_t get_kernel_size(void)
@@ -304,12 +294,9 @@ uint32_t get_kernel_size(void)
 
 
 /**
- * alloc_page
- *
  * Return a free page entry or 0 if memory is full
  *
- * Parameters:
- * 		zone - DMA_ZONE or NORMAL_ZONE
+ * \param zone DMA_ZONE or NORMAL_ZONE
  */
 uint32_t alloc_page(zone_t zone)
 {
@@ -324,8 +311,6 @@ uint32_t alloc_page(zone_t zone)
 
 
 /**
- * free_page
- *
  * Free the page entry allocated with alloc_page
  */
 void free_page(uint32_t page_e)
@@ -335,10 +320,7 @@ void free_page(uint32_t page_e)
 }
 
 
-
 /**
- * kmalloc_e
- *
  * This is our kmalloc_e (early), which aims to be used before
  * enabling paging system. The variable free_phy_addr points to
  * the physical free memory space (after kernel). So as far as
@@ -350,5 +332,4 @@ void *kmalloc_e(uint32_t size)
 	free_phy_addr = PAGE_ALIGN(free_phy_addr + size);
 	return((void *)tmp);
 }
-
 

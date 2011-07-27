@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -53,7 +53,7 @@
 	#define PIC_SLAVE_MASK		0xFF
 
 
-	/* A simple wait for io operations */
+	/** A simple wait for io operations */
 	#define pic_delay()	asm volatile("nop; nop; nop");
 
 

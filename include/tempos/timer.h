@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -41,7 +41,7 @@
 		#error "CONFIG_SYSTEM_HZ it's not defined. It should be defined at configuration file."
 	#endif
 
-	/* Alarm struct */
+	/** Alarm struct */
 	struct _alarm_t {
 		uint32_t expires;
 		void (*handler)(int);

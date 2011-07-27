@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -28,10 +28,10 @@
 	#include <tempos/kernel.h>
 	#include <x86/page.h>
 
-	/* Get the physical address of x */
+	/** Get the physical address of x */
 	#define GET_PHYADDR(x)		(((uint32_t)(x)) - KERNEL_ADDR_OFFSET)
 
-	/* Directory position that kernel is mapped */
+	/** Directory position that kernel is mapped */
 	#define KERNEL_PDIR_SPACE	  768 /* 3GB */
 
 	/* Memory zones */
@@ -39,15 +39,15 @@
 	#define NORMAL_ZONE		     0x02
 	#define DMA_ZONE_SIZE	0x1000000 /* 16MB */
 
-	/* Pages directory */
+	/** Pages directory */
 	struct _page_dir {
-		/* Pointer to each page table */
+		/** Pointer to each page table */
 		uint32_t *tables[TABLE_SIZE];
 
-		/* Physical address of each page table */
+		/** Physical address of each page table */
 		uint32_t *tables_phy_addr;
 
-		/* Physical address of the directory */
+		/** Physical address of the directory */
 		uint32_t dir_phy_addr;
 	} __attribute__((packed));
 

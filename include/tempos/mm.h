@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -45,13 +45,13 @@
 	#define GFP_ZEROP		0x04
 
 
-	/* Map of a directory */
+	/** Map of a directory */
 	struct _mem_map {
 		volatile pagedir_t *pagedir;	/* page directory */
 		uchar8_t bitmap[BITMAP_SIZE];
 	} __attribute__ ((packed));
 
-	/* Region of allocated memory */
+	/** Region of allocated memory */
 	struct _mregion {
 		struct _mem_map *memm;
 		uint32_t initial_addr;

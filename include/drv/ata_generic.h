@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -38,14 +38,17 @@
 	#define LBA48			0x02
 
 
-	/* Device info */
-	/* Flags format:
-	 * 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 
-	 * |   |   |   |   |   |   |   |
-	 * |   |   |   |   |   |   |   |---> PRESENT (0 = NO, 1 = YES)
-	 * |   |   |   |   |   |   |-------> LBA48   (0 = NO, 1 = YES)
-	 * |   |   |   |   |   |
-	 *  --   NOT USED    --
+	/**
+	 * Device info
+	 \verbatim
+	 Flags format:
+	  7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 
+	  |   |   |   |   |   |   |   |
+	  |   |   |   |   |   |   |   |---> PRESENT (0 = NO, 1 = YES)
+	  |   |   |   |   |   |   |-------> LBA48   (0 = NO, 1 = YES)
+	  |   |   |   |   |   |
+	   --   NOT USED    --
+	 \endverbatim
 	 */
 	struct _ata_dev_info {
 		uchar8_t flags;

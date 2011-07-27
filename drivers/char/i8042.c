@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -146,8 +146,6 @@ static uint32_t scan2ascii_table[][8] =
 
 
 /**
- * init_8042
- *
  * Initialize keyboard controller
  */
 void init_8042(void)

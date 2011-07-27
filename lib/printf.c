@@ -44,12 +44,12 @@ static void numtostr(char **dest, char flags, long int value, int base, int prec
 
 /**
  * Convert number to string (in specific base)
- * @param dest Destination of converted string
- * @param flags Flags
- * @param value Numeric value
- * @param base The base (2 = binary / 10 = decimal / 16 = hexa)
- * @param prec Precision
- * @param sig Signed conversion (0 = unsigned)
+ * \param dest Destination of converted string
+ * \param flags Flags
+ * \param value Numeric value
+ * \param base The base (2 = binary / 10 = decimal / 16 = hexa)
+ * \param prec Precision
+ * \param sig Signed conversion (0 = unsigned)
  */
 static void numtostr(char **dest, char flags, long int value, int base, int prec, char sig)
 {
@@ -170,9 +170,9 @@ static void numtostr(char **dest, char flags, long int value, int base, int prec
 
 /**
  * Formatted output conversion
- * @param str Destination string
- * @param format Format
- * @param ap Variable arguments list
+ * \param str Destination string
+ * \param format Format
+ * \param ap Variable arguments list
  */
 int vsprintf(char *str, const char *format, va_list ap)
 {
@@ -286,9 +286,9 @@ int vsprintf(char *str, const char *format, va_list ap)
 
 /**
  * Formatted output conversion
- * @param str Destination string
- * @param format Format
- * @param ...
+ * \param str Destination string
+ * \param format Format
+ * \param ...
  */
 int sprintf(char *str, const char *format, ...)
 {
@@ -304,7 +304,7 @@ int sprintf(char *str, const char *format, ...)
 
 /**
  * This is a temporary implementation
- * TODO: final implementation
+ * \todo final implementation
  */
 int kprintf(const char *format, ...)
 {

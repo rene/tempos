@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -29,7 +29,7 @@
 #include <x86/i8259A.h>
 
 
-/* handlers queue for each IRQ */
+/** handlers queue for each IRQ */
 irq_queue_t irq_list[N_IRQ];
 
 
@@ -49,8 +49,6 @@ void init_IRQ(void)
 
 
 /**
- * do_irq
- *
  * Manager for IRQ handlers. This function is called
  * on every IRQ interrupt (see arch/x86/isr.S).
  */

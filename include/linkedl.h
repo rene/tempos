@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -34,14 +34,14 @@
 	#define foreach(list, tmp) for(tmp = list; tmp != NULL; tmp = tmp->next)
 
 
-	/* Singly-linked list */
+	/** Singly-linked list */
 	struct _llist {
 		void *element;
 		struct _llist *next;
 	} __attribute__ ((packed));
 
 
-	/* Circular-linked list */
+	/** Circular-linked list */
 	struct _c_llist {
 		void *element;
 		struct _c_llist *prev;

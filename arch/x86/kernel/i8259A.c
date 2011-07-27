@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -27,8 +27,6 @@
 
 
 /**
- * init_PIC
- *
  * Initialize the two PICs (Master and Slave):
  */
 void init_PIC(void)
@@ -82,15 +80,10 @@ void init_PIC(void)
 
 
 /**
- * get_picmask
- *
  * Return the interrupt mask
  *
- * Parameters:
- * 		pic - PIC_MASTER or PIC_SLAVE
- *
- * Return:
- * 		uchar8_t - Mask or 0 on error
+ * \param pic PIC_MASTER or PIC_SLAVE
+ * \return uchar8_t Mask or 0 on error
  */
 uchar8_t get_picmask(uchar8_t pic)
 {
@@ -106,13 +99,10 @@ uchar8_t get_picmask(uchar8_t pic)
 
 
 /**
- * set_picmask
- *
  * Set the interrupt mask
  *
- * Parameters:
- * 		mask - Mask
- * 		pic  - PIC_MASTER or PIC_SLAVE
+ * \param mask Mask
+ * \param pic PIC_MASTER or PIC_SLAVE
  */
 void set_picmask(uchar8_t mask, uchar8_t pic)
 {
