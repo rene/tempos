@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -24,7 +24,9 @@
 
 #include <linkedl.h>
 
-
+/**
+ * Create a circular linked list
+ */
 int c_llist_create(c_llist **list)
 {
 	*list = NULL;
@@ -32,6 +34,9 @@ int c_llist_create(c_llist **list)
 }
 
 
+/**
+ * Destroy (free memory) a list.
+ */
 int c_llist_destroy(c_llist **list)
 {
 	c_llist *head = *list;
@@ -53,7 +58,12 @@ int c_llist_destroy(c_llist **list)
 	return(1);
 }
 
-
+/**
+ * Add a element into the list
+ *
+ * \param list List.
+ * \param element Element to be inserted.
+ */
 int c_llist_add(c_llist **list, void *element)
 {
 	c_llist *head = *list;
@@ -86,7 +96,12 @@ int c_llist_add(c_llist **list, void *element)
 	return(1);
 }
 
-
+/**
+ * Remove the nth element from the list
+ *
+ * \param list List.
+ * \param pos Element position.
+ */
 int c_llist_remove_nth(c_llist **list, uint32_t pos)
 {
 	c_llist *head = *list;
@@ -129,7 +144,12 @@ int c_llist_remove_nth(c_llist **list, uint32_t pos)
 	}
 }
 
-
+/**
+ * Remove a element from the list
+ *
+ * \param list List.
+ * \parma element Element to remove.
+ */
 int c_llist_remove(c_llist **list, void *element)
 {
 	c_llist *head = *list;
@@ -174,7 +194,13 @@ int c_llist_remove(c_llist **list, void *element)
 	}
 }
 
-
+/**
+ * Return the element at nth position in the list
+ *
+ * \param list List.
+ * \param index Element position.
+ * \return The element or NULL if not found.
+ */
 void *c_llist_nth(c_llist *list, uint32_t index)
 {
 	c_llist *head = list;
@@ -198,7 +224,13 @@ void *c_llist_nth(c_llist *list, uint32_t index)
 	}
 }
 
-
+/**
+ * Return the index of a element in the list
+ *
+ * \param list List.
+ * \param element Element to find the index.
+ * \return -1 if element was not found, the index otherwise.
+ */
 int32_t c_llist_index(c_llist *list, void *element)
 {
 	c_llist *tmp;
@@ -226,7 +258,11 @@ int32_t c_llist_index(c_llist *list, void *element)
 	}
 }
 
-
+/**
+ * Return the length of a circular linked list
+ *
+ * \param list List
+ */
 int32_t c_llist_length(c_llist *list)
 {
 	c_llist *head  = list;

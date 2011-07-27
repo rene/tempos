@@ -36,6 +36,7 @@
 	#endif
 
 	#ifdef CONFIG_SYSTEM_HZ
+		/** System frequency defined at kernel configuration file */
 		#define HZ CONFIG_SYSTEM_HZ
 	#else
 		#error "CONFIG_SYSTEM_HZ it's not defined. It should be defined at configuration file."

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -40,8 +40,6 @@ task_st *current_task = NULL;
 
 
 /**
- * init_sched
- *
  * Initialize the scheduler
  */
 void init_scheduler(void)
@@ -54,8 +52,6 @@ void init_scheduler(void)
 
 
 /**
- * schedule
- *
  * Do a task switch
  */
 void schedule(int p)

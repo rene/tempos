@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -24,6 +24,9 @@
 
 #include <tempos/syscall.h>
 
+/**
+ * TempOS system calls table
+ */
 void *syscall_table[] = {
 
 	&sys_exit,			/* 0 */

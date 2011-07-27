@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -28,21 +28,19 @@
 #include <tempos/jiffies.h>
 #include <unistd.h>
 
-
+/** BogoMIPS calculated at system startup */
 uint32_t bogomips;
 
 
 /**
- * calibrate_delay
- *
- * Calibrate delay (find BogoMIPS)
+ * Calibrate delay (calculate BogoMIPS)
  */
 void calibrate_delay(void)
 {
 	uint32_t timeout;
 	bogomips = 0;
 
-	kprintf(KERN_INFO "Calibrating delay...");
+	kprintf(KERN_INFO "Calibrating loop delay...");
 	timeout = jiffies + ((HZ / 1000)); /* Calibration takes 1ms */
 	while( !time_after(jiffies, timeout) )
 			bogomips++;
@@ -54,9 +52,9 @@ void calibrate_delay(void)
 
 
 /**
- * udelay
+ * Delay in microseconds
  *
- * Delay in microsecond
+ * \param usecs Microseconds to wait
  */
 void udelay(uint32_t usecs)
 {
@@ -67,13 +65,12 @@ void udelay(uint32_t usecs)
 
 
 /**
- * mdelay
+ * Delay in milliseconds
  *
- * Delay in millisecond
+ * \param msecs Miliseconds to wait
  */
 void mdelay(uint32_t msecs)
 {
 	udelay(msecs * 1000);
 }
-
 

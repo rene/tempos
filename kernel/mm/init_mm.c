@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -26,10 +26,12 @@
 
 extern volatile pagedir_t *kerneldir;
 
-/* Kernel Map memory */
+/** Kernel Map memory */
 volatile mem_map kmem;
 
-
+/**
+ * Init the high level memory manager
+ */
 void init_mm(void)
 {
 	uint32_t kpages;
@@ -55,8 +57,6 @@ void init_mm(void)
 
 
 /**
- * bmap_clear
- *
  * Clear a bit map
  */
 void bmap_clear(volatile mem_map *map)
@@ -70,8 +70,6 @@ void bmap_clear(volatile mem_map *map)
 
 
 /**
- * bmap_on
- *
  * Mark a bit (block) on a bitmap
  */
 void bmap_on(volatile mem_map *map, uint32_t block)
@@ -84,8 +82,6 @@ void bmap_on(volatile mem_map *map, uint32_t block)
 
 
 /**
- * bmap_off
- *
  * Unmark a bit (block) on a bitmap
  */
 void bmap_off(volatile mem_map *map, uint32_t block)

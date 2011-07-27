@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -25,15 +25,13 @@
 #include <tempos/mm.h>
 
 
-/* Kernel Map memory */
+/** Kernel Map memory */
 extern mem_map kmem;
 
 
 /**
- * kmalloc
- *
  * Alloc memory =:)
-*/
+ */
 void *kmalloc(uint32_t size, uint16_t flags)
 {
 	return( _vmalloc_(&kmem, size, flags) );
@@ -41,8 +39,6 @@ void *kmalloc(uint32_t size, uint16_t flags)
 
 
 /**
- * _vmalloc_
- *
  * What this functions does it's look at a memory map bitmap and try to
  * find space to alloc size bytes. We can also free the memory allocated
  * with _vmalloc_, to do that, every piece of memory allocated will start
@@ -50,6 +46,10 @@ void *kmalloc(uint32_t size, uint16_t flags)
  * region allocated. So once we call kfree function it will look at
  * inital_address-sizeof(mregion), get the region information and free the
  * memory. This is a very simple memory allocator, that works only with pages.
+ *
+ * \param memm Memory allocation bitmap.
+ * \param size How many bytes to alloc.
+ * \param flags Flags
  */
 void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 {
@@ -182,8 +182,6 @@ error:
 
 
 /**
- * kfree
- *
  * Free memory allocated with _vmalloc
  */
 void kfree(void *ptr)

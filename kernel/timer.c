@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -29,7 +29,7 @@
 #include <arch/irq.h>
 
 
-/* Queue of alarms */
+/** Queue of alarms */
 llist *alarm_queue;
 
 
@@ -38,16 +38,15 @@ static void update_alarms(void);
 
 
 /**
- * jiffies
- *
  * Contains the number of system clock ticks
+ *
+ * \note System frequency is expressed in hertz by HZ defined at compilation.
+ * \see tempos/timer.h
  */
 volatile uint32_t jiffies;
 
 
 /**
- * init_timer
- *
  * Initialize time system
  */
 void init_timer(void)
@@ -65,8 +64,6 @@ void init_timer(void)
 
 
 /**
- * timer_handler
- *
  * Interrupt handler
  */
 static void timer_handler(void)
@@ -77,8 +74,6 @@ static void timer_handler(void)
 
 
 /**
- * update_alarms
- *
  * Check and execute handlers of expired alarms
  */
 static void update_alarms(void)
@@ -104,9 +99,11 @@ static void update_alarms(void)
 
 
 /**
- * new_alarm
- *
  * Create a new alarm
+ *
+ * \param expires When alarm will expire (expressed in jiffies)
+ * \param handler The function to be executed when alarm expires.
+ * \param arg Argument to be passed to handler function.
  */
 int new_alarm(uint32_t expires, void (*handler)(int), uint32_t arg)
 {

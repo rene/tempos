@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -37,7 +37,7 @@
 #include <semaphore.h>
 
 
-/* information passed from first stage */
+/** information passed from first stage */
 karch_t kinfo;
 
 extern uint32_t *kpagedir;
