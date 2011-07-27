@@ -30,7 +30,7 @@
 	/** Semaphore structure */
 	typedef int16_t sem_t;
 
-	/**
+	/*
 	 * prototypes
 	 */
 	int mutex_init(sem_t *mutex);

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -24,7 +24,11 @@
 
 #include <linkedl.h>
 
-
+/**
+ * Create a new linked list
+ * @param list New list
+ * @return int Always return true
+ */
 int llist_create(llist **list)
 {
 	*list = NULL;

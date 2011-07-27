@@ -41,7 +41,7 @@ HISTORY:
 
 AUTHOR:
 	TempOS was written by Renê de Souza Pinto and supervised by
-	the PhD teacher Francisco José Monaco, at University of
+	the PhD professor Francisco José Monaco, at University of
 	São Paulo - USP, from São Carlos - Brazil.
 
 	Author E-mail: rene@renesp.com.br
@@ -55,11 +55,19 @@ AUTHOR:
 
 BUILD AND INSTALL:
 
-	To build and test TempOS simple type:
+	To build and test TempOS just type:
 
-		$ make tempos
+		$ make
 		$ make install
 		$ make test
+
+	To view make targets use:
+
+		$ make help
+
+	To generate TempOS source code documentation:
+
+		$ make doc
 
 	The following dependencies are necessary to build and test TempOS:
 

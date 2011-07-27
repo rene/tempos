@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -33,13 +33,24 @@
 #define FLAG_SPACE	0x03
 #define FLAG_PLUS	0x04
 
+/** Signed conversion */
 #define SIGNED         1
+/** Unsigned conversion */
 #define UNSIGNED       0
 
 
 static void numtostr(char **dest, char flags, long int value, int base, int prec, char sig);
 
 
+/**
+ * Convert number to string (in specific base)
+ * @param dest Destination of converted string
+ * @param flags Flags
+ * @param value Numeric value
+ * @param base The base (2 = binary / 10 = decimal / 16 = hexa)
+ * @param prec Precision
+ * @param sig Signed conversion (0 = unsigned)
+ */
 static void numtostr(char **dest, char flags, long int value, int base, int prec, char sig)
 {
 	char *ndest = *dest;
@@ -157,6 +168,12 @@ static void numtostr(char **dest, char flags, long int value, int base, int prec
 }
 
 
+/**
+ * Formatted output conversion
+ * @param str Destination string
+ * @param format Format
+ * @param ap Variable arguments list
+ */
 int vsprintf(char *str, const char *format, va_list ap)
 {
 	char *fmt  = (char *)format;
@@ -267,6 +284,12 @@ int vsprintf(char *str, const char *format, va_list ap)
 }
 
 
+/**
+ * Formatted output conversion
+ * @param str Destination string
+ * @param format Format
+ * @param ...
+ */
 int sprintf(char *str, const char *format, ...)
 {
 	va_list args;
