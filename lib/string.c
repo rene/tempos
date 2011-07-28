@@ -36,14 +36,14 @@ char *strcat(char *dest, const char *src)
 		*pdest++ = *src++;
 	*pdest = '\0';
 
-	return(dest);
+	return dest;
 }
 
 
 int strcmp(const char *s1, const char *s2)
 {
 	while( (*s1++ != *s2++) && (*s1 && *s2) );
-	return((int)((unsigned char)*s1 - (unsigned char)*s2));
+	return ((int)((unsigned char)*s1 - (unsigned char)*s2));
 }
 
 
@@ -51,7 +51,7 @@ char *strcpy(char *dest, const char *src)
 {
 	size_t len = strlen(src);
 	memcpy(dest, src, len);
-	return(dest);
+	return dest;
 }
 
 
@@ -60,7 +60,7 @@ size_t strlen(const char *s)
 	char *tmp = (char*)s;
 	while(*tmp != '\0')
 		tmp++;
-	return((size_t)(tmp - s));
+	return (size_t)(tmp - s);
 }
 
 
@@ -76,7 +76,7 @@ char *strncat(char *dest, const char *src, size_t n)
 		*pdest++ = *src++;
 	*pdest = '\0';
 
-	return(dest);
+	return dest;
 }
 
 
@@ -84,14 +84,14 @@ int strncmp(const char *s1, const char *s2, size_t n)
 {
 	size_t p = n;
 	while( (*s1++ != *s2++) && (*s1 && *s2) && p-- );
-	return((int)((unsigned char)*s1 - (unsigned char)*s2));
+	return ((int)((unsigned char)*s1 - (unsigned char)*s2));
 }
 
 
 char *strncpy(char *dest, const char *src, size_t n)
 {
 	memcpy(dest, src, n);
-	return(dest);
+	return dest;
 }
 
 
@@ -112,9 +112,9 @@ char *strstr(const char *haystack, const char *needle)
 	}
 
 	if(!*pnee)
-		return(res);
+		return res;
 	else
-		return(NULL);
+		return NULL;
 }
 
 
@@ -127,7 +127,18 @@ void *memcpy(void *dest, const void *src, size_t n)
 	while(p--)
 		*pdest++ = *psrc++;
 
-	return(dest);
+	return dest;
 }
 
+
+void *memset(void *s, int c, size_t n)
+{
+	size_t p = n;
+	char *pdest = (char *)s;
+
+	while(p--)
+		*pdest++ = c;
+
+	return s;
+}
 

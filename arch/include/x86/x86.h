@@ -52,6 +52,12 @@
 	#define KERNEL_CS	0x08
 	/** Position 2 on GDT */
 	#define KERNEL_DS	0x10
+	/** Position 3 on GDT */
+	#define USER_CS		0x18
+	/** Position 4 on GDT */
+	#define USER_DS		0x20
+	/** Position 5 on GDT */
+	#define TSS_INDEX   0x28
 
 #endif /* ARCH_X86_H */
 

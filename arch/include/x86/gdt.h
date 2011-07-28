@@ -29,12 +29,12 @@
 
 	#define GDT_TABLE_SIZE	0x06
 
-	#define GDT_SET_BASE(a, base)      a->base_low         = (base & 0x0000FFFF);        \
-									   a->high.base_middle = ((base >> 16) & 0x000000FF);  \
-									   a->high.base_high   = ((base >> 24) & 0x000000FF);
+	#define GDT_SET_BASE(a, base)      a->base_low         = ((base) & 0x0000FFFF);        \
+									   a->high.base_middle = (((base) >> 16) & 0x000000FF);  \
+									   a->high.base_high   = (((base) >> 24) & 0x000000FF);
 
-	#define GDT_SET_LIMIT(b, limit)    b->limit_low        = (limit & 0x0000FFFF);       \
-									   b->high.limit_high  = ((limit >> 16) & 0x0000000F);
+	#define GDT_SET_LIMIT(b, limit)    b->limit_low        = ((limit) & 0x0000FFFF);       \
+									   b->high.limit_high  = (((limit) >> 16) & 0x0000000F);
 
 	#define CODE_SEG	0x0A	/* Execute / Read 					 */
 	#define DATA_SEG	0x02	/* Read / Write						 */

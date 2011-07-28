@@ -34,16 +34,16 @@
 	 */
 	struct _tss_struct {
 		uint16_t prev_task_link;
-		uint16_t reserverd0;
+		uint16_t reserved0;
 		uint32_t esp0;
 		uint16_t ss0;
-		uint16_t reserverd1;
+		uint16_t reserved1;
 		uint32_t esp1;
 		uint16_t ss1;
-		uint16_t reserverd2;
+		uint16_t reserved2;
 		uint32_t esp2;
 		uint16_t ss2;
-		uint16_t reserverd3;
+		uint16_t reserved3;
 		uint32_t cr3;
 		uint32_t eip;
 		uint32_t eflags;
@@ -56,19 +56,22 @@
 		uint32_t esi;
 		uint32_t edi;
 		uint16_t es;
-		uint16_t reserverd4;
+		uint16_t reserved4;
 		uint16_t cs;
-		uint16_t reserverd5;
+		uint16_t reserved5;
 		uint16_t ss;
-		uint16_t reserverd6;
+		uint16_t reserved6;
 		uint16_t ds;
-		uint16_t reserverd7;
+		uint16_t reserved7;
 		uint16_t fs;
-		uint16_t reserverd8;
+		uint16_t reserved8;
 		uint16_t gs;
-		uint16_t reserverd9;
+		uint16_t reserved9;
 		uint16_t LDT_seg_selector;
-		uint16_t reserverd10;
+		uint16_t reserved10;
+		uint16_t debug : 1;
+		uint16_t reserved11 : 15;
+		uint16_t iomap;
 	} __attribute__ ((packed));
 
 	typedef struct _tss_struct tss_t;

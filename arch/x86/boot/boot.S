@@ -33,7 +33,7 @@
  */
  	.text
 
-	.globl start, _start
+	.globl start, _start, stack
 	.extern karch
 
 start:

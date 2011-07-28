@@ -40,7 +40,7 @@ idt_t idt_table[IDT_TABLE_SIZE];
   enable after PIC initialization. See arch/x86/kernel/i8259A.c and 
   arch/x86/boot/karch.c.
  
-  As you should know, x86 architecture permits three types of gate
+  As you should know, x86 architecture allows three types of gate
   descriptors in IDT: Task-gate, Interrupt-gate and Trap-gate descriptors.
   TempOS uses only Interrupt-gate descritors, that has this format:
  

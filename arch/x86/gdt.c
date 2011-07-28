@@ -142,7 +142,7 @@ void setup_GDT(void)
 	tssentry->high.busy        = 0;
 	tssentry->high.type_res1   = 2; /* do NOT change! */
 	tssentry->high.reserved1   = 0;
-	tssentry->high.DPL         = USER_DPL;
+	tssentry->high.DPL         = KERNEL_DPL;
 	tssentry->high.present     = 1;
 	tssentry->high.avaliable   = 0;
 	tssentry->high.reserved2   = 0;
@@ -172,6 +172,9 @@ inline void load_gdt(void)
 		/* Reload CODE segment */
 		"ljmp %2, $reloadCS \n"
 		"reloadCS:            "
-			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS) : "eax");
+		/* Now, we also load the Task Register */
+		"	movw %3, %%ax      \n"
+		"	ltrw %%ax          \n"
+			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS), "n" (TSS_INDEX) : "eax");
 }
 
