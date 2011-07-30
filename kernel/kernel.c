@@ -41,9 +41,9 @@ karch_t kinfo;
 
 extern pagedir_t *kerneldir;
 
-/*char kstack[4096];
+char kstack[4096];
+extern uint32_t stack;
 void k_thread_1(void);
-extern tss_t task_tss;*/
 
 
 /**
@@ -56,7 +56,7 @@ void tempos_main(karch_t kinf)
 {
 	memcpy(&kinfo, &kinf, sizeof(karch_t));
 
-	/* keep init_timer() in first palce because drivers use timer functions */
+	/* keep init_timer() in first place because drivers use timer functions */
 	init_timer();
 	calibrate_delay();
 
@@ -98,40 +98,26 @@ void tempos_main(karch_t kinf)
 
 	kprintf(KERN_INFO "\nI'am back from syscall!!\n");*/
 
-	kprintf(KERN_INFO "1 ");
+	/*kprintf(KERN_INFO "1 ");
 	mdelay(1000);
 	kprintf(KERN_INFO "2 ");
 	mdelay(1000);
-	kprintf(KERN_INFO "3 ");
-
-	/*task_st kth;
-
-	memset(&kth, 0, sizeof(kth));
-
-	kth.arch_tss.cr3 = (uint32_t)kerneldir;
-	kth.arch_tss.eip = (uint32_t)k_thread_1;
-
-	kth.arch_tss.cs = 0x08; // KERNEL_CS
-	kth.arch_tss.ds = 0x10; // KERNEL_DS
-	kth.arch_tss.es = 0x10;
-	kth.arch_tss.fs = 0x10;
-	kth.arch_tss.gs = 0x10;
-
-	kth.arch_tss.ss0 = 0x10;
-	kth.arch_tss.esp0 = (uint32_t)kstack;
-
-	kth.arch_tss.iomap = sizeof(task_tss);
-
-	task_tss = kth.arch_tss;
-
+	kprintf(KERN_INFO "3 ");*/
+		
+	/* do a context switch */
 	asm("cli                 \n"
 		"movl  %%esp, %%eax  \n"
 		"movl  %0, %%esp     \n"
 		"pushl %%eax         \n"
+		"pushfl \n"
+		"popl  %%eax         \n"
+		"andl $0x3F3FD7, %%eax \n"
+		"pushl %%eax \n"
+		"pushf \n"
 		"sti \n"
 		"ljmp  %1, %2        \n"
 		"popl  %%eax         \n"
-		"movl  %%eax, %%esp  \n" :: "i" (kstack), "i" (KERNEL_CS), "i" (k_thread_1) : "eax"); */
+		"movl  %%eax, %%esp  \n" :: "i" (&kstack[4095]), "i" (KERNEL_CS), "i" (k_thread_1) : "%eax");
 
 	for(;;);
 }
@@ -145,9 +131,9 @@ void panic(const char *str)
 
 void k_thread_1(void)
 {
-	kprintf(KERN_INFO "Hello, I'm the Kernel Thread 1\n");
+	kprintf(KERN_INFO "Hello, I'm the Kernel Thread 1, running with my own stack!\n");
 	mdelay(1000);
-	kprintf(KERN_INFO "Hello, I'm the Kernel Thread 1\n");
+	kprintf(KERN_INFO "Hello, I'm the Kernel Thread 1, running with my own stack!\n");
 	for(;;);
 }
 

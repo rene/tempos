@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
@@ -43,10 +43,11 @@
 
 no_error_code:
 
-	/**
+	/*
 	 * Save machine state
 	 */
 
+	cli
 	/* Exchange EAX value with the address function pushed onto the stack */
 	xchgl %eax,(%esp)
 	pushl %ebx
@@ -55,6 +56,8 @@ no_error_code:
 	pushl %edi
 	pushl %esi
 	pushl %ebp
+	pushl %esp
+	pushw %ss
 	pushw %ds
 	pushw %es
 	pushw %fs
@@ -78,6 +81,8 @@ no_error_code:
 	popw %fs
 	popw %es
 	popw %ds
+	popw %ss
+	popl %esp
 	popl %ebp
 	popl %esi
 	popl %edi
@@ -85,6 +90,8 @@ no_error_code:
 	popl %ecx
 	popl %ebx
 	popl %eax
+
+	sti
 	iret
 
 
@@ -93,6 +100,7 @@ error_code:
 	 * Save machine state
 	 */
 
+	cli
 	/* Exchange EAX value with the error code pushed onto the stack and also
 	   with EBX value with the address function pushed too */
 	xchgl %eax,4(%esp)
@@ -102,6 +110,8 @@ error_code:
 	pushl %edi
 	pushl %esi
 	pushl %ebp
+	pushl %esp
+	pushw %ss
 	pushw %ds
 	pushw %es
 	pushw %fs
@@ -125,6 +135,8 @@ error_code:
 	popw %fs
 	popw %es
 	popw %ds
+	popw %ss
+	popl %esp
 	popl %ebp
 	popl %esi
 	popl %edi
@@ -132,8 +144,9 @@ error_code:
 	popl %ecx
 	popl %ebx
 	popl %eax
+	
+	sti
 	iret
-
 
 /**
  * Null ISR (do nothing)
