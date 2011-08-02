@@ -27,10 +27,16 @@
 
 	#include <x86/x86.h>
 	#include <unistd.h>
-	
+
 	/**
 	 * This is the Task-State Segment (TSS).
-	 * \todo Document this struct.
+	 *
+	 * \note This structure is used when hardware context switch is used.
+	 * However, TempOS does context switches by software, so we will NOT use
+	 * this structure. The only reason to declare it it's to make a TSS entry at
+	 * GDT (Global Descriptor Table).
+	 *
+	 * \see arch/x86/gdt.c
 	 */
 	struct _tss_struct {
 		uint16_t prev_task_link;
@@ -67,16 +73,31 @@
 		uint16_t reserved8;
 		uint16_t gs;
 		uint16_t reserved9;
-		uint16_t LDT_seg_selector;
+		uint16_t LDT_seg;
 		uint16_t reserved10;
 		uint16_t debug : 1;
 		uint16_t reserved11 : 15;
 		uint16_t iomap;
 	} __attribute__ ((packed));
 
+	/**
+	 * This is the structure that contains all "registers context" of a process.
+	 *
+	 * TempOS scheduler will uses this structure to store/reload process
+	 * architecture specific context.
+	 *
+	 * \see arch/x86/isr.S
+	 */
+	struct _tss_st {
+		/** Context registers */
+		pt_regs regs;
+		/** Page table directory */
+		uint32_t cr3;
+	} __attribute__ ((packed));
+
 	typedef struct _tss_struct tss_t;
 
-	extern tss_t task_tss;
+	typedef struct _tss_st arch_tss_t;
 
 #endif /* ARCH_X86_TSS_H */
 

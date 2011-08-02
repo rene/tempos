@@ -52,7 +52,7 @@ void init_IRQ(void)
  * Manager for IRQ handlers. This function is called
  * on every IRQ interrupt (see arch/x86/isr.S).
  */
-void do_irq(uint32_t irqnum, pt_regs regs)
+pushargs void do_irq(uint32_t irqnum, pt_regs regs)
 {
 	irq_queue_t *queue;
 	irq_handler_t *handler;
@@ -68,7 +68,7 @@ void do_irq(uint32_t irqnum, pt_regs regs)
 	foreach(queue->queue, tmp) {
 		handler = (irq_handler_t *)tmp->element;
 		if(handler != NULL)
-			handler->handler(handler->id, &regs);
+			handler->handler(handler->id, regs);
 	}
 
 
@@ -86,7 +86,7 @@ void do_irq(uint32_t irqnum, pt_regs regs)
  *
  * This function it's used by device drivers
  */
-int request_irq(uint16_t irq, void (*handler)(int, pt_regs *),
+int request_irq(uint16_t irq, void (*handler)(int, pt_regs),
 						uint16_t flags, const char *name)
 {
 	irq_queue_t *queue;

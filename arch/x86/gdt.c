@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string.h>
 #include <x86/gdt.h>
 #include <x86/tss.h>
 
@@ -29,14 +30,13 @@
 /** GDT table */
 gdt_t gdt_table[GDT_TABLE_SIZE];
 
-
 /** Global Task Struct */
 tss_t task_tss;
 
 /**
 \verbatim
   TempOS use a Protected Flat Model with paging for memory organization
-  and protection. The GDT have five entries:
+  and protection. The GDT has seven entries:
   		
   		KERNEL_CS (Code Segment, Ring 0) <-- For kernel code
   		KERNEL_DS (Data Segment, Ring 0) <-- For kernel data and stack
@@ -133,11 +133,12 @@ void setup_GDT(void)
 	gdtentry->high.DB          = 1; /* 32-bit segment */
 	gdtentry->high.granularity = GDT_GR_4KB;
 
-
+	
 	/* TSS_SEG */
+	memset(&task_tss, 0, sizeof(tss_t));
 	tssentry = (gdt_tsseg_t *)&gdt_table[5];
 	GDT_SET_BASE(tssentry,  (size_t)&task_tss);
-	GDT_SET_LIMIT(tssentry, sizeof(tss_t));
+	GDT_SET_LIMIT(tssentry, sizeof(tss_t)-1);
 	tssentry->high.type_res0   = 1; /* do NOT change! */
 	tssentry->high.busy        = 0;
 	tssentry->high.type_res1   = 2; /* do NOT change! */
@@ -149,7 +150,7 @@ void setup_GDT(void)
 	tssentry->high.reserved3   = 0;
 	tssentry->high.granularity = GDT_GR_4KB;
 
-
+	/* Finally, load GDT */
 	GDTR.table_limit = (GDT_TABLE_SIZE * sizeof(gdt_t)) - 1;
 	GDTR.gdt_ptr     = gdt_table;
 	load_gdt();
@@ -175,6 +176,6 @@ inline void load_gdt(void)
 		/* Now, we also load the Task Register */
 		"	movw %3, %%ax      \n"
 		"	ltrw %%ax          \n"
-			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS), "n" (TSS_INDEX) : "eax");
+			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS), "i" (TSS_SEG) : "eax");
 }
 

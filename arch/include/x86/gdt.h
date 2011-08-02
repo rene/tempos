@@ -36,8 +36,8 @@
 	#define GDT_SET_LIMIT(b, limit)    b->limit_low        = ((limit) & 0x0000FFFF);       \
 									   b->high.limit_high  = (((limit) >> 16) & 0x0000000F);
 
-	#define CODE_SEG	0x0A	/* Execute / Read 					 */
-	#define DATA_SEG	0x02	/* Read / Write						 */
+	#define CODE_SEG	 0x0A	/* Execute / Read 					 */
+	#define DATA_SEG	 0x02	/* Read / Write						 */
 
 	#define STYPE_SYS	0  		/* System segment descriptor type    */
 	#define STYPE_DC	1  		/* Data/Code segment descriptor type */

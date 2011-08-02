@@ -158,7 +158,7 @@ void init_8042(void)
 	kbc_sendcomm(KBD_ENABLE);
 
 	/* Register IRQ service routine */
-	if( request_irq(KBD_IRQ, (void(*)(int, pt_regs *))keyboard_handler, 0, "i8042") < 0) {
+	if( request_irq(KBD_IRQ, (void(*)(int, pt_regs))keyboard_handler, 0, "i8042") < 0) {
 		kprintf(KERN_ERROR "Error on initialize i8042\n");
 	}
 

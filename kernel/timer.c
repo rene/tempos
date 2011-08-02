@@ -28,13 +28,12 @@
 #include <unistd.h>
 #include <arch/irq.h>
 
-
 /** Queue of alarms */
 llist *alarm_queue;
 
 
-static void timer_handler(void);
-static void update_alarms(void);
+static void timer_handler(int i, pt_regs regs);
+static void update_alarms(pt_regs regs);
 
 
 /**
@@ -55,7 +54,7 @@ void init_timer(void)
 
 	kprintf(KERN_INFO "Initializing timer...\n");
 
-	if( request_irq(TIMER_IRQ, (void(*)(int, pt_regs *))timer_handler, 0, "PIT") < 0 ) {
+	if( request_irq(TIMER_IRQ, timer_handler, 0, "PIT") < 0 ) {
 		kprintf(KERN_ERROR "Error on initialize PIT\n");
 	} else {
 		llist_create(&alarm_queue);
@@ -66,17 +65,17 @@ void init_timer(void)
 /**
  * Interrupt handler
  */
-static void timer_handler(void)
+pushargs void timer_handler(int i, pt_regs regs)
 {
 	jiffies++;
-	update_alarms();
+	update_alarms(regs);
 }
 
 
 /**
  * Check and execute handlers of expired alarms
  */
-static void update_alarms(void)
+static void update_alarms(pt_regs regs)
 {
 	llist *tmp;
 	alarm_t *alarm;
@@ -89,7 +88,7 @@ static void update_alarms(void)
 
 		if( time_after(jiffies, alarm->expires) ) {
 			/* Execute handler and remove from list */
-			alarm->handler(alarm->arg);
+			alarm->handler(regs, alarm->arg);
 			llist_remove_nth(&alarm_queue, pos);
 		}
 
@@ -105,7 +104,7 @@ static void update_alarms(void)
  * \param handler The function to be executed when alarm expires.
  * \param arg Argument to be passed to handler function.
  */
-int new_alarm(uint32_t expires, void (*handler)(int), uint32_t arg)
+int new_alarm(uint32_t expires, void (*handler)(pt_regs, void *), void *arg)
 {
 	alarm_t *nalarm;
 

@@ -104,9 +104,9 @@ void ex_stack()
 }
 
 
-void ex_gp()
+void ex_gp(int code)
 {
-	kprintf("EXCEP: GP\n");
+	kprintf("EXCEP: GP - %d\n", code);
 }
 
 

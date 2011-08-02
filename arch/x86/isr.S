@@ -47,20 +47,18 @@ no_error_code:
 	 * Save machine state
 	 */
 
-	cli
 	/* Exchange EAX value with the address function pushed onto the stack */
 	xchgl %eax,(%esp)
-	pushl %ebx
 	pushl %ecx
 	pushl %edx
-	pushl %edi
-	pushl %esi
-	pushl %ebp
+	pushl %ebx
 	pushl %esp
-	pushw %ss
 	pushw %ds
 	pushw %es
 	pushw %fs
+	pushw %gs
+	pushw %ss
+	
 	pushl  $0x00 /* Error code */
 
 	/* Move to kernel mode */
@@ -78,17 +76,15 @@ no_error_code:
 	/**
 	 * Restore machine state
 	 */
+	popw %ss
+	popw %gs
 	popw %fs
 	popw %es
 	popw %ds
-	popw %ss
 	popl %esp
-	popl %ebp
-	popl %esi
-	popl %edi
+	popl %ebx
 	popl %edx
 	popl %ecx
-	popl %ebx
 	popl %eax
 
 	sti
@@ -100,21 +96,19 @@ error_code:
 	 * Save machine state
 	 */
 
-	cli
 	/* Exchange EAX value with the error code pushed onto the stack and also
 	   with EBX value with the address function pushed too */
 	xchgl %eax,4(%esp)
-	xchgl %ebx,(%esp)
-	pushl %ecx
+	xchgl %ecx,(%esp)
 	pushl %edx
-	pushl %edi
-	pushl %esi
-	pushl %ebp
+	pushl %ebx
 	pushl %esp
-	pushw %ss
 	pushw %ds
 	pushw %es
 	pushw %fs
+	pushw %gs
+	pushw %ss
+	
 	pushl %eax /* Error code */
 
 	/* Move to kernel mode */
@@ -126,26 +120,23 @@ error_code:
 	movw %dx, %es
 
 	/* Execute the ISR */
-	call *%ebx
+	call *%ecx
 
 	/**
 	 * Restore machine state
 	 */
 	popl %eax /* error code */
+	popw %ss
+	popw %gs
 	popw %fs
 	popw %es
 	popw %ds
-	popw %ss
 	popl %esp
-	popl %ebp
-	popl %esi
-	popl %edi
+	popl %ebx
 	popl %edx
 	popl %ecx
-	popl %ebx
 	popl %eax
-	
-	sti
+
 	iret
 
 /**

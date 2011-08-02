@@ -39,11 +39,11 @@
 /** information passed from first stage */
 karch_t kinfo;
 
-extern pagedir_t *kerneldir;
+//extern pagedir_t *kerneldir;
 
 char kstack[4096];
 extern uint32_t stack;
-void k_thread_1(void);
+void kernel_main_thread(void);
 
 
 /**
@@ -66,15 +66,27 @@ void tempos_main(karch_t kinf)
 	/* ATA controller */
 	init_ata_generic();
 
-	/* Init scheduler */
-	init_scheduler();
-
-	/* Init Virtual File System */
+	/* Init Virtual File System layer */
 	register_all_fs_types();
 
 	/* Show command line */
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 
+	/* Init scheduler */
+	init_scheduler(kernel_main_thread);
+
+	/* Should never reaches here! */
+	panic("Error on initialize scheduler!");
+}
+
+void panic(const char *str)
+{
+	kprintf(KERN_CRIT "%s\n", str);
+	for(;;);
+}
+
+void kernel_main_thread(void)
+{
 	/* Test *
 	sem_t mt;
 	mutex_init(&mt);
@@ -103,37 +115,15 @@ void tempos_main(karch_t kinf)
 	kprintf(KERN_INFO "2 ");
 	mdelay(1000);
 	kprintf(KERN_INFO "3 ");*/
-		
-	/* do a context switch */
-	asm("cli                 \n"
-		"movl  %%esp, %%eax  \n"
-		"movl  %0, %%esp     \n"
-		"pushl %%eax         \n"
-		"pushfl \n"
-		"popl  %%eax         \n"
-		"andl $0x3F3FD7, %%eax \n"
-		"pushl %%eax \n"
-		"pushf \n"
-		"sti \n"
-		"ljmp  %1, %2        \n"
-		"popl  %%eax         \n"
-		"movl  %%eax, %%esp  \n" :: "i" (&kstack[4095]), "i" (KERNEL_CS), "i" (k_thread_1) : "%eax");
 
-	for(;;);
-}
+	/* Mount root file system */
+	/* ... */
+	/*asm("movl $0x24, %%eax \n"
+		"lopp:             \n" 
+		"  jmp $0x08, $lopp" ::: "eax");*/
 
-
-void panic(const char *str)
-{
-	kprintf(KERN_CRIT "%s\n", str);
-	for(;;);
-}
-
-void k_thread_1(void)
-{
-	kprintf(KERN_INFO "Hello, I'm the Kernel Thread 1, running with my own stack!\n");
-	mdelay(1000);
-	kprintf(KERN_INFO "Hello, I'm the Kernel Thread 1, running with my own stack!\n");
+	kprintf(KERN_INFO "Hello, I'm the main kernel process!\n");
+	//mdelay(1000);
 	for(;;);
 }
 

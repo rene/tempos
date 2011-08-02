@@ -38,7 +38,7 @@
 	void ex_inv_tss();
 	void ex_segnp();
 	void ex_stack();
-	void ex_gp();
+	void ex_gp(int code);
 	void ex_pfault();
 	void ex_floatp();
 	void ex_align();

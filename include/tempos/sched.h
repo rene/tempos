@@ -28,7 +28,36 @@
 	#include <sys/types.h>
 	#include <unistd.h>
 	#include <arch/task.h>
+	#include <linkedl.h>
 
+	/** Task state: Ready to run */
+	#define TASK_READY_TO_RUN 0x00
+	/** Task state: Running */
+	#define TASK_RUNNING      0x01
+	/** Task state: Stopped */
+	#define TASK_STOPPED      0x02
+	/** Task state: Zombie */
+	#define TASK_ZOMBIE       0x03
+
+	/** Default priority */
+	#define DEFAULT_PRIORITY  0
+
+	/** PID of kernel threads */
+	#define KERNEL_PID 0
+	
+	/** PID of init */
+	#define INIT_PID 1
+
+	/** Process's stack size */
+	#define PROCESS_STACK_SIZE STACK_SIZE
+
+	/** Return cur_task circular linked list element (or NULL) */
+	#define GET_TASK(a) (a == NULL ? NULL : (task_t*)a->element)
+
+	/**
+	 * Process structure. This structure holds all information about a
+	 * process, PID, state, and also its context.
+	 */
 	struct _task_struct {
 		/** Process state */
 		int state;
@@ -36,17 +65,31 @@
 		int priority;
 		/** Process ID */
 		pid_t pid;
-
-		/** architecture dependent */
+		/** Process stack */
+		size_t *stack;
+		/** Return code */
+		int return_code;
+		/** Wait queue */
+		int wait_queue;
+		/** Architecture dependent */
 		arch_tss_t arch_tss;
 	};
 
-	typedef struct _task_struct task_st;
+	typedef struct _task_struct task_t;
 
+	extern c_llist *tasks;
+	extern c_llist *cur_task;
 
-	void init_scheduler(void);
+	void init_scheduler(void (start_routine)(void));
 
-	void schedule(int p);
+	void schedule(pt_regs regs, void *arg);
+
+	task_t *kernel_thread_create(int priority, void *(*start_routine)(void *), void *arg);
+
+	/* These are Architecture specific */
+	void arch_init_scheduler(void (start_routine)(void));
+	void setup_task(task_t *task, void *(*start_routine)(void *));
+	void switch_to(pt_regs regs, c_llist *tsk);
 
 #endif /* SCHED_H */
 

@@ -30,6 +30,7 @@
 
 	/* System timer (Hz) */
 	#ifdef CONFIG_ARCH_X86
+		#include <x86/x86.h>
 		#include <x86/i82C54.h>
 		
 		#define TIMER_IRQ	0
@@ -45,14 +46,14 @@
 	/** Alarm struct */
 	struct _alarm_t {
 		uint32_t expires;
-		void (*handler)(int);
-		uint32_t arg; /* argument to handler */
+		void (*handler)(pt_regs, void *);
+		void *arg; /* argument to handler */
 	};
 
 	typedef struct _alarm_t alarm_t;
 
 	void init_timer(void);
-	int new_alarm(uint32_t expires, void (*handler)(int), uint32_t arg);
+	int new_alarm(uint32_t expires, void (*handler)(pt_regs, void *), void *arg);
 
 #endif /* TIMER_H */
 

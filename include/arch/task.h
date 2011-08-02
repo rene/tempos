@@ -33,8 +33,6 @@
 	/* IA-32 (x86 32 bits) */
 	#ifdef CONFIG_ARCH_X86
 		#include <x86/tss.h>
-
-		typedef tss_t arch_tss_t;
 	#endif
 
 #endif /* ARCH_TASK_H */

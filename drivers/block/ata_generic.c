@@ -98,9 +98,9 @@ static void set_device(uchar8_t bus, uchar8_t device);
 
 static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo);
 
-static void ata_handler1(int id, pt_regs *regs);
+static void ata_handler1(int id, pt_regs regs);
 
-static void ata_handler2(int id, pt_regs *regs);
+static void ata_handler2(int id, pt_regs regs);
 
 int read_hd_sector(int major, int device, uint64_t addr);
 int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector);
@@ -605,11 +605,11 @@ int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector)
 }
 
 
-static void ata_handler1(int id, pt_regs *regs)
+static void ata_handler1(int id, pt_regs regs)
 {
 	uint16_t data, i;
 
-	kprintf("PRIM: %d -- %d\n", id, regs->ds);
+	kprintf("PRIM: %d -- %d\n", id, regs.ds);
 
 	for(i=0; i<SECTOR_HALF_SIZE; i++) {
 		wait_bus(PRI_BUS);
@@ -621,11 +621,11 @@ static void ata_handler1(int id, pt_regs *regs)
 	read_done = 1;
 }
 
-static void ata_handler2(int id, pt_regs *regs)
+static void ata_handler2(int id, pt_regs regs)
 {
 	//uint16_t i, p;
 
-	kprintf("SEC: %d -- %d\n", id, regs->ds);
+	kprintf("SEC: %d -- %d\n", id, regs.ds);
 
 	/*for(i=1, p=1; i<=256; i++, p+=2) {
 		wait_bus(SEC_BUS);

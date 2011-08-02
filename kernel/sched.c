@@ -27,40 +27,62 @@
 #include <tempos/timer.h>
 #include <tempos/jiffies.h>
 
-/**
- * TempOS scheduler uses a round robin algorithm.
- * Yes, I know you are very surprised :-o
- */
-static uint32_t scheduler_quantum = HZ; /* 1 second << JUST FOR TEST */
+/** Scheduler Quantum */
+static uint32_t scheduler_quantum = (HZ / 100); /* 10 ms */
 
-/**
- * Pointer to the current task running
- */
-task_st *current_task = NULL;
+/** Linked list of all tasks */
+c_llist *tasks = NULL;
 
+/** Element of list that points to current task */
+c_llist *cur_task = NULL;
 
 /**
  * Initialize the scheduler
  */
-void init_scheduler(void)
+void init_scheduler(void (start_routine)(void))
 {
+	/* Create circular linked list */
+	c_llist_create(&tasks);
+
+	/* Architecture dependent */
+	arch_init_scheduler(start_routine);
+
 	/* Register alarm to do task switch */
-	if( !new_alarm((jiffies + scheduler_quantum), schedule, 0) ) {
-		panic(KERN_CRIT "Could not install scheduler alarm.");
+	if( !new_alarm((jiffies + scheduler_quantum), schedule, NULL) ) {
+		panic("Could not install scheduler alarm.");
 	}
 }
 
 
 /**
- * Do a task switch
+ * Decides what task to run and make the task switch.
+ *
+ * TempOS scheduler uses a round robin policy.
+ *
+ * \param p Scheduler Quantum (in ticks).
  */
-void schedule(int p)
+void schedule(pt_regs regs, void *arg)
 {
+	//task_t *current_task = GET_TASK(cur_task);
+	c_llist *next;
+
 	/* Register alarm again */
-	if( !new_alarm((jiffies + scheduler_quantum - 1), schedule, p) ) {
+	if( !new_alarm((jiffies + scheduler_quantum - 1), schedule, arg) ) {
 		panic(KERN_CRIT "Could not install scheduler alarm.");
 	}
 
 	/* do schedule */
+	if (cur_task == NULL) {
+		cur_task = tasks;
+		switch_to(regs, cur_task);
+		return;
+	}
+
+	next = cur_task->next;
+	if (next != NULL) {
+		if (next != cur_task) {
+			switch_to(regs, next);
+		}
+	}
 }
 

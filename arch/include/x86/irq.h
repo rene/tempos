@@ -39,7 +39,7 @@
 	struct _irq_handler {
 		uint32_t id;
 		char name[MAX_IRQH_NAME];
-		void (*handler)(int, pt_regs *);
+		void (*handler)(int, pt_regs);
 	};
 
 	/** IRQ queue struct */
@@ -53,9 +53,9 @@
 	typedef struct _irq_queue   irq_queue_t;
 	void init_IRQ(void);
 
-	void do_irq(uint32_t irqnum, pt_regs regs);
+	pushargs void do_irq(uint32_t irqnum, pt_regs regs);
 
-	int request_irq(uint16_t irq, void (*handler)(int, pt_regs *), \
+	int request_irq(uint16_t irq, void (*handler)(int, pt_regs), \
 						uint16_t flags, const char *name);
 
 
