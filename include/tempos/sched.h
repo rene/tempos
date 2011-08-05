@@ -80,16 +80,19 @@
 	extern c_llist *tasks;
 	extern c_llist *cur_task;
 
-	void init_scheduler(void (start_routine)(void));
+	void init_scheduler(void (*start_routine)(void*));
 
-	void schedule(pt_regs regs, void *arg);
+	void schedule(pt_regs *regs);
 
-	task_t *kernel_thread_create(int priority, void *(*start_routine)(void *), void *arg);
+	task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *arg);
+	void kernel_thread_exit(int return_code);
+	int kernel_thread_wait(task_t *th);
+
 
 	/* These are Architecture specific */
-	void arch_init_scheduler(void (start_routine)(void));
-	void setup_task(task_t *task, void *(*start_routine)(void *));
-	void switch_to(pt_regs regs, c_llist *tsk);
+	void arch_init_scheduler(void (*start_routine)(void*));
+	void setup_task(task_t *task, void (*start_routine)(void *));
+	void switch_to(pt_regs *regs, c_llist *tsk);
 
 #endif /* SCHED_H */
 

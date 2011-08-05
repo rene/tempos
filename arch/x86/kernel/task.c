@@ -28,16 +28,18 @@
 #include <x86/io.h>
 
 extern pagedir_t *kerneldir;
-char mystack[4096];
 
-inline void jmp_to_task(task_t *task);
-
+/**
+ * This is the low level routine to make context switch
+ * \see arch/x86/task.S
+ */
+void jmp_to_task(task_t task);
 
 /**
  *
  *
  */
-void arch_init_scheduler(void (start_routine)(void))
+void arch_init_scheduler(void (*start_routine)(void*))
 {
 	uint32_t esp, eflags;
 	task_t *newth = NULL;
@@ -67,74 +69,16 @@ void arch_init_scheduler(void (start_routine)(void))
 	newth->arch_tss.regs.es  = KERNEL_DS;
 	newth->arch_tss.regs.esp = (uint32_t)newth->stack;
 	newth->arch_tss.regs.cs  = KERNEL_CS;
-	newth->arch_tss.cr3 = (uint32_t)kerneldir;
-	newth->arch_tss.regs.eflags = eflags;
+	newth->arch_tss.cr3 = (uint32_t)kerneldir->dir_phy_addr; /* physical address */
+	newth->arch_tss.regs.eflags = (eflags | EFLAGS_IF); /* enable interrupts */
 
-	jmp_to_task(newth);
+	c_llist_add(&tasks, newth);
+	cur_task = tasks;
+
+	jmp_to_task(*newth);
 }
 
-inline void jmp_to_task(task_t *task)
-{
-	cli();
-	asm("movw %0, %%ax     \n"
-		"movw %%ax, %%ds   \n"
-		"movw %%ax, %%fs   \n"
-		"movw %%ax, %%gs   \n"
-		"movw %%ax, %%ss   \n"
-		"movw %%ax, %%es   \n"
-		"movl %1, %%eax    \n"
-		"movl %%eax, %%esp \n"
-		"push %2           \n"
-		"push %3           \n"
-		"pushl $calltask   \n"
-		"iret              \n"
-		"calltask:         \n"
-		"   add $4, %%esp  \n"
-		"   sti            \n"
-		"   jmp *%4        \n" :: "r" (task->arch_tss.regs.ds),
-						"r" (task->arch_tss.regs.esp),
-						"r" (task->arch_tss.regs.eflags),
-						"r" (task->arch_tss.regs.cs),
-						"r" (task->arch_tss.regs.eip) : "eax");
-
-	/*
-	cli();
-	asm("movw %0, %%ax     \n"
-		"movw %%ax, %%ds   \n"
-		"movw %%ax, %%fs   \n"
-		"movw %%ax, %%gs   \n"
-		"movw %%ax, %%ss   \n"
-		"movw %%ax, %%es   \n"
-		//"movl %1, %%eax    \n"
-		//"movl %%eax, %%esp \n"
-		
-		//"pushl %2\n"
-		//"push %%esp \n"
-		"pushf \n"
-		"push  %1 \n"
-		
-		//"pushl %2          \n"
-		//"push  $0x10       \n"
-		//"pushl $0x10  \n"
-		//"pushl %%esp \n"
-		//"pushf           \n"
-		//"push  %2          \n"
-		//"pushl $0x00       \n"
-		
-		"pushl $calltask   \n"
-		"iret              \n"
-		"calltask:         \n"
-		"   add $4, %%esp  \n"
-		"   sti            \n"
-		"   jmp *%2        \n" :: "i" (KERNEL_DS), //"i" (task->arch_tss.regs.ds),
-						//"r" (task->arch_tss.regs.esp),
-						//"r" (task->arch_tss.regs.eflags),
-						"r" (task->arch_tss.regs.cs),
-						"r" (task->arch_tss.regs.eip) : "eax");*/
-}
-
-
-void setup_task(task_t *task, void *(*start_routine)(void*))
+void setup_task(task_t *task, void (*start_routine)(void*))
 {
 	if (task == NULL) {
 		return;
@@ -148,21 +92,16 @@ void setup_task(task_t *task, void *(*start_routine)(void*))
 	task->arch_tss.regs.es  = KERNEL_DS;
 	task->arch_tss.regs.esp = (uint32_t)task->stack;
 	task->arch_tss.regs.cs  = KERNEL_CS;
-	task->arch_tss.cr3 = (uint32_t)kerneldir;
+	task->arch_tss.cr3 = (uint32_t)kerneldir->dir_phy_addr; /* physical address */
+	task->arch_tss.regs.eflags = 0x2020000;
 
-	return;
-}
-
-void switch_to(pt_regs regs, c_llist *tsk)
-{
-	kprintf("oi\n");
 	return;
 }
 
 /**
  * Switch task
  */
-void switch_to_old(pt_regs regs, c_llist *tsk)
+void switch_to(pt_regs *regs, c_llist *tsk)
 {
 	task_t *current_task = GET_TASK(cur_task);
 	task_t *task = GET_TASK(tsk);
@@ -171,28 +110,33 @@ void switch_to_old(pt_regs regs, c_llist *tsk)
 		return;
 	}
 	
-	cli();
-
 	/* Save current task registers */
-	current_task->arch_tss.regs.eip = regs.eip;
-	current_task->arch_tss.regs.ss  = regs.ss;
-	current_task->arch_tss.regs.gs  = regs.gs;
-	current_task->arch_tss.regs.fs  = regs.fs;
-	current_task->arch_tss.regs.es  = regs.es;
-	current_task->arch_tss.regs.ds  = regs.ds;
-	current_task->arch_tss.regs.esp = regs.esp - 16;
-	current_task->arch_tss.regs.eax = regs.eax;
-	current_task->arch_tss.regs.ecx = regs.ecx;
-	current_task->arch_tss.regs.edx = regs.edx;
-	current_task->arch_tss.regs.ebx = regs.ebx;
+	current_task->arch_tss.regs.eip = regs->eip;
+	current_task->arch_tss.regs.ss  = regs->ss;
+	current_task->arch_tss.regs.gs  = regs->gs;
+	current_task->arch_tss.regs.fs  = regs->fs;
+	current_task->arch_tss.regs.es  = regs->es;
+	current_task->arch_tss.regs.ds  = regs->ds;
+	current_task->arch_tss.regs.esp = regs->esp + 26;
 
-	current_task->state = TASK_STOPPED;
+	/*uint32_t val;
+	asm("movl (%1), %%eax \n"
+		"movl %%eax, %0" : "=r"(val) : "r"(current_task->arch_tss.regs.esp) : "eax");
+	kprintf("Valor de (%%esp): 0x%x\n", val);
+	kprintf("Valor de EIP:   0x%x\n", regs->eip);
+	while(1);*/
 
-	current_task->arch_tss.regs.eflags = regs.eflags;
+	current_task->arch_tss.regs.eax = regs->eax;
+	current_task->arch_tss.regs.ecx = regs->ecx;
+	current_task->arch_tss.regs.edx = regs->edx;
+	current_task->arch_tss.regs.ebx = regs->ebx;
+
+	current_task->state = TASK_READY_TO_RUN;
+	current_task->arch_tss.regs.eflags = regs->eflags;
 
 	/* Change context to the new task */
 	cur_task = tsk;
 	task->state = TASK_RUNNING;
-	//kprintf(">> %x\n", task->arch_tss.regs.esp);
+	jmp_to_task(*task);
 }
 

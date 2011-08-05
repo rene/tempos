@@ -24,7 +24,9 @@
 
 #include <tempos/timer.h>
 #include <tempos/jiffies.h>
+#include <tempos/sched.h>
 #include <linkedl.h>
+#include <semaphore.h>
 #include <unistd.h>
 #include <arch/irq.h>
 
@@ -32,8 +34,7 @@
 llist *alarm_queue;
 
 
-static void timer_handler(int i, pt_regs regs);
-static void update_alarms(pt_regs regs);
+_pushargs void timer_handler(int i, pt_regs *regs);
 
 
 /**
@@ -44,7 +45,6 @@ static void update_alarms(pt_regs regs);
  */
 volatile uint32_t jiffies;
 
-
 /**
  * Initialize time system
  */
@@ -54,10 +54,10 @@ void init_timer(void)
 
 	kprintf(KERN_INFO "Initializing timer...\n");
 
+	llist_create(&alarm_queue);
+
 	if( request_irq(TIMER_IRQ, timer_handler, 0, "PIT") < 0 ) {
 		kprintf(KERN_ERROR "Error on initialize PIT\n");
-	} else {
-		llist_create(&alarm_queue);
 	}
 }
 
@@ -65,22 +65,17 @@ void init_timer(void)
 /**
  * Interrupt handler
  */
-pushargs void timer_handler(int i, pt_regs regs)
-{
-	jiffies++;
-	update_alarms(regs);
-}
-
-
-/**
- * Check and execute handlers of expired alarms
- */
-static void update_alarms(pt_regs regs)
+_pushargs void timer_handler(int i, pt_regs *regs)
 {
 	llist *tmp;
 	alarm_t *alarm;
 	uint32_t pos;
 
+	jiffies++;
+
+	/*
+ 	 * Check and execute handlers of expired alarms
+ 	 */
 	tmp = alarm_queue;
 	pos = 0;
 	foreach(alarm_queue, tmp) {
@@ -88,12 +83,17 @@ static void update_alarms(pt_regs regs)
 
 		if( time_after(jiffies, alarm->expires) ) {
 			/* Execute handler and remove from list */
-			alarm->handler(regs, alarm->arg);
 			llist_remove_nth(&alarm_queue, pos);
+			alarm->handler(regs, alarm->arg);
 		}
 
 		pos++;
 	}
+
+	/*
+	 * Call schedule()
+	 */
+	schedule(regs);
 }
 
 
@@ -104,7 +104,7 @@ static void update_alarms(pt_regs regs)
  * \param handler The function to be executed when alarm expires.
  * \param arg Argument to be passed to handler function.
  */
-int new_alarm(uint32_t expires, void (*handler)(pt_regs, void *), void *arg)
+int new_alarm(uint32_t expires, void (*handler)(pt_regs *, void *), void *arg)
 {
 	alarm_t *nalarm;
 

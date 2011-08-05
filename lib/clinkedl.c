@@ -69,7 +69,6 @@ int c_llist_add(c_llist **list, void *element)
 	c_llist *head = *list;
 	c_llist *new_node, *last;
 
-
 	new_node = (c_llist*)kmalloc(sizeof(c_llist), GFP_NORMAL_Z);
 	if(new_node == NULL) {
 		return(0);

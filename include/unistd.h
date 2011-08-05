@@ -25,6 +25,9 @@
 
 	#define UNISTD_H
 
+	#include <config.h>
+
+	#ifdef CONFIG_ARCH_X86
 	typedef char           		char8_t;
 	typedef unsigned char  		uchar8_t;
 	typedef short          		int16_t;
@@ -36,6 +39,7 @@
 
 	typedef unsigned long size_t;
 	typedef long ssize_t;
+	#endif
 
 #endif /* UNISTD_H */
 

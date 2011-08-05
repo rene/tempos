@@ -2,7 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: timer.h
+ * File: atomic.c
+ * Desc: Implements basic atomic operations.
  *
  * This file is part of TempOS.
  *
@@ -20,40 +21,25 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <x86/atomic.h>
 
-#ifndef TIMER_H
+inline void atomic_incl(int32_t *i)
+{
+	asm("incl (%0)" : "=r"(i));
+}
 
-	#define TIMER_H
+inline void atomic_decl(int32_t *i)
+{
+	asm("decl (%0)" : "=r"(i));
+}
 
-	#include <unistd.h>
-	#include <config.h>
-
-	/* System timer (Hz) */
-	#ifdef CONFIG_ARCH_X86
-		#include <x86/x86.h>
-		#include <x86/i82C54.h>
-		
-		#define TIMER_IRQ	0
-	#endif
-
-	#ifdef CONFIG_SYSTEM_HZ
-		/** System frequency defined at kernel configuration file */
-		#define HZ CONFIG_SYSTEM_HZ
-	#else
-		#error "CONFIG_SYSTEM_HZ it's not defined. It should be defined at configuration file."
-	#endif
-
-	/** Alarm struct */
-	struct _alarm_t {
-		uint32_t expires;
-		void (*handler)(pt_regs *, void *);
-		void *arg; /* argument to handler */
-	};
-
-	typedef struct _alarm_t alarm_t;
-
-	void init_timer(void);
-	int new_alarm(uint32_t expires, void (*handler)(pt_regs *, void *), void *arg);
-
-#endif /* TIMER_H */
+void atomic_spin_down(uint32_t *i)
+{
+	asm("_spin_loop:         \n"
+		"   cli              \n"
+		"   movl (%1), %%ecx \n"
+		"   sti              \n"
+		"	jecxz _spin_loop \n"
+		"decl (%0)" : "=r"(i) : "0"(i) : "ecx");
+}
 

@@ -30,6 +30,9 @@
 /** Scheduler Quantum */
 static uint32_t scheduler_quantum = (HZ / 100); /* 10 ms */
 
+/** Scheduler time counter */
+static size_t sched_cnt;
+
 /** Linked list of all tasks */
 c_llist *tasks = NULL;
 
@@ -39,18 +42,16 @@ c_llist *cur_task = NULL;
 /**
  * Initialize the scheduler
  */
-void init_scheduler(void (start_routine)(void))
+void init_scheduler(void (*start_routine)(void*))
 {
 	/* Create circular linked list */
 	c_llist_create(&tasks);
 
+	/* Start scheduler time counter */
+	sched_cnt = jiffies + scheduler_quantum;
+
 	/* Architecture dependent */
 	arch_init_scheduler(start_routine);
-
-	/* Register alarm to do task switch */
-	if( !new_alarm((jiffies + scheduler_quantum), schedule, NULL) ) {
-		panic("Could not install scheduler alarm.");
-	}
 }
 
 
@@ -61,27 +62,31 @@ void init_scheduler(void (start_routine)(void))
  *
  * \param p Scheduler Quantum (in ticks).
  */
-void schedule(pt_regs regs, void *arg)
+void schedule(pt_regs *regs)
 {
-	//task_t *current_task = GET_TASK(cur_task);
+	task_t *current_task;
 	c_llist *next;
 
-	/* Register alarm again */
-	if( !new_alarm((jiffies + scheduler_quantum - 1), schedule, arg) ) {
-		panic(KERN_CRIT "Could not install scheduler alarm.");
+	/* Check if the quantum has exceeded */
+	if( !time_after(jiffies, sched_cnt) ) {
+		return;
+	} else {
+		sched_cnt = jiffies + scheduler_quantum;
 	}
 
 	/* do schedule */
 	if (cur_task == NULL) {
-		cur_task = tasks;
-		switch_to(regs, cur_task);
 		return;
 	}
 
 	next = cur_task->next;
 	if (next != NULL) {
 		if (next != cur_task) {
-			switch_to(regs, next);
+			current_task = GET_TASK(next);
+			if (current_task->state == TASK_RUNNING || 
+					current_task->state == TASK_READY_TO_RUN) {
+				switch_to(regs, next);
+			}
 		}
 	}
 }

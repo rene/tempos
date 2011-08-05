@@ -28,7 +28,7 @@
 #ifndef ASM
 	#include <unistd.h>
 
-	#define pushargs __attribute__((regparm(0)))
+	#define _pushargs __attribute__((regparm(0)))
 
 	/**
 	 * Registers saved at interrupt trapping.
@@ -82,6 +82,9 @@
 	#define USER_DS		0x20
 	/** Position 5 on GDT */
 	#define TSS_SEG     0x28
+
+	/** Interrupt flags in EFLAGS */
+	#define EFLAGS_IF   0x2020000
 
 #endif /* ARCH_X86_H */
 

@@ -28,13 +28,13 @@
 	#include <unistd.h>
 
 	/** Semaphore structure */
-	typedef int16_t sem_t;
+	typedef uint32_t sem_t;
 
 	/* prototypes */
 	int mutex_init(sem_t *mutex);
-	void mutex_lock(sem_t *mutex);
-	void mutex_unlock(sem_t *mutex);
 	int mutex_is_locked(sem_t mutex);
+	void mutex_spin_down(sem_t *mutex);
+	void mutex_up(sem_t *mutex);
 
 #endif /* SEMAPHORE_H */
 

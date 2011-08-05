@@ -58,7 +58,7 @@ no_error_code:
 	pushw %fs
 	pushw %gs
 	pushw %ss
-	
+
 	pushl  $0x00 /* Error code */
 
 	/* Move to kernel mode */

@@ -30,7 +30,7 @@
 #include <string.h>
 
 
-task_t *kernel_thread_create(int priority, void *(*start_routine)(void *), void *arg)
+task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *arg)
 {
 	task_t *newth = NULL;
 	size_t *stack = NULL;
@@ -70,8 +70,30 @@ task_t *kernel_thread_create(int priority, void *(*start_routine)(void *), void 
 
 void kernel_thread_exit(int return_code)
 {
-	cli();
+	task_t *current_task;
 
+	cli();
+	current_task = GET_TASK(cur_task);
+	current_task->state = TASK_ZOMBIE;
+	kfree(current_task->stack);
 	sti();
+}
+
+int kernel_thread_wait(task_t *th)
+{
+	int ret;
+
+	if (th == NULL) {
+		return -1;
+	}
+
+	cli();
+	if (th->state == TASK_ZOMBIE) {
+		ret = th->return_code;
+		c_llist_remove(&tasks, th);
+	}
+	sti();
+
+	return ret;
 }
 

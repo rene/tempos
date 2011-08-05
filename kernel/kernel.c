@@ -43,8 +43,10 @@ karch_t kinfo;
 
 char kstack[4096];
 extern uint32_t stack;
-void kernel_main_thread(void);
+void kernel_main_thread(void *arg);
+void idle_thread(void *arg);
 
+int thread_done = 0;
 
 /**
  * tempos_main : Second stage
@@ -82,23 +84,15 @@ void tempos_main(karch_t kinf)
 void panic(const char *str)
 {
 	kprintf(KERN_CRIT "%s\n", str);
-	for(;;);
+	for(;;); /* FIXME: dump_cpu(); halt_cpu(); */
 }
 
-void kernel_main_thread(void)
-{
-	/* Test *
-	sem_t mt;
-	mutex_init(&mt);
-	kprintf(KERN_DEBUG "Value of mutex: %d\n", (int)mt);
-	mutex_lock(&mt);
-	if ( mutex_is_locked(mt) ) {
-		kprintf(KERN_DEBUG "MUTEX LOCKED!: %d\n", (int)mt);
-	}
-	kprintf(KERN_INFO "We are in TempOS kernel!\n");
-	mutex_unlock(&mt);
-	kprintf(KERN_DEBUG "Value of mutex: %d\n", (int)mt);*/
 
+void kernel_main_thread(void *arg)
+{
+	kprintf(KERN_INFO "Hello, I'm the main kernel process!\n");
+
+	//kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
 
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
@@ -118,12 +112,16 @@ void kernel_main_thread(void)
 
 	/* Mount root file system */
 	/* ... */
-	/*asm("movl $0x24, %%eax \n"
-		"lopp:             \n" 
-		"  jmp $0x08, $lopp" ::: "eax");*/
-
-	kprintf(KERN_INFO "Hello, I'm the main kernel process!\n");
 	//mdelay(1000);
 	for(;;);
+}
+
+void idle_thread(void *arg)
+{
+	while(!thread_done) {
+		kprintf("Hi!\n");
+		mdelay(100);
+	}
+	kernel_thread_exit(0);
 }
 

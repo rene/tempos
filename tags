@@ -8,11 +8,13 @@ ABRT_BIT	drivers/block/ata_generic.c	67;"	d	file:
 AM_HIGH	arch/include/x86/i82C54.h	47;"	d
 AM_LOW	arch/include/x86/i82C54.h	46;"	d
 AM_LOW_HIGH	arch/include/x86/i82C54.h	48;"	d
+ARCH_ATOMIC_H	include/arch/atomic.h	26;"	d
 ARCH_CF	arch/x86/build/Makefile	/^ARCH_CF  := -m32$/;"	m
 ARCH_IO_H	include/arch/io.h	26;"	d
 ARCH_IRQ_H	include/arch/irq.h	26;"	d
 ARCH_LF	arch/x86/build/Makefile	/^ARCH_LF  := -melf_i386$/;"	m
 ARCH_TASK_H	include/arch/task.h	26;"	d
+ARCH_X86_ATOMIC_H	arch/include/x86/atomic.h	26;"	d
 ARCH_X86_EXCEPTIONS_H	arch/include/x86/exceptions.h	26;"	d
 ARCH_X86_GDT_H	arch/include/x86/gdt.h	26;"	d
 ARCH_X86_H	arch/include/x86/x86.h	26;"	d
@@ -63,9 +65,6 @@ CMD_WRITE_SECTORS	drivers/block/ata_generic.c	73;"	d	file:
 CMD_WRITE_SECTORS_EXT	drivers/block/ata_generic.c	74;"	d	file:
 CM_PORT	arch/include/x86/i82C54.h	39;"	d
 CODE_SEG	arch/include/x86/gdt.h	39;"	d
-CONFIG_ARCH_X86	include/config.h	10;"	d
-CONFIG_SYSTEM_HZ	include/config.h	12;"	d
-CONFIG_X86_MAKEFILE	include/config.h	11;"	d
 CR0_PG_MASK	arch/include/x86/io.h	30;"	d
 CTYPE_H	include/ctype.h	26;"	d
 CWD	arch/x86/build/Makefile	/^CWD := arch\/x86\/build$/;"	m
@@ -101,6 +100,7 @@ DPL	arch/include/x86/gdt.h	/^			uint32_t DPL         : 2;$/;"	m	struct:_gdt_tss_
 DPL	arch/include/x86/idt.h	/^			uint16_t DPL         : 2;$/;"	m	struct:_idt_tpint_desc::_idt_high
 DRDY_BIT	drivers/block/ata_generic.c	66;"	d	file:
 ECHO	Makefile	/^ECHO       := $(shell which echo)$/;"	m
+EFLAGS_IF	arch/include/x86/x86.h	87;"	d
 EI_CLASS	include/fs/elf.h	49;"	d
 EI_CLASS	include/fs/elf32.h	36;"	d
 EI_DATA	include/fs/elf.h	50;"	d
@@ -296,7 +296,7 @@ LBA48	include/drv/ata_generic.h	38;"	d
 LBA_BYTE	drivers/block/ata_generic.c	46;"	d	file:
 LBA_UHIGH	drivers/block/ata_generic.c	45;"	d	file:
 LD	Makefile	/^LD = ld$/;"	m
-LDT_seg_selector	arch/include/x86/tss.h	/^		uint16_t LDT_seg_selector;$/;"	m	struct:_tss_struct
+LDT_seg	arch/include/x86/tss.h	/^		uint16_t LDT_seg;$/;"	m	struct:_tss_struct
 LIGHT_BLUE	arch/x86/boot/video.h	27;"	d
 LIGHT_CYAN	arch/x86/boot/video.h	29;"	d
 LIGHT_GRAY	arch/x86/boot/video.h	25;"	d
@@ -432,13 +432,12 @@ TASK_READY_TO_RUN	include/tempos/sched.h	34;"	d
 TASK_RUNNING	include/tempos/sched.h	36;"	d
 TASK_STOPPED	include/tempos/sched.h	38;"	d
 TASK_ZOMBIE	include/tempos/sched.h	40;"	d
-TEMPOS_CONFIG_H	include/config.h	8;"	d
 TIMEOUT	drivers/block/ata_generic.c	40;"	d	file:
 TIMEOUT	drivers/char/i8042.c	33;"	d	file:
 TIMER_H	include/tempos/timer.h	26;"	d
 TIMER_IRQ	include/tempos/timer.h	36;"	d
 TRANS_TMOUT	include/drv/i8042.h	45;"	d
-TSS_INDEX	arch/include/x86/x86.h	84;"	d
+TSS_SEG	arch/include/x86/x86.h	84;"	d
 TYPES_H	include/sys/types.h	26;"	d
 UNISTD_H	include/unistd.h	26;"	d
 UNSIGNED	lib/printf.c	39;"	d	file:
@@ -500,6 +499,7 @@ _mmap_tentry	include/tempos/kernel.h	/^	struct _mmap_tentry {$/;"	s
 _mregion	include/tempos/mm.h	/^	struct _mregion {$/;"	s
 _page_dir	arch/include/x86/mm.h	/^	struct _page_dir {$/;"	s
 _pt_regs	arch/include/x86/x86.h	/^	struct _pt_regs {$/;"	s
+_pushargs	arch/include/x86/x86.h	31;"	d
 _start	arch/x86/boot/boot.S	/^_start:$/;"	l
 _sys_enter	arch/x86/kernel/sys_enter.S	/^_sys_enter:$/;"	l
 _task_struct	include/tempos/sched.h	/^	struct _task_struct {$/;"	s
@@ -514,14 +514,18 @@ alloc_page	arch/x86/mm/mm.c	/^uint32_t alloc_page(zone_t zone)$/;"	f
 aout_sym	arch/include/x86/multiboot.h	/^    aout_symbol_table_t aout_sym;$/;"	m	union:multiboot_info::__anon7
 aout_symbol_table	arch/include/x86/multiboot.h	/^typedef struct aout_symbol_table$/;"	s
 aout_symbol_table_t	arch/include/x86/multiboot.h	/^} aout_symbol_table_t;$/;"	t	typeref:struct:aout_symbol_table
+arch_init_scheduler	arch/x86/kernel/task.c	/^void arch_init_scheduler(void (*start_routine)(void*))$/;"	f
 arch_tss	include/tempos/sched.h	/^		arch_tss_t arch_tss;$/;"	m	struct:_task_struct
 arch_tss_t	arch/include/x86/tss.h	/^	typedef struct _tss_st arch_tss_t;$/;"	t	typeref:struct:_tss_st
 arg	include/tempos/timer.h	/^		void *arg; \/* argument to handler *\/$/;"	m	struct:_alarm_t
 ata_dev_info	include/drv/ata_generic.h	/^	typedef struct _ata_dev_info ata_dev_info;$/;"	t	typeref:struct:_ata_dev_info
 ata_devices	drivers/block/ata_generic.c	/^static ata_dev_info ata_devices[4];$/;"	v	file:
-ata_handler1	drivers/block/ata_generic.c	/^static void ata_handler1(int id, pt_regs regs)$/;"	f	file:
-ata_handler2	drivers/block/ata_generic.c	/^static void ata_handler2(int id, pt_regs regs)$/;"	f	file:
+ata_handler1	drivers/block/ata_generic.c	/^static void ata_handler1(int id, pt_regs *regs)$/;"	f	file:
+ata_handler2	drivers/block/ata_generic.c	/^static void ata_handler2(int id, pt_regs *regs)$/;"	f	file:
 atoi	lib/stdlib.c	/^int atoi(const char *nptr)$/;"	f
+atomic_decl	arch/x86/kernel/atomic.c	/^inline void atomic_decl(int32_t *i)$/;"	f
+atomic_incl	arch/x86/kernel/atomic.c	/^inline void atomic_incl(int32_t *i)$/;"	f
+atomic_spin_down	arch/x86/kernel/atomic.c	/^void atomic_spin_down(uint32_t *i)$/;"	f
 avaliable	arch/include/x86/gdt.h	/^			uint32_t avaliable   : 1;$/;"	m	struct:_gdt_cd_seg::_gdt_high
 avaliable	arch/include/x86/gdt.h	/^			uint32_t avaliable   : 1;$/;"	m	struct:_gdt_tss_seg::_gdt_tss_high
 base_addr_high	arch/include/x86/multiboot.h	/^  unsigned long base_addr_high;$/;"	m	struct:memory_map
@@ -582,7 +586,7 @@ debug	arch/include/x86/tss.h	/^		uint16_t debug : 1;$/;"	m	struct:_tss_struct
 desc_type	arch/include/x86/gdt.h	/^			uint32_t desc_type   : 1;$/;"	m	struct:_gdt_cd_seg::_gdt_high
 device	include/fs/bhash.h	/^		int device;$/;"	m	struct:_hash_queue_t
 dir_phy_addr	arch/include/x86/mm.h	/^		uint32_t dir_phy_addr;$/;"	m	struct:_page_dir
-do_irq	arch/x86/kernel/irq.c	/^pushargs void do_irq(uint32_t irqnum, pt_regs regs)$/;"	f
+do_irq	arch/x86/kernel/irq.c	/^_pushargs void do_irq(uint32_t irqnum, pt_regs regs)$/;"	f
 doxycfg	Makefile	/^doxycfg    := doc\/doxygen.cfg$/;"	m
 doxydir	Makefile	/^doxydir    := doc\/doxygen$/;"	m
 ds	arch/include/x86/tss.h	/^		uint16_t ds;$/;"	m	struct:_tss_struct
@@ -668,7 +672,7 @@ ex_device	arch/x86/exceptions.c	/^void ex_device()$/;"	f
 ex_dfault	arch/x86/exceptions.c	/^void ex_dfault()$/;"	f
 ex_div	arch/x86/exceptions.c	/^void ex_div()$/;"	f
 ex_floatp	arch/x86/exceptions.c	/^void ex_floatp()$/;"	f
-ex_gp	arch/x86/exceptions.c	/^void ex_gp()$/;"	f
+ex_gp	arch/x86/exceptions.c	/^void ex_gp(int code)$/;"	f
 ex_inv_op	arch/x86/exceptions.c	/^void ex_inv_op()$/;"	f
 ex_inv_tss	arch/x86/exceptions.c	/^void ex_inv_tss()$/;"	f
 ex_machine	arch/x86/exceptions.c	/^void ex_machine()$/;"	f
@@ -706,8 +710,8 @@ granularity	arch/include/x86/gdt.h	/^			uint32_t granularity : 1;$/;"	m	struct:_
 granularity	arch/include/x86/gdt.h	/^			uint32_t granularity : 1;$/;"	m	struct:_gdt_tss_seg::_gdt_tss_high
 gs	arch/include/x86/tss.h	/^		uint16_t gs;$/;"	m	struct:_tss_struct
 gs	arch/include/x86/x86.h	/^		uint16_t gs;$/;"	m	struct:_pt_regs
-handler	arch/include/x86/irq.h	/^		void (*handler)(int, pt_regs);$/;"	m	struct:_irq_handler
-handler	include/tempos/timer.h	/^		void (*handler)(pt_regs, void *);$/;"	m	struct:_alarm_t
+handler	arch/include/x86/irq.h	/^		void (*handler)(int, pt_regs *);$/;"	m	struct:_irq_handler
+handler	include/tempos/timer.h	/^		void (*handler)(pt_regs *, void *);$/;"	m	struct:_alarm_t
 header_addr	arch/include/x86/multiboot.h	/^  unsigned long header_addr;$/;"	m	struct:multiboot_header
 high	arch/include/x86/gdt.h	/^		uint32_t high;$/;"	m	struct:_gdt_entry
 high	arch/include/x86/gdt.h	/^		} __attribute__ ((packed)) high;$/;"	m	struct:_gdt_cd_seg	typeref:struct:_gdt_cd_seg::_gdt_high
@@ -716,6 +720,7 @@ high	arch/include/x86/idt.h	/^		uint32_t high;$/;"	m	struct:_idt_entry
 high	arch/include/x86/idt.h	/^		} __attribute__ ((packed)) high;$/;"	m	struct:_idt_tpint_desc	typeref:struct:_idt_tpint_desc::_idt_high
 higherhalf	arch/x86/boot/boot.S	/^higherhalf:$/;"	l
 id	arch/include/x86/irq.h	/^		uint32_t id;$/;"	m	struct:_irq_handler
+idle_thread	kernel/kernel.c	/^void idle_thread(void *arg)$/;"	f
 idt_ptr	arch/include/x86/idt.h	/^		void* idt_ptr;$/;"	m	struct:_idt_idtr
 idt_t	arch/include/x86/idt.h	/^	typedef struct _idt_entry      idt_t;$/;"	t	typeref:struct:_idt_entry
 idt_table	arch/x86/idt.c	/^idt_t idt_table[IDT_TABLE_SIZE];$/;"	v
@@ -729,7 +734,7 @@ init_ata_generic	drivers/block/ata_generic.c	/^void init_ata_generic(void)$/;"	f
 init_hash_queue	fs/bhash.c	/^int init_hash_queue(int device, uint64_t size)$/;"	f
 init_mm	kernel/mm/init_mm.c	/^void init_mm(void)$/;"	f
 init_pg	arch/x86/mm/mm.c	/^void init_pg(karch_t *kinf)$/;"	f
-init_scheduler	kernel/sched.c	/^void init_scheduler(void)$/;"	f
+init_scheduler	kernel/sched.c	/^void init_scheduler(void (*start_routine)(void*))$/;"	f
 init_timer	kernel/timer.c	/^void init_timer(void)$/;"	f
 initial_addr	include/tempos/mm.h	/^		uint32_t initial_addr;$/;"	m	struct:_mregion
 inl	arch/x86/io.c	/^inline uint32_t inl(uint16_t port)$/;"	f
@@ -772,16 +777,18 @@ isspace	lib/ctype.c	/^int isspace(int c)$/;"	f
 isupper	lib/ctype.c	/^int isupper(int c)$/;"	f
 isxdigit	lib/ctype.c	/^int isxdigit(int c)$/;"	f
 jiffies	kernel/timer.c	/^volatile uint32_t jiffies;$/;"	v
-k_thread_1	kernel/kernel.c	/^void *k_thread_1(void *arg)$/;"	f
+jmp_to_task	arch/x86/task.S	/^jmp_to_task:$/;"	l
 karch	arch/x86/boot/karch.c	/^void karch(unsigned long magic, unsigned long addr)$/;"	f
 karch_t	include/tempos/kernel.h	/^	typedef struct _karch_t karch_t;$/;"	t	typeref:struct:_karch_t
 kbc_read	drivers/char/i8042.c	/^uchar8_t kbc_read(void)$/;"	f
 kbc_sendcomm	drivers/char/i8042.c	/^void kbc_sendcomm(uchar8_t command)$/;"	f
+kernel_main_thread	kernel/kernel.c	/^void kernel_main_thread(void *arg)$/;"	f
 kernel_size	arch/x86/mm/mm.c	/^static uint32_t kernel_size;$/;"	v	file:
-kernel_thread_create	kernel/thread.c	/^task_t *kernel_thread_create(int priority, void *(*start_routine)(void *), void *arg)$/;"	f
+kernel_thread_create	kernel/thread.c	/^task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *arg)$/;"	f
 kernel_thread_exit	kernel/thread.c	/^void kernel_thread_exit(int return_code)$/;"	f
+kernel_thread_wait	kernel/thread.c	/^int kernel_thread_wait(task_t *th)$/;"	f
 kerneldir	arch/x86/mm/mm.c	/^volatile pagedir_t *kerneldir;$/;"	v
-keyboard_handler	drivers/char/i8042.c	/^static void keyboard_handler(void)$/;"	f	file:
+keyboard_handler	drivers/char/i8042.c	/^static void keyboard_handler(int i, pt_regs *regs)$/;"	f	file:
 kfree	kernel/mm/kmalloc.c	/^void kfree(void *ptr)$/;"	f
 kimage	Makefile	/^kimage     := tempos.elf$/;"	m
 kinfo	kernel/kernel.c	/^karch_t kinfo;$/;"	v
@@ -853,11 +860,11 @@ multiboot_info	arch/include/x86/multiboot.h	/^typedef struct multiboot_info$/;"	
 multiboot_info_t	arch/include/x86/multiboot.h	/^} multiboot_info_t;$/;"	t	typeref:struct:multiboot_info
 mutex_init	lib/semaphore.c	/^int mutex_init(sem_t *mutex)$/;"	f
 mutex_is_locked	lib/semaphore.c	/^int mutex_is_locked(sem_t mutex)$/;"	f
-mutex_lock	lib/semaphore.c	/^void mutex_lock(sem_t *mutex)$/;"	f
-mutex_unlock	lib/semaphore.c	/^void mutex_unlock(sem_t *mutex)$/;"	f
+mutex_spin_down	lib/semaphore.c	/^void mutex_spin_down(sem_t *mutex)$/;"	f
+mutex_up	lib/semaphore.c	/^void mutex_up(sem_t *mutex)$/;"	f
 mword_dma	include/drv/ata_generic.h	/^		uint16_t mword_dma;$/;"	m	struct:_ata_dev_info
 name	arch/include/x86/irq.h	/^		char name[MAX_IRQH_NAME];$/;"	m	struct:_irq_handler
-new_alarm	kernel/timer.c	/^int new_alarm(uint32_t expires, void (*handler)(pt_regs, void *), void *arg)$/;"	f
+new_alarm	kernel/timer.c	/^int new_alarm(uint32_t expires, void (*handler)(pt_regs *, void *), void *arg)$/;"	f
 next	include/linkedl.h	/^		struct _c_llist *next;$/;"	m	struct:_c_llist	typeref:struct:_c_llist::_c_llist
 next	include/linkedl.h	/^		struct _llist *next;$/;"	m	struct:_llist	typeref:struct:_llist::_llist
 no_error_code	arch/x86/isr.S	/^no_error_code:$/;"	l
@@ -912,7 +919,6 @@ prev	include/linkedl.h	/^		struct _c_llist *prev;$/;"	m	struct:_c_llist	typeref:
 prev_task_link	arch/include/x86/tss.h	/^		uint16_t prev_task_link;$/;"	m	struct:_tss_struct
 priority	include/tempos/sched.h	/^		int priority;$/;"	m	struct:_task_struct
 pt_regs	arch/include/x86/x86.h	/^	typedef struct _pt_regs pt_regs;$/;"	t	typeref:struct:_pt_regs
-pushargs	arch/include/x86/x86.h	31;"	d
 px	arch/x86/boot/video.c	/^static unsigned char px        = 0;$/;"	v	file:
 py	arch/x86/boot/video.c	/^static unsigned char py        = 0;$/;"	v	file:
 queue	arch/include/x86/irq.h	/^		llist *queue;$/;"	m	struct:_irq_queue
@@ -922,7 +928,7 @@ read_hd_sector	drivers/block/ata_generic.c	/^int read_hd_sector(int major, int d
 read_key	drivers/char/i8042.c	/^uchar8_t read_key(void)$/;"	f
 register_all_fs_types	fs/vfs.c	/^void register_all_fs_types(void)$/;"	f
 regs	arch/include/x86/tss.h	/^		pt_regs regs;$/;"	m	struct:_tss_st
-request_irq	arch/x86/kernel/irq.c	/^int request_irq(uint16_t irq, void (*handler)(int, pt_regs),$/;"	f
+request_irq	arch/x86/kernel/irq.c	/^int request_irq(uint16_t irq, void (*handler)(int, pt_regs *),$/;"	f
 reserved	arch/include/x86/gdt.h	/^			uint32_t reserved    : 1;$/;"	m	struct:_gdt_cd_seg::_gdt_high
 reserved	arch/include/x86/multiboot.h	/^  unsigned long reserved;$/;"	m	struct:aout_symbol_table
 reserved	arch/include/x86/multiboot.h	/^  unsigned long reserved;$/;"	m	struct:module
@@ -945,12 +951,13 @@ reserved8	arch/include/x86/tss.h	/^		uint16_t reserved8;$/;"	m	struct:_tss_struc
 reserved9	arch/include/x86/tss.h	/^		uint16_t reserved9;$/;"	m	struct:_tss_struct
 return_code	include/tempos/sched.h	/^		int return_code;$/;"	m	struct:_task_struct
 scan2ascii_table	drivers/char/i8042.c	/^static uint32_t scan2ascii_table[][8] =$/;"	v	file:
-schedule	kernel/sched.c	/^void schedule(pt_regs regs, void *arg)$/;"	f
-scheduler_quantum	kernel/sched.c	/^static uint32_t scheduler_quantum = HZ; \/\/(HZ \/ 100); \/* 10 ms *\/$/;"	v	file:
+sched_cnt	kernel/sched.c	/^static size_t sched_cnt;$/;"	v	file:
+schedule	kernel/sched.c	/^void schedule(pt_regs *regs)$/;"	f
+scheduler_quantum	kernel/sched.c	/^static uint32_t scheduler_quantum = (HZ \/ 100); \/* 10 ms *\/$/;"	v	file:
 scroll_screen	arch/x86/boot/video.c	/^void scroll_screen(void)$/;"	f
 sectors	include/drv/ata_generic.h	/^		uint64_t sectors;$/;"	m	struct:_ata_dev_info
 seg_selector	arch/include/x86/idt.h	/^		uint16_t  seg_selector;$/;"	m	struct:_idt_tpint_desc
-sem_t	include/semaphore.h	/^	typedef int16_t sem_t;$/;"	t
+sem_t	include/semaphore.h	/^	typedef uint32_t sem_t;$/;"	t
 send_cmd	drivers/block/ata_generic.c	/^static void send_cmd(uchar8_t bus, uchar8_t command)$/;"	f	file:
 serial	include/drv/ata_generic.h	/^		char     serial[20];$/;"	m	struct:_ata_dev_info
 set_device	drivers/block/ata_generic.c	/^static void set_device(uchar8_t bus, uchar8_t device)$/;"	f	file:
@@ -959,7 +966,7 @@ setattr	arch/x86/boot/video.c	/^void setattr(unsigned char attr)$/;"	f
 setor	drivers/block/ata_generic.c	/^uint16_t setor[256];$/;"	v
 setup_GDT	arch/x86/gdt.c	/^void setup_GDT(void)$/;"	f
 setup_IDT	arch/x86/idt.c	/^void setup_IDT(void)$/;"	f
-setup_task	arch/x86/kernel/task.c	/^void setup_task(task_t *task, void *(*start_routine)(void*))$/;"	f
+setup_task	arch/x86/kernel/task.c	/^void setup_task(task_t *task, void (*start_routine)(void*))$/;"	f
 sh_addr	include/fs/elf.h	/^    Elf32_Addr	sh_addr;$/;"	m	struct:__anon5
 sh_addr	include/fs/elf.h	/^    Elf64_Addr	sh_addr;$/;"	m	struct:__anon2
 sh_addralign	include/fs/elf.h	/^    Elf32_Word	sh_addralign;$/;"	m	struct:__anon5
@@ -1011,7 +1018,7 @@ strncmp	lib/string.c	/^int strncmp(const char *s1, const char *s2, size_t n)$/;"
 strncpy	lib/string.c	/^char *strncpy(char *dest, const char *src, size_t n)$/;"	f
 strsize	arch/include/x86/multiboot.h	/^  unsigned long strsize;$/;"	m	struct:aout_symbol_table
 strstr	lib/string.c	/^char *strstr(const char *haystack, const char *needle)$/;"	f
-switch_to	arch/x86/kernel/task.c	/^void switch_to(pt_regs regs, c_llist *tsk)$/;"	f
+switch_to	arch/x86/kernel/task.c	/^void switch_to(pt_regs *regs, c_llist *tsk)$/;"	f
 sys_execve	kernel/execve.c	/^int sys_execve(const char *filename, char *const argv[], char *const envp[])$/;"	f
 sys_exit	kernel/exit.c	/^int sys_exit(int status)$/;"	f
 sys_fork	kernel/fork.c	/^void sys_fork(void)$/;"	f
@@ -1027,11 +1034,12 @@ task_t	include/tempos/sched.h	/^	typedef struct _task_struct task_t;$/;"	t	typer
 task_tss	arch/x86/gdt.c	/^tss_t task_tss;$/;"	v
 tasks	kernel/sched.c	/^c_llist *tasks = NULL;$/;"	v
 tempos_main	kernel/kernel.c	/^void tempos_main(karch_t kinf)$/;"	f
+thread_done	kernel/kernel.c	/^int thread_done = 0;$/;"	v
 time_after	include/tempos/jiffies.h	39;"	d
 time_after_eq	include/tempos/jiffies.h	42;"	d
 time_before	include/tempos/jiffies.h	41;"	d
 time_before_eq	include/tempos/jiffies.h	44;"	d
-timer_handler	kernel/timer.c	/^pushargs void timer_handler(int i, pt_regs regs)$/;"	f
+timer_handler	kernel/timer.c	/^_pushargs void timer_handler(int i, pt_regs *regs)$/;"	f
 tss_t	arch/include/x86/tss.h	/^	typedef struct _tss_struct tss_t;$/;"	t	typeref:struct:_tss_struct
 type	arch/include/x86/gdt.h	/^			uint32_t type        : 4;$/;"	m	struct:_gdt_cd_seg::_gdt_high
 type	arch/include/x86/idt.h	/^			uint16_t type        : 3;$/;"	m	struct:_idt_tpint_desc::_idt_high
@@ -1047,7 +1055,6 @@ uint16_t	include/unistd.h	/^	typedef unsigned short 		uint16_t;$/;"	t
 uint32_t	include/unistd.h	/^	typedef unsigned int   		uint32_t;$/;"	t
 uint64_t	include/unistd.h	/^	typedef unsigned long long 	uint64_t;$/;"	t
 ultra_dma	include/drv/ata_generic.h	/^		uint16_t ultra_dma;$/;"	m	struct:_ata_dev_info
-update_alarms	kernel/timer.c	/^static void update_alarms(pt_regs regs)$/;"	f	file:
 videomem	arch/x86/boot/video.c	/^static unsigned char *videomem = (unsigned char*)VIDEO_MEM_ADDR;$/;"	v	file:
 vsprintf	lib/printf.c	/^int vsprintf(char *str, const char *format, va_list ap)$/;"	f
 wait_bus	drivers/block/ata_generic.c	/^static void wait_bus(uchar8_t bus)$/;"	f	file:
