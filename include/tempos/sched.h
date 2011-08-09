@@ -92,7 +92,7 @@
 	/* These are Architecture specific */
 	void arch_init_scheduler(void (*start_routine)(void*));
 	void setup_task(task_t *task, void (*start_routine)(void *));
-	void switch_to(pt_regs *regs, c_llist *tsk);
+	void switch_to(c_llist *tsk);
 
 #endif /* SCHED_H */
 

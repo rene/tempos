@@ -53,10 +53,10 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 	newth->pid = KERNEL_PID;
 	newth->return_code = 0;
 	newth->wait_queue = 0;
-	newth->stack = &stack[PROCESS_STACK_SIZE-1];
+	newth->stack = stack + (PROCESS_STACK_SIZE - (2*sizeof(size_t)));
 
 	/* "push" start_routine argument */
-	memcpy(&newth->stack[PROCESS_STACK_SIZE-1], arg, sizeof(size_t));
+	memcpy(newth->stack, arg, sizeof(size_t));
 
 	/* Architecture specific */
 	setup_task(newth, start_routine);

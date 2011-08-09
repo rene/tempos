@@ -52,6 +52,9 @@ no_error_code:
 	pushl %ecx
 	pushl %edx
 	pushl %ebx
+	pushl %ebp
+	pushl %esi
+	pushl %edi
 	pushl %esp
 	pushw %ds
 	pushw %es
@@ -82,6 +85,9 @@ no_error_code:
 	popw %es
 	popw %ds
 	popl %esp
+	popl %edi
+	popl %esi
+	popl %ebp
 	popl %ebx
 	popl %edx
 	popl %ecx
@@ -102,6 +108,9 @@ error_code:
 	xchgl %ecx,(%esp)
 	pushl %edx
 	pushl %ebx
+	pushl %ebp
+	pushl %esi
+	pushl %edi
 	pushl %esp
 	pushw %ds
 	pushw %es
@@ -132,6 +141,9 @@ error_code:
 	popw %es
 	popw %ds
 	popl %esp
+	popl %edi
+	popl %esi
+	popl %ebp
 	popl %ebx
 	popl %edx
 	popl %ecx

@@ -29,6 +29,7 @@
 #include <semaphore.h>
 #include <unistd.h>
 #include <arch/irq.h>
+#include <arch/io.h>
 
 /** Queue of alarms */
 llist *alarm_queue;
@@ -118,7 +119,11 @@ int new_alarm(uint32_t expires, void (*handler)(pt_regs *, void *), void *arg)
 			nalarm->expires = expires;
 			nalarm->handler = handler;
 			nalarm->arg     = arg;
-			llist_add(&alarm_queue, nalarm);
+			/* Interrupt routines can access and change linked lists, so 
+			   we disable interrupts to keep the consistency */
+			cli();
+				llist_add(&alarm_queue, nalarm);
+			sti();
 		}
 	}
 

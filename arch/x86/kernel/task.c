@@ -33,7 +33,10 @@ extern pagedir_t *kerneldir;
  * This is the low level routine to make context switch
  * \see arch/x86/task.S
  */
-void jmp_to_task(task_t task);
+void task_switch_to(arch_tss_t *task);
+void initial_task(task_t *task);
+
+arch_tss_t *arch_tss_cur_task;
 
 /**
  *
@@ -75,11 +78,14 @@ void arch_init_scheduler(void (*start_routine)(void*))
 	c_llist_add(&tasks, newth);
 	cur_task = tasks;
 
-	jmp_to_task(*newth);
+	/* Jump to main thread */
+	initial_task(newth);
 }
 
 void setup_task(task_t *task, void (*start_routine)(void*))
 {
+	int esp = 0;
+
 	if (task == NULL) {
 		return;
 	}
@@ -92,8 +98,21 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.es  = KERNEL_DS;
 	task->arch_tss.regs.esp = (uint32_t)task->stack;
 	task->arch_tss.regs.cs  = KERNEL_CS;
+	task->arch_tss.regs.esp = (uint32_t)task->stack;
 	task->arch_tss.cr3 = (uint32_t)kerneldir->dir_phy_addr; /* physical address */
-	task->arch_tss.regs.eflags = 0x2020000;
+	task->arch_tss.regs.eflags = 0x2020000; //(eflags | EFLAGS_IF); /* enable interrupts */
+
+	/* Setup thread context into stack */
+	esp = -sizeof(pt_regs) - (4*sizeof(size_t));
+	memcpy(task->stack+esp, &task->arch_tss.regs.eflags, sizeof(size_t));
+	esp += sizeof(size_t);
+	memcpy(task->stack+esp, &task->arch_tss.regs.cs, sizeof(size_t));
+	esp += sizeof(size_t);
+	memcpy(task->stack+esp, &task->arch_tss.regs.eip, sizeof(size_t));
+	esp += sizeof(size_t);
+	memcpy(task->stack+esp, &task->arch_tss.regs, sizeof(arch_tss_t));
+	esp += sizeof(arch_tss_t);
+	memcpy(task->stack+esp, &task->arch_tss.cr3, sizeof(size_t));
 
 	return;
 }
@@ -101,7 +120,7 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 /**
  * Switch task
  */
-void switch_to(pt_regs *regs, c_llist *tsk)
+void switch_to(c_llist *tsk)
 {
 	task_t *current_task = GET_TASK(cur_task);
 	task_t *task = GET_TASK(tsk);
@@ -110,33 +129,11 @@ void switch_to(pt_regs *regs, c_llist *tsk)
 		return;
 	}
 	
-	/* Save current task registers */
-	current_task->arch_tss.regs.eip = regs->eip;
-	current_task->arch_tss.regs.ss  = regs->ss;
-	current_task->arch_tss.regs.gs  = regs->gs;
-	current_task->arch_tss.regs.fs  = regs->fs;
-	current_task->arch_tss.regs.es  = regs->es;
-	current_task->arch_tss.regs.ds  = regs->ds;
-	current_task->arch_tss.regs.esp = regs->esp + 26;
-
-	/*uint32_t val;
-	asm("movl (%1), %%eax \n"
-		"movl %%eax, %0" : "=r"(val) : "r"(current_task->arch_tss.regs.esp) : "eax");
-	kprintf("Valor de (%%esp): 0x%x\n", val);
-	kprintf("Valor de EIP:   0x%x\n", regs->eip);
-	while(1);*/
-
-	current_task->arch_tss.regs.eax = regs->eax;
-	current_task->arch_tss.regs.ecx = regs->ecx;
-	current_task->arch_tss.regs.edx = regs->edx;
-	current_task->arch_tss.regs.ebx = regs->ebx;
-
-	current_task->state = TASK_READY_TO_RUN;
-	current_task->arch_tss.regs.eflags = regs->eflags;
-
 	/* Change context to the new task */
+	current_task->state = TASK_READY_TO_RUN;
+	arch_tss_cur_task = &current_task->arch_tss;
 	cur_task = tsk;
 	task->state = TASK_RUNNING;
-	jmp_to_task(*task);
+	task_switch_to(&task->arch_tss);
 }
 

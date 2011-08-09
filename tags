@@ -65,6 +65,9 @@ CMD_WRITE_SECTORS	drivers/block/ata_generic.c	73;"	d	file:
 CMD_WRITE_SECTORS_EXT	drivers/block/ata_generic.c	74;"	d	file:
 CM_PORT	arch/include/x86/i82C54.h	39;"	d
 CODE_SEG	arch/include/x86/gdt.h	39;"	d
+CONFIG_ARCH_X86	include/config.h	10;"	d
+CONFIG_SYSTEM_HZ	include/config.h	12;"	d
+CONFIG_X86_MAKEFILE	include/config.h	11;"	d
 CR0_PG_MASK	arch/include/x86/io.h	30;"	d
 CTYPE_H	include/ctype.h	26;"	d
 CWD	arch/x86/build/Makefile	/^CWD := arch\/x86\/build$/;"	m
@@ -100,7 +103,7 @@ DPL	arch/include/x86/gdt.h	/^			uint32_t DPL         : 2;$/;"	m	struct:_gdt_tss_
 DPL	arch/include/x86/idt.h	/^			uint16_t DPL         : 2;$/;"	m	struct:_idt_tpint_desc::_idt_high
 DRDY_BIT	drivers/block/ata_generic.c	66;"	d	file:
 ECHO	Makefile	/^ECHO       := $(shell which echo)$/;"	m
-EFLAGS_IF	arch/include/x86/x86.h	87;"	d
+EFLAGS_IF	arch/include/x86/x86.h	93;"	d
 EI_CLASS	include/fs/elf.h	49;"	d
 EI_CLASS	include/fs/elf32.h	36;"	d
 EI_DATA	include/fs/elf.h	50;"	d
@@ -277,9 +280,9 @@ KB_RESEND	include/drv/i8042.h	63;"	d
 KB_RESET	include/drv/i8042.h	56;"	d
 KB_SELFTEST	include/drv/i8042.h	59;"	d
 KERNEL_ADDR_OFFSET	arch/include/x86/karch.h	32;"	d
-KERNEL_CS	arch/include/x86/x86.h	76;"	d
-KERNEL_DPL	arch/include/x86/x86.h	72;"	d
-KERNEL_DS	arch/include/x86/x86.h	78;"	d
+KERNEL_CS	arch/include/x86/x86.h	82;"	d
+KERNEL_DPL	arch/include/x86/x86.h	78;"	d
+KERNEL_DS	arch/include/x86/x86.h	84;"	d
 KERNEL_END_ADDR	arch/include/x86/karch.h	50;"	d
 KERNEL_H	include/tempos/kernel.h	26;"	d
 KERNEL_PA_START	arch/include/x86/karch.h	48;"	d
@@ -432,18 +435,19 @@ TASK_READY_TO_RUN	include/tempos/sched.h	34;"	d
 TASK_RUNNING	include/tempos/sched.h	36;"	d
 TASK_STOPPED	include/tempos/sched.h	38;"	d
 TASK_ZOMBIE	include/tempos/sched.h	40;"	d
+TEMPOS_CONFIG_H	include/config.h	8;"	d
 TIMEOUT	drivers/block/ata_generic.c	40;"	d	file:
 TIMEOUT	drivers/char/i8042.c	33;"	d	file:
 TIMER_H	include/tempos/timer.h	26;"	d
 TIMER_IRQ	include/tempos/timer.h	36;"	d
 TRANS_TMOUT	include/drv/i8042.h	45;"	d
-TSS_SEG	arch/include/x86/x86.h	84;"	d
+TSS_SEG	arch/include/x86/x86.h	90;"	d
 TYPES_H	include/sys/types.h	26;"	d
 UNISTD_H	include/unistd.h	26;"	d
 UNSIGNED	lib/printf.c	39;"	d	file:
-USER_CS	arch/include/x86/x86.h	80;"	d
-USER_DPL	arch/include/x86/x86.h	73;"	d
-USER_DS	arch/include/x86/x86.h	82;"	d
+USER_CS	arch/include/x86/x86.h	86;"	d
+USER_DPL	arch/include/x86/x86.h	79;"	d
+USER_DS	arch/include/x86/x86.h	88;"	d
 VFS_H	include/fs/vfs.h	26;"	d
 VIDEO_COLS	arch/x86/boot/video.h	13;"	d
 VIDEO_H_	arch/x86/boot/video.h	10;"	d
@@ -636,11 +640,13 @@ e_version	include/fs/elf32.h	/^		Elf32_Word	e_version;$/;"	m	struct:_Elf32_Ehdr
 eax	arch/include/x86/tss.h	/^		uint32_t eax;$/;"	m	struct:_tss_struct
 eax	arch/include/x86/x86.h	/^		uint32_t eax;$/;"	m	struct:_pt_regs
 ebp	arch/include/x86/tss.h	/^		uint32_t ebp;$/;"	m	struct:_tss_struct
+ebp	arch/include/x86/x86.h	/^		uint32_t ebp;$/;"	m	struct:_pt_regs
 ebx	arch/include/x86/tss.h	/^		uint32_t ebx;$/;"	m	struct:_tss_struct
 ebx	arch/include/x86/x86.h	/^		uint32_t ebx;$/;"	m	struct:_pt_regs
 ecx	arch/include/x86/tss.h	/^		uint32_t ecx;$/;"	m	struct:_tss_struct
 ecx	arch/include/x86/x86.h	/^		uint32_t ecx;$/;"	m	struct:_pt_regs
 edi	arch/include/x86/tss.h	/^		uint32_t edi;$/;"	m	struct:_tss_struct
+edi	arch/include/x86/x86.h	/^		uint32_t edi;$/;"	m	struct:_pt_regs
 edx	arch/include/x86/tss.h	/^		uint32_t edx;$/;"	m	struct:_tss_struct
 edx	arch/include/x86/x86.h	/^		uint32_t edx;$/;"	m	struct:_pt_regs
 eflags	arch/include/x86/tss.h	/^		uint32_t eflags;$/;"	m	struct:_tss_struct
@@ -658,6 +664,7 @@ error_code	arch/x86/isr.S	/^error_code:$/;"	l
 es	arch/include/x86/tss.h	/^		uint16_t es;$/;"	m	struct:_tss_struct
 es	arch/include/x86/x86.h	/^		uint16_t es;$/;"	m	struct:_pt_regs
 esi	arch/include/x86/tss.h	/^		uint32_t esi;$/;"	m	struct:_tss_struct
+esi	arch/include/x86/x86.h	/^		uint32_t esi;$/;"	m	struct:_pt_regs
 esp	arch/include/x86/tss.h	/^		uint32_t esp;$/;"	m	struct:_tss_struct
 esp	arch/include/x86/x86.h	/^		uint32_t esp;$/;"	m	struct:_pt_regs
 esp0	arch/include/x86/tss.h	/^		uint32_t esp0;$/;"	m	struct:_tss_struct
@@ -737,6 +744,7 @@ init_pg	arch/x86/mm/mm.c	/^void init_pg(karch_t *kinf)$/;"	f
 init_scheduler	kernel/sched.c	/^void init_scheduler(void (*start_routine)(void*))$/;"	f
 init_timer	kernel/timer.c	/^void init_timer(void)$/;"	f
 initial_addr	include/tempos/mm.h	/^		uint32_t initial_addr;$/;"	m	struct:_mregion
+initial_task	arch/x86/task.S	/^initial_task:$/;"	l
 inl	arch/x86/io.c	/^inline uint32_t inl(uint16_t port)$/;"	f
 int16_t	include/unistd.h	/^	typedef short          		int16_t;$/;"	t
 int32_t	include/unistd.h	/^	typedef int            		int32_t;$/;"	t
@@ -777,7 +785,6 @@ isspace	lib/ctype.c	/^int isspace(int c)$/;"	f
 isupper	lib/ctype.c	/^int isupper(int c)$/;"	f
 isxdigit	lib/ctype.c	/^int isxdigit(int c)$/;"	f
 jiffies	kernel/timer.c	/^volatile uint32_t jiffies;$/;"	v
-jmp_to_task	arch/x86/task.S	/^jmp_to_task:$/;"	l
 karch	arch/x86/boot/karch.c	/^void karch(unsigned long magic, unsigned long addr)$/;"	f
 karch_t	include/tempos/kernel.h	/^	typedef struct _karch_t karch_t;$/;"	t	typeref:struct:_karch_t
 kbc_read	drivers/char/i8042.c	/^uchar8_t kbc_read(void)$/;"	f
@@ -1018,7 +1025,7 @@ strncmp	lib/string.c	/^int strncmp(const char *s1, const char *s2, size_t n)$/;"
 strncpy	lib/string.c	/^char *strncpy(char *dest, const char *src, size_t n)$/;"	f
 strsize	arch/include/x86/multiboot.h	/^  unsigned long strsize;$/;"	m	struct:aout_symbol_table
 strstr	lib/string.c	/^char *strstr(const char *haystack, const char *needle)$/;"	f
-switch_to	arch/x86/kernel/task.c	/^void switch_to(pt_regs *regs, c_llist *tsk)$/;"	f
+switch_to	arch/x86/kernel/task.c	/^void switch_to(c_llist *tsk)$/;"	f
 sys_execve	kernel/execve.c	/^int sys_execve(const char *filename, char *const argv[], char *const envp[])$/;"	f
 sys_exit	kernel/exit.c	/^int sys_exit(int status)$/;"	f
 sys_fork	kernel/fork.c	/^void sys_fork(void)$/;"	f
@@ -1030,6 +1037,7 @@ table_limit	arch/include/x86/idt.h	/^		uint16_t table_limit;$/;"	m	struct:_idt_i
 tables	arch/include/x86/mm.h	/^		uint32_t *tables[TABLE_SIZE];$/;"	m	struct:_page_dir
 tables_phy_addr	arch/include/x86/mm.h	/^		uint32_t *tables_phy_addr;$/;"	m	struct:_page_dir
 tabsize	arch/include/x86/multiboot.h	/^  unsigned long tabsize;$/;"	m	struct:aout_symbol_table
+task_switch_to	arch/x86/task.S	/^task_switch_to:$/;"	l
 task_t	include/tempos/sched.h	/^	typedef struct _task_struct task_t;$/;"	t	typeref:struct:_task_struct
 task_tss	arch/x86/gdt.c	/^tss_t task_tss;$/;"	v
 tasks	kernel/sched.c	/^c_llist *tasks = NULL;$/;"	v

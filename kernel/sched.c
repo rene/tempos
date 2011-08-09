@@ -85,7 +85,7 @@ void schedule(pt_regs *regs)
 			current_task = GET_TASK(next);
 			if (current_task->state == TASK_RUNNING || 
 					current_task->state == TASK_READY_TO_RUN) {
-				switch_to(regs, next);
+				switch_to(next);
 			}
 		}
 	}

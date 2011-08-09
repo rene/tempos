@@ -22,34 +22,127 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-.global jmp_to_task
+.global initial_task, task_switch_to
+.extern arch_tss_cur_task
 
-
-jmp_to_task:
+/**
+ * This is function should be used only once to
+ * Jump to the first kernel thread.
+ */
+initial_task:
 	cli
-	/* Context level switching */
-	movw 36(%esp), %ax # regs.ds
-	movw %ax, %ds
-	movw %ax, %fs
-	movw %ax, %gs
-	movw %ax, %ss
-	movw %ax, %es
-	/* Read task_t values */
-	xorl %eax, %eax
-	movl 38(%esp), %ebp # regs.esp
-	movw 62(%esp), %cx  # regs.cs
-	movl 64(%esp), %ebx # regs.eflags
-	movl 58(%esp), %edx # regs.eip
-	movl 68(%esp), %eax # regs.cr3 
-	/* Invalidate TLB's caches and set page table directory */
-	movl %eax, %cr3
-	/* Stack switching */
-	movl %ebp, %esp
-	xorl %ebp, %ebp
-	/* Now, finish context switching calling iret */
-	pushl %ebx
-	pushw %cx
+	movl 4(%esp), %eax
+	/**
+	 * Since this function should be called just once at kernel
+	 * initialization, and so at the kernel mode, we doesn't
+	 * need to make level switch, because we are already in kernel mode,
+	 * so here all we need it's ajust stack and jmp to main thread function
+	 */
+	movl 34(%eax), %ebx /* arch_tss.regs.esp    */
+	movl 72(%eax), %ecx /* arch_tss.regs.eflags */
+	movl 66(%eax), %edx /* arch_tss.regs.eip    */
+	
+	/* Ajust stack */
+	movl  %ebx, %esp
+	
+	/* Push arguments for iret and call it */
+	pushl %ecx
+	pushw %cs
 	pushl %edx
+	sti
+	iret
+
+
+/**
+ * void task_switch_to(task_t *task);
+ * Make a context switch
+ *
+ * Here we have the stack of the current task with:
+ *  ----------------
+ * | return address | <-- ESP
+ *  ----------------
+ * | task_t *task   |
+ *  ----------------
+ * |      ...       |
+ *  ----------------
+ *
+ * First, we will rearrange this stack to:
+ *
+ *  ----------------
+ * | return address | <-- ESP
+ *  ----------------
+ * |       CS       |
+ *  ----------------
+ * |     EFLAGS     |
+ *  ----------------
+ * |      ...       |
+ *  ----------------
+ * 
+ * Are you asking why? A: To make iret happy ;)
+ *
+ * So then we gonna save all context of the current task in it's stack, and
+ * then we will make a stack switch. In the new stack we gonna
+ * pop all registers context and call iret to jump to the new thread.
+ */
+task_switch_to:
+	cli
+	pushl %eax          /* save EAX           */
+	movl  4(%esp), %eax /* get return address */
+	movl %eax, -4(%esp) /* "push" return address without change esp */
+	addl  $8,%esp
+	pushf               /* save eflags        */
+	pushl %cs
+	subl $4,%esp
+
+	/* push fake error code and interrupt number */
+	pushl $0
+	pushl $0
+
+	/* Save registers */
+	pusha
+	pushl %esp
+	pushw %ds
+	pushw %es
+	pushw %fs
+	pushw %gs
+	pushw %ss
+	
+	/* Save CR3 */
+	pushl %eax
+	movl %cr3, %eax
+	xchgl %eax,(%esp)   /* exchange CR3 with EAX value in the stack */
+
+	/**
+	 * Save stack
+	 */
+	movl arch_tss_cur_task,%eax
+	movl %esp, 12(%eax)
+
+	/**
+	 * Make stack switch
+	 * keep offset values sync with struct _task_struct
+	 * \see include/tempos/sched.h
+	 */
+	movl 70(%esp), %eax
+	movl 12(%eax), %esp
+
+	/* Invalidate TLB cache and load page table directory */
+	popl %eax
+	movl %eax, %cr3
+
+	/* Restore register values from new task */
+	popw %ss
+	popw %gs
+	popw %fs
+	popw %es
+	popw %ds
+	popl %esp
+	popa
+
+	/* Skip interrupt number and error code */
+	addl $8, %esp
+
+	/* Call iret and go to new thread */
 	sti
 	iret
 
