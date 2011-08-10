@@ -128,7 +128,7 @@ task_switch_to:
 
 	/* Invalidate TLB cache and load page table directory */
 	popl %eax
-	movl %eax, %cr3
+#	movl %eax, %cr3
 
 	/* Restore register values from new task */
 	popw %ss
