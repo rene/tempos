@@ -33,7 +33,7 @@
 task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *arg)
 {
 	task_t *newth = NULL;
-	size_t *stack = NULL;
+	size_t *kstack = NULL;
 
 	/* Alloc memory for task structure */
 	newth = (task_t*)kmalloc(sizeof(task_t), GFP_NORMAL_Z);
@@ -41,9 +41,9 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 		return NULL;
 	}
 
-	/* Alloc memory for process stack */
-	stack = (size_t*)kmalloc(PROCESS_STACK_SIZE, GFP_NORMAL_Z);
-	if (stack == NULL) {
+	/* Alloc memory for process kernel stack */
+	kstack = (size_t*)kmalloc(PROCESS_STACK_SIZE, GFP_NORMAL_Z);
+	if (kstack == NULL) {
 		kfree(newth);
 		return NULL;
 	}
@@ -53,10 +53,11 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 	newth->pid = KERNEL_PID;
 	newth->return_code = 0;
 	newth->wait_queue = 0;
-	newth->stack = stack + (PROCESS_STACK_SIZE - (2*sizeof(size_t)));
+	newth->kstack = kstack + (PROCESS_STACK_SIZE - 1);
 
 	/* "push" start_routine argument */
-	memcpy(newth->stack, arg, sizeof(size_t));
+	newth->kstack -= sizeof(size_t);
+	memcpy(newth->kstack, arg, sizeof(size_t));
 
 	/* Architecture specific */
 	setup_task(newth, start_routine);
@@ -75,7 +76,7 @@ void kernel_thread_exit(int return_code)
 	cli();
 	current_task = GET_TASK(cur_task);
 	current_task->state = TASK_ZOMBIE;
-	kfree(current_task->stack);
+	kfree(current_task->kstack);
 	sti();
 }
 

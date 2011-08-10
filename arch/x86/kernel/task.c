@@ -62,7 +62,7 @@ void arch_init_scheduler(void (*start_routine)(void*))
 	newth->pid         = KERNEL_PID;
 	newth->return_code = 0;
 	newth->wait_queue  = 0;
-	newth->stack       = (size_t*)esp;
+	newth->kstack      = (size_t*)esp;
 
 	newth->arch_tss.regs.eip = (uint32_t)start_routine;
 	newth->arch_tss.regs.ds  = KERNEL_DS;
@@ -70,7 +70,7 @@ void arch_init_scheduler(void (*start_routine)(void*))
 	newth->arch_tss.regs.gs  = KERNEL_DS;
 	newth->arch_tss.regs.ss  = KERNEL_DS;
 	newth->arch_tss.regs.es  = KERNEL_DS;
-	newth->arch_tss.regs.esp = (uint32_t)newth->stack;
+	newth->arch_tss.regs.esp = (uint32_t)newth->kstack;
 	newth->arch_tss.regs.cs  = KERNEL_CS;
 	newth->arch_tss.cr3 = (uint32_t)kerneldir->dir_phy_addr; /* physical address */
 	newth->arch_tss.regs.eflags = (eflags | EFLAGS_IF); /* enable interrupts */
@@ -96,24 +96,23 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.gs  = KERNEL_DS;
 	task->arch_tss.regs.ss  = KERNEL_DS;
 	task->arch_tss.regs.es  = KERNEL_DS;
-	task->arch_tss.regs.esp = (uint32_t)task->stack;
 	task->arch_tss.regs.cs  = KERNEL_CS;
-	task->arch_tss.regs.esp = (uint32_t)task->stack;
 	task->arch_tss.cr3 = (uint32_t)kerneldir->dir_phy_addr; /* physical address */
 	task->arch_tss.regs.eflags = 0x2020000; //(eflags | EFLAGS_IF); /* enable interrupts */
 
 	/* Setup thread context into stack */
 	esp = -sizeof(pt_regs) - (4*sizeof(size_t));
-	memcpy(task->stack+esp, &task->arch_tss.regs.eflags, sizeof(size_t));
-	esp += sizeof(size_t);
-	memcpy(task->stack+esp, &task->arch_tss.regs.cs, sizeof(size_t));
-	esp += sizeof(size_t);
-	memcpy(task->stack+esp, &task->arch_tss.regs.eip, sizeof(size_t));
-	esp += sizeof(size_t);
-	memcpy(task->stack+esp, &task->arch_tss.regs, sizeof(arch_tss_t));
-	esp += sizeof(arch_tss_t);
-	memcpy(task->stack+esp, &task->arch_tss.cr3, sizeof(size_t));
+	task->arch_tss.regs.esp = (uint32_t)task->kstack + esp;
 
+	memcpy(task->kstack+esp, &task->arch_tss.cr3, sizeof(size_t));
+	esp += sizeof(size_t);
+	memcpy(task->kstack+esp, &task->arch_tss.regs, sizeof(arch_tss_t));
+	esp += sizeof(arch_tss_t);
+	memcpy(task->kstack+esp, &task->arch_tss.regs.eip, sizeof(size_t));
+	esp += sizeof(size_t);
+	memcpy(task->kstack+esp, &task->arch_tss.regs.cs, sizeof(size_t));
+	esp += sizeof(size_t);
+	memcpy(task->kstack+esp, &task->arch_tss.regs.eflags, sizeof(size_t));
 	return;
 }
 

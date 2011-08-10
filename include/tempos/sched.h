@@ -65,8 +65,8 @@
 		int priority;
 		/** Process ID */
 		pid_t pid;
-		/** Process stack */
-		size_t *stack;
+		/** Process kernel stack */
+		size_t *kstack;
 		/** Return code */
 		int return_code;
 		/** Wait queue */
