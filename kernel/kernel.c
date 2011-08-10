@@ -92,7 +92,7 @@ void kernel_main_thread(void *arg)
 {
 	kprintf(KERN_INFO "Hello, I'm the main kernel process!\n");
 
-	kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
+	//kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
 
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */

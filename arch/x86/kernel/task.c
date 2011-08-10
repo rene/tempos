@@ -101,18 +101,21 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.eflags = 0x2020000; //(eflags | EFLAGS_IF); /* enable interrupts */
 
 	/* Setup thread context into stack */
-	esp = -sizeof(pt_regs) - (4*sizeof(size_t));
-	task->arch_tss.regs.esp = (uint32_t)task->kstack + esp;
-
-	memcpy(task->kstack+esp, &task->arch_tss.cr3, sizeof(size_t));
-	esp += sizeof(size_t);
-	memcpy(task->kstack+esp, &task->arch_tss.regs, sizeof(arch_tss_t));
-	esp += sizeof(arch_tss_t);
-	memcpy(task->kstack+esp, &task->arch_tss.regs.eip, sizeof(size_t));
-	esp += sizeof(size_t);
-	memcpy(task->kstack+esp, &task->arch_tss.regs.cs, sizeof(size_t));
-	esp += sizeof(size_t);
+	esp -= sizeof(size_t);
 	memcpy(task->kstack+esp, &task->arch_tss.regs.eflags, sizeof(size_t));
+	esp -= sizeof(size_t);
+	memcpy(task->kstack+esp, &task->arch_tss.regs.cs, sizeof(size_t));
+	esp -= sizeof(size_t);
+	memcpy(task->kstack+esp, &task->arch_tss.regs.eip, sizeof(size_t));
+	esp -= sizeof(arch_tss_t);
+	memcpy(task->kstack+esp, &task->arch_tss.regs, sizeof(arch_tss_t));
+	esp -= sizeof(size_t);
+	memcpy(task->kstack, &task->arch_tss.cr3, sizeof(size_t));
+
+	task->arch_tss.regs.esp = (size_t)task->kstack;
+
+	//kprintf("CR3: 0x%x\n", task->arch_tss.regs.esp);
+
 	return;
 }
 
