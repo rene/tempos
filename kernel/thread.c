@@ -53,7 +53,7 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 	newth->pid = KERNEL_PID;
 	newth->return_code = 0;
 	newth->wait_queue = 0;
-	newth->kstack = kstack + (PROCESS_STACK_SIZE - sizeof(size_t));
+	newth->kstack = kstack + (PROCESS_STACK_SIZE - 1);
 
 	/* "push" start_routine argument */
 	newth->kstack -= sizeof(size_t);

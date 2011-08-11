@@ -106,7 +106,7 @@ task_switch_to:
 	pushw %fs
 	pushw %gs
 	pushw %ss
-	
+
 	/* Save CR3 */
 	pushl %eax
 	movl %cr3, %eax
@@ -123,15 +123,17 @@ task_switch_to:
 	 * keep offset values sync with struct _task_struct
 	 * \see include/tempos/sched.h
 	 */
+	#movl 52(%esp), %eax
 	movl 14(%esp), %eax
+	#addl $46, %eax
 	movl 12(%eax), %esp
-
-	/* Invalidate TLB cache and load page table directory */
+	
 	popl %eax
+	/* Invalidate TLB cache and load page table directory */
 #lp:
 #	jmp lp
 	
-#	movl %eax, %cr3
+	movl %eax, %cr3
 
 	/* Restore register values from new task */
 	popw %ss
