@@ -38,6 +38,9 @@ void initial_task(task_t *task);
 
 arch_tss_t *arch_tss_cur_task;
 
+task_t *task;
+task_t *current_task;
+
 /**
  *
  *
@@ -62,7 +65,7 @@ void arch_init_scheduler(void (*start_routine)(void*))
 	newth->pid         = KERNEL_PID;
 	newth->return_code = 0;
 	newth->wait_queue  = 0;
-	newth->kstack      = (size_t*)esp;
+	newth->kstack      = (uint32_t*)esp;
 
 	newth->arch_tss.regs.eip = (uint32_t)start_routine;
 	newth->arch_tss.regs.ds  = KERNEL_DS;
@@ -99,21 +102,50 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.eflags = 0x2020000; //(eflags | EFLAGS_IF); /* enable interrupts */
 
 	/* Setup thread context into stack */
-	task->kstack -= sizeof(size_t);
-	task->arch_tss.regs.esp = (size_t)task->kstack + 16;
+	//task->arch_tss.regs.esp = (uint32_t)task->kstack - (12 * sizeof(uint32_t)) - (5 * sizeof(uint16_t));
 
-	memcpy(task->kstack, &task->arch_tss.regs.eflags, sizeof(size_t));
-	task->kstack -= sizeof(size_t);
-	memcpy(task->kstack, &task->arch_tss.regs.cs, sizeof(size_t));
-	task->kstack -= sizeof(size_t);
-	memcpy(task->kstack, &task->arch_tss.regs.eip, sizeof(size_t));
-	task->kstack -= sizeof(arch_tss_t);
-	memcpy(task->kstack, &task->arch_tss.regs, sizeof(arch_tss_t));
-	task->kstack -= sizeof(size_t);
-	memcpy(task->kstack, &task->arch_tss.cr3, sizeof(size_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.eflags, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.cs, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.eip, sizeof(uint32_t));
+	
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.eax, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.ecx, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.edx, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.ebx, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.esp, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.ebp, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.esi, sizeof(uint32_t));
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.regs.edi, sizeof(uint32_t));
+	task->kstack -= sizeof(uint16_t);
+	memcpy(task->kstack, &task->arch_tss.regs.ds, sizeof(uint16_t));
+	task->kstack -= sizeof(uint16_t);
+	memcpy(task->kstack, &task->arch_tss.regs.es, sizeof(uint16_t));
+	task->kstack -= sizeof(uint16_t);
+	memcpy(task->kstack, &task->arch_tss.regs.fs, sizeof(uint16_t));
+	task->kstack -= sizeof(uint16_t);
+	memcpy(task->kstack, &task->arch_tss.regs.gs, sizeof(uint16_t));
+	task->kstack -= sizeof(uint16_t);
+	memcpy(task->kstack, &task->arch_tss.regs.ss, sizeof(uint16_t));
 
-	task->arch_tss.regs.esp = (size_t)task->kstack;
+	task->kstack -= sizeof(uint32_t);
+	memcpy(task->kstack, &task->arch_tss.cr3, sizeof(uint32_t));
+	
+	task->arch_tss.regs.esp = (uint32_t)task->kstack;
+
 	//kprintf("CR3: 0x%x\n",*task->kstack);
+	//kprintf("CR3: 0x%x CS: 0x%x\n",*((uint32_t*)task->arch_tss.regs.esp), *((uint32_t*)task->arch_tss.regs.esp+50));
+	//kprintf("esp: 0x%x\n", task->arch_tss.regs.esp);
 
 	return;
 }
@@ -123,8 +155,8 @@ void setup_task(task_t *task, void (*start_routine)(void*))
  */
 void switch_to(c_llist *tsk)
 {
-	task_t *current_task = GET_TASK(cur_task);
-	task_t *task = GET_TASK(tsk);
+	current_task = GET_TASK(cur_task);
+	task = GET_TASK(tsk);
 
 	if (current_task == NULL || task == NULL) {
 		return;
@@ -135,6 +167,11 @@ void switch_to(c_llist *tsk)
 	arch_tss_cur_task = &current_task->arch_tss;
 	cur_task = tsk;
 	task->state = TASK_RUNNING;
+	//task_switch_to(&task->arch_tss);
+
+	//kprintf("CR3: 0x%x CS: 0x%x\n",*((uint32_t*)task->arch_tss.regs.esp), *((uint32_t*)task->arch_tss.regs.esp+50));
+	//kprintf("esp: 0x%x\n", task->arch_tss.regs.esp);
+
 	task_switch_to(&task->arch_tss);
 }
 

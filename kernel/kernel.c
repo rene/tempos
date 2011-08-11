@@ -122,8 +122,8 @@ void kernel_main_thread(void *arg)
 void idle_thread(void *arg)
 {
 	while(!thread_done) {
-		kprintf("Hello bar!\n");
 		mdelay(100);
+		kprintf("Hello bar!\n");
 	}
 	kernel_thread_exit(0);
 }

@@ -75,6 +75,8 @@ initial_task:
  *  ----------------
  * |     EFLAGS     |
  *  ----------------
+ * | task_t *task   |
+ *  ----------------
  * |      ...       |
  *  ----------------
  * 
@@ -86,11 +88,12 @@ initial_task:
  */
 task_switch_to:
 	cli
-	pushl %eax          /* save EAX           */
-	movl  4(%esp), %eax /* get return address */
-	movl %eax, -4(%esp) /* "push" return address without change esp */
+	pushl %eax            /* save EAX           */
+	movl  4(%esp), %eax   /* get return address */
+	movl %eax, -4(%esp)   /* "push" return address without change esp */
 	addl  $8,%esp
-	pushf               /* save eflags        */
+	pushf                 /* save eflags                */
+	xchgl %eax,-4(%esp) /* back EAX value to register */
 	pushl %cs
 	subl $4,%esp
 
@@ -100,7 +103,6 @@ task_switch_to:
 
 	/* Save registers */
 	pushal
-	pushl %esp
 	pushw %ds
 	pushw %es
 	pushw %fs
@@ -116,24 +118,23 @@ task_switch_to:
 	 * Save stack
 	 */
 	movl arch_tss_cur_task,%eax
-	movl %esp, 12(%eax)
+	movl %esp, 10(%eax)
 
 	/**
 	 * Make stack switch
 	 * keep offset values sync with struct _task_struct
 	 * \see include/tempos/sched.h
 	 */
-	#movl 52(%esp), %eax
-	movl 14(%esp), %eax
-	#addl $46, %eax
-	movl 12(%eax), %esp
-	
-	popl %eax
+	movl 58(%esp), %eax
+	movl 10(%eax), %esp
+
 	/* Invalidate TLB cache and load page table directory */
-#lp:
-#	jmp lp
-	
+	popl %eax
 	movl %eax, %cr3
+
+	popl %ebx
+lp:
+	jmp lp
 
 	/* Restore register values from new task */
 	popw %ss
@@ -141,7 +142,6 @@ task_switch_to:
 	popw %fs
 	popw %es
 	popw %ds
-	popl %esp
 	popal
 
 	/* Skip interrupt number and error code */
