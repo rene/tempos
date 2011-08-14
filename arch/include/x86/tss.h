@@ -78,7 +78,7 @@
 		uint16_t debug : 1;
 		uint16_t reserved11 : 15;
 		uint16_t iomap;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 
 	/**
 	 * This is the structure that contains all "registers context" of a process.
@@ -93,7 +93,7 @@
 		pt_regs regs;
 		/** Page table directory */
 		uint32_t cr3;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 
 	typedef struct _tss_struct tss_t;
 

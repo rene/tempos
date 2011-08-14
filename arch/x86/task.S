@@ -98,8 +98,8 @@ task_switch_to:
 	subl $4,%esp
 
 	/* push fake error code and interrupt number */
-#pushl $0
-#	pushl $0
+	/*pushl $0
+	pushl $0*/
 
 	/* Save registers */
 	pushal
@@ -126,17 +126,15 @@ task_switch_to:
 	 * \see include/tempos/sched.h
 	 */
 	movl 58(%esp), %eax
+#movl 66(%esp), %eax
 	movl 10(%eax), %esp
+	movl %eax, arch_tss_cur_task
 
 	/* Invalidate TLB cache and load page table directory */
 	popl %eax
 	movl %eax, %cr3
 
-	popl %ebx
-lp:
-	jmp lp
-
-	/* Restore register values from new task */
+	/* Restore register values for new task */
 	popw %ss
 	popw %gs
 	popw %fs
@@ -145,8 +143,8 @@ lp:
 	popal
 
 	/* Skip interrupt number and error code */
-#addl $8, %esp
-
+	/*addl $8, %esp*/
+	
 	/* Call iret and go to new thread */
 	sti
 	iret

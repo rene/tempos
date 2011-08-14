@@ -121,8 +121,8 @@ char *strstr(const char *haystack, const char *needle)
 void *memcpy(void *dest, const void *src, size_t n)
 {
 	size_t p    = n;
-	char *pdest = (char *)dest;
-	char *psrc  = (char *)src;
+	char *pdest = (char*)dest;
+	char *psrc  = (char*)src;
 
 	while(p--)
 		*pdest++ = *psrc++;
@@ -134,7 +134,7 @@ void *memcpy(void *dest, const void *src, size_t n)
 void *memset(void *s, int c, size_t n)
 {
 	size_t p = n;
-	char *pdest = (char *)s;
+	char *pdest = (char*)s;
 
 	while(p--)
 		*pdest++ = c;

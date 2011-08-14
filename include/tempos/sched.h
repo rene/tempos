@@ -66,7 +66,7 @@
 		/** Process ID */
 		pid_t pid;
 		/** Process kernel stack */
-		uint32_t *kstack;
+		char *kstack;
 		/** Return code */
 		int return_code;
 		/** Wait queue */

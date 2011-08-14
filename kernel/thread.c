@@ -29,11 +29,17 @@
 #include <linkedl.h>
 #include <string.h>
 
+void fail(void)
+{
+	kprintf("FAILLLLLLLLLLLLL\n");
+	while(1);
+}
+
 
 task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *arg)
 {
 	task_t *newth = NULL;
-	uint32_t *kstack = NULL;
+	char *new_kstack = NULL;
 
 	/* Alloc memory for task structure */
 	newth = (task_t*)kmalloc(sizeof(task_t), GFP_NORMAL_Z);
@@ -42,22 +48,27 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 	}
 
 	/* Alloc memory for process kernel stack */
-	kstack = (uint32_t*)kmalloc(PROCESS_STACK_SIZE, GFP_NORMAL_Z);
-	if (kstack == NULL) {
+	new_kstack = (char*)kmalloc(PROCESS_STACK_SIZE, GFP_NORMAL_Z);
+	if (new_kstack == NULL) {
 		kfree(newth);
 		return NULL;
 	}
 
 	newth->state = TASK_READY_TO_RUN;
 	newth->priority = priority;
-	newth->pid = 11; //KERNEL_PID;
+	newth->pid = KERNEL_PID;
 	newth->return_code = 0;
 	newth->wait_queue = 0;
-	newth->kstack = kstack + PROCESS_STACK_SIZE;
+	newth->kstack = (char*)((uint32_t)new_kstack + PROCESS_STACK_SIZE);
 
 	/* "push" start_routine argument */
 	newth->kstack -= sizeof(uint32_t);
 	memcpy(newth->kstack, arg, sizeof(uint32_t));
+
+	/* "push" return address */
+	newth->kstack -= sizeof(uint32_t);
+	uint32_t ret = (uint32_t)fail;
+	memcpy(newth->kstack, &ret, sizeof(uint32_t));
 
 	/* Architecture specific */
 	setup_task(newth, start_routine);
