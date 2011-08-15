@@ -28,7 +28,12 @@
 #include <x86/io.h>
 
 #define load_esp(x) __asm__ __volatile__("movl %%esp, %0" : "=r"(x))
+
 #define load_eflags(x) __asm__ __volatile__("pushfl ; popl %0" : "=r"(x) :: "eax")
+
+#define push_into_stack(task, arg) { task->kstack -= sizeof(arg); \
+										memcpy(task->kstack, &arg, sizeof(arg)); }
+
 
 extern pagedir_t *kerneldir;
 
@@ -42,8 +47,8 @@ void initial_task(task_t *task);
 arch_tss_t *arch_tss_cur_task;
 
 /**
- *
- *
+ * Configure and start the first kernel thread.
+ * \param start_routine Pointer to the function which will be executed.
  */
 void arch_init_scheduler(void (*start_routine)(void*))
 {
@@ -100,86 +105,29 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.cs  = KERNEL_CS;
 	task->arch_tss.cr3 = (uint32_t)kerneldir->dir_phy_addr; /* physical address */
 
-	uint32_t eflags;
-	asm("pushf ; popl %0" : "=r"(eflags));
-	task->arch_tss.regs.eflags = 0x2020000;  //(eflags | EFLAGS_IF);
-		//0x2020000; //(eflags | EFLAGS_IF); /* enable interrupts */
-
+	task->arch_tss.regs.eflags = 0x2020000;
+	
 	/* Setup thread context into stack */
 	task->arch_tss.regs.esp = (uint32_t)task->kstack - (11 * sizeof(uint32_t)) - (6 * sizeof(uint16_t));
-	//task->kstack = (char*)(task->arch_tss.regs.esp);
 	
-	//kprintf(">> 0x%x\n", task->kstack);
-
-	//task->kstack = (uint32_t*)((uint32_t)task->kstack - sizeof(uint32_t));
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.eflags, sizeof(uint32_t));
-	
-	//kprintf(">> 0x%x -- 0x%x\n", task->kstack, *((uint32_t*)task->kstack));
-
-	//task->kstack = (uint32_t*)((uint32_t)task->kstack - sizeof(uint32_t));
-	task->kstack -= sizeof(uint16_t);
-	memcpy(task->kstack, &task->arch_tss.regs.cs, sizeof(uint16_t));
-
-	//kprintf(">> 0x%x -- 0x%x\n", task->kstack, *((uint32_t*)task->kstack));
-
-	//task->kstack = (uint32_t*)((uint32_t)task->kstack - sizeof(uint32_t));
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.eip, sizeof(uint32_t));
-	
-	//kprintf(">> 0x%x -- 0x%x\n", task->kstack, *((uint32_t*)task->kstack));
-
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.eax, sizeof(uint32_t));
-	
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.ecx, sizeof(uint32_t));
-	
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.edx, sizeof(uint32_t));
-
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.ebx, sizeof(uint32_t));
-	
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.esp, sizeof(uint32_t));
-	
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.ebp, sizeof(uint32_t));
-	
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.esi, sizeof(uint32_t));
-	
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.regs.edi, sizeof(uint32_t));
-	
-	task->kstack -= sizeof(uint16_t);
-	memcpy(task->kstack, &task->arch_tss.regs.ds, sizeof(uint16_t));
-	
-	task->kstack -= sizeof(uint16_t);
-	memcpy(task->kstack, &task->arch_tss.regs.es, sizeof(uint16_t));
-
-	task->kstack -= sizeof(uint16_t);
-	memcpy(task->kstack, &task->arch_tss.regs.fs, sizeof(uint16_t));
-
-	task->kstack -= sizeof(uint16_t);
-	memcpy(task->kstack, &task->arch_tss.regs.gs, sizeof(uint16_t));
-
-	task->kstack -= sizeof(uint16_t);
-	memcpy(task->kstack, &task->arch_tss.regs.ss, sizeof(uint16_t));
-
-	task->kstack -= sizeof(uint32_t);
-	memcpy(task->kstack, &task->arch_tss.cr3, sizeof(uint32_t));
-	
-	//task->arch_tss.regs.esp = (uint32_t)task->kstack;
-
-	//kprintf("kstack: 0x%x\n",(uint32_t)task->kstack);
-	//kprintf("CR3: 0x%x CS: 0x%x\n",*((uint32_t*)task->arch_tss.regs.esp), *((uint32_t*)task->arch_tss.regs.esp+4));
-	//kprintf("esp: 0x%x\n", task->arch_tss.regs.esp);
-
-	//kprintf("CR3: 0x%x SS: 0x%x\n",*((uint32_t*)task->arch_tss.regs.esp), *((uint32_t*)task->arch_tss.regs.esp+4));
-	//kprintf("kstack: 0x%x\n", (uint32_t)task->kstack);
-	//kprintf("esp: 0x%x\n", task->arch_tss.regs.esp);
+	/* Configure thread's stack */
+	push_into_stack(task, task->arch_tss.regs.eflags);
+	push_into_stack(task, task->arch_tss.regs.cs);
+	push_into_stack(task, task->arch_tss.regs.eip);
+	push_into_stack(task, task->arch_tss.regs.eax);
+	push_into_stack(task, task->arch_tss.regs.ecx);
+	push_into_stack(task, task->arch_tss.regs.edx);
+	push_into_stack(task, task->arch_tss.regs.ebx);
+	push_into_stack(task, task->arch_tss.regs.esp);
+	push_into_stack(task, task->arch_tss.regs.ebp);
+	push_into_stack(task, task->arch_tss.regs.esi);
+	push_into_stack(task, task->arch_tss.regs.edi);
+	push_into_stack(task, task->arch_tss.regs.ds);
+	push_into_stack(task, task->arch_tss.regs.es);
+	push_into_stack(task, task->arch_tss.regs.fs);
+	push_into_stack(task, task->arch_tss.regs.gs);
+	push_into_stack(task, task->arch_tss.regs.ss);
+	push_into_stack(task, task->arch_tss.cr3);
 
 	return;
 }
@@ -201,13 +149,6 @@ void switch_to(c_llist *tsk)
 	arch_tss_cur_task = &current_task->arch_tss;
 	cur_task = tsk;
 	task->state = TASK_RUNNING;
-	//task_switch_to(&task->arch_tss);
-
-	//kprintf("CR3: 0x%x CS: 0x%x\n",*((uint32_t*)task->arch_tss.regs.esp), *((uint32_t*)task->arch_tss.regs.esp+50));
-	//kprintf("esp: 0x%x\n", task->arch_tss.regs.esp);
-
-	//kprintf("> CR3: 0x%x SS: 0x%x\n",*((uint32_t*)task->arch_tss.regs.esp), *((uint32_t*)task->arch_tss.regs.esp+4));
-	//kprintf("> esp: 0x%x\n", *(&task->arch_tss.regs.esp)+4);
 	task_switch_to(&task->arch_tss);
 }
 

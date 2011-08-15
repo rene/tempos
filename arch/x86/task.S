@@ -93,13 +93,9 @@ task_switch_to:
 	movl %eax, -4(%esp)   /* "push" return address without change esp */
 	addl  $8,%esp
 	pushf                 /* save eflags                */
-	xchgl %eax,-4(%esp) /* back EAX value to register */
+	xchgl %eax,-4(%esp)   /* back EAX value to register */
 	pushl %cs
 	subl $4,%esp
-
-	/* push fake error code and interrupt number */
-	/*pushl $0
-	pushl $0*/
 
 	/* Save registers */
 	pushal
@@ -126,7 +122,6 @@ task_switch_to:
 	 * \see include/tempos/sched.h
 	 */
 	movl 58(%esp), %eax
-#movl 66(%esp), %eax
 	movl 10(%eax), %esp
 	movl %eax, arch_tss_cur_task
 
@@ -142,9 +137,6 @@ task_switch_to:
 	popw %ds
 	popal
 
-	/* Skip interrupt number and error code */
-	/*addl $8, %esp*/
-	
 	/* Call iret and go to new thread */
 	sti
 	iret

@@ -89,6 +89,7 @@ void kernel_thread_exit(int return_code)
 	cli();
 	current_task = GET_TASK(cur_task);
 	current_task->state = TASK_ZOMBIE;
+	current_task->return_code = return_code;
 	kfree(current_task->kstack);
 	sti();
 }
