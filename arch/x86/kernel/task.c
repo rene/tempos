@@ -31,9 +31,6 @@
 
 #define load_eflags(x) __asm__ __volatile__("pushfl ; popl %0" : "=r"(x) :: "eax")
 
-#define push_into_stack(task, arg) { task->kstack -= sizeof(arg); \
-										memcpy(task->kstack, &arg, sizeof(arg)); }
-
 
 extern pagedir_t *kerneldir;
 
@@ -90,6 +87,9 @@ void arch_init_scheduler(void (*start_routine)(void*))
 	initial_task(newth);
 }
 
+/**
+ * Configure and prepare the stack to initialize the thread.
+ */
 void setup_task(task_t *task, void (*start_routine)(void*))
 {
 	if (task == NULL) {
@@ -108,26 +108,27 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.eflags = 0x2020000;
 	
 	/* Setup thread context into stack */
-	task->arch_tss.regs.esp = (uint32_t)task->kstack - (11 * sizeof(uint32_t)) - (6 * sizeof(uint16_t));
+	task->kstack -= 2; /* FIXME: I've figure out that some how stack is "shifted" by 2 bytes, why? I have no idea :'( */
+	task->arch_tss.regs.esp = (uint32_t)task->kstack - sizeof(arch_tss_t);
 	
 	/* Configure thread's stack */
-	push_into_stack(task, task->arch_tss.regs.eflags);
-	push_into_stack(task, task->arch_tss.regs.cs);
-	push_into_stack(task, task->arch_tss.regs.eip);
-	push_into_stack(task, task->arch_tss.regs.eax);
-	push_into_stack(task, task->arch_tss.regs.ecx);
-	push_into_stack(task, task->arch_tss.regs.edx);
-	push_into_stack(task, task->arch_tss.regs.ebx);
-	push_into_stack(task, task->arch_tss.regs.esp);
-	push_into_stack(task, task->arch_tss.regs.ebp);
-	push_into_stack(task, task->arch_tss.regs.esi);
-	push_into_stack(task, task->arch_tss.regs.edi);
-	push_into_stack(task, task->arch_tss.regs.ds);
-	push_into_stack(task, task->arch_tss.regs.es);
-	push_into_stack(task, task->arch_tss.regs.fs);
-	push_into_stack(task, task->arch_tss.regs.gs);
-	push_into_stack(task, task->arch_tss.regs.ss);
-	push_into_stack(task, task->arch_tss.cr3);
+	push_into_stack(task->kstack, task->arch_tss.regs.eflags);
+	push_into_stack(task->kstack, task->arch_tss.regs.cs);
+	push_into_stack(task->kstack, task->arch_tss.regs.eip);
+	push_into_stack(task->kstack, task->arch_tss.regs.eax);
+	push_into_stack(task->kstack, task->arch_tss.regs.ecx);
+	push_into_stack(task->kstack, task->arch_tss.regs.edx);
+	push_into_stack(task->kstack, task->arch_tss.regs.ebx);
+	push_into_stack(task->kstack, task->arch_tss.regs.esp);
+	push_into_stack(task->kstack, task->arch_tss.regs.ebp);
+	push_into_stack(task->kstack, task->arch_tss.regs.esi);
+	push_into_stack(task->kstack, task->arch_tss.regs.edi);
+	push_into_stack(task->kstack, task->arch_tss.regs.ds);
+	push_into_stack(task->kstack, task->arch_tss.regs.es);
+	push_into_stack(task->kstack, task->arch_tss.regs.fs);
+	push_into_stack(task->kstack, task->arch_tss.regs.gs);
+	push_into_stack(task->kstack, task->arch_tss.regs.ss);
+	push_into_stack(task->kstack, task->arch_tss.cr3);
 
 	return;
 }
@@ -145,7 +146,9 @@ void switch_to(c_llist *tsk)
 	}
 	
 	/* Change context to the new task */
-	current_task->state = TASK_READY_TO_RUN;
+	if (current_task->state == TASK_RUNNING) {
+		current_task->state = TASK_READY_TO_RUN;
+	}
 	arch_tss_cur_task = &current_task->arch_tss;
 	cur_task = tsk;
 	task->state = TASK_RUNNING;

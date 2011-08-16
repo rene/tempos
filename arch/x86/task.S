@@ -41,7 +41,7 @@ initial_task:
 	movl 34(%eax), %ebx /* arch_tss.regs.esp    */
 	movl 72(%eax), %ecx /* arch_tss.regs.eflags */
 	movl 66(%eax), %edx /* arch_tss.regs.eip    */
-	
+		
 	/* Ajust stack */
 	movl  %ebx, %esp
 	
@@ -88,14 +88,18 @@ initial_task:
  */
 task_switch_to:
 	cli
-	pushl %eax            /* save EAX           */
-	movl  4(%esp), %eax   /* get return address */
-	movl %eax, -4(%esp)   /* "push" return address without change esp */
-	addl  $8,%esp
-	pushf                 /* save eflags                */
-	xchgl %eax,-4(%esp)   /* back EAX value to register */
-	pushl %cs
-	subl $4,%esp
+	pushw %cs		/* push CS */
+	pushl %eax 		/* save EAX in the stack */
+	
+	/* put eflags in EAX */
+	pushf
+	popl  %eax
+
+	/* exchange eflags with return address */
+	xchgl %eax,6(%esp)
+	
+	/* exchange return address with EAX value */
+	xchgl %eax,(%esp)
 
 	/* Save registers */
 	pushal
@@ -121,7 +125,7 @@ task_switch_to:
 	 * keep offset values sync with struct _task_struct
 	 * \see include/tempos/sched.h
 	 */
-	movl 58(%esp), %eax
+	movl 56(%esp), %eax
 	movl 10(%eax), %esp
 	movl %eax, arch_tss_cur_task
 

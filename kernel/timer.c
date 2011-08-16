@@ -92,9 +92,9 @@ _pushargs void timer_handler(int i, pt_regs *regs)
 	}
 
 	/*
-	 * Call schedule()
+	 * Call do_schedule()
 	 */
-	schedule(regs);
+	do_schedule(regs);
 }
 
 

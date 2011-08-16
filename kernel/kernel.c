@@ -39,9 +39,6 @@
 /** information passed from first stage */
 karch_t kinfo;
 
-//extern pagedir_t *kerneldir;
-
-char kstack[4096];
 extern uint32_t stack;
 void kernel_main_thread(void *arg);
 void idle_thread(void *arg);
@@ -87,12 +84,13 @@ void panic(const char *str)
 	for(;;); /* FIXME: dump_cpu(); halt_cpu(); */
 }
 
+extern void teste(void *);
 
 void kernel_main_thread(void *arg)
 {
 	kprintf(KERN_INFO "Hello, I'm the main kernel process!\n");
 
-	kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
+	kernel_thread_create(DEFAULT_PRIORITY, idle_thread, (void*)0x2525);
 
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
@@ -122,9 +120,9 @@ void kernel_main_thread(void *arg)
 void idle_thread(void *arg)
 {
 	while(!thread_done) {
-		mdelay(50);
-		kprintf("Hello bar!\n");
+		mdelay(20);
+		kprintf("Hello bar! 0x%x\n", (uint32_t)arg);
 	}
-	kernel_thread_exit(0);
+	//kernel_thread_exit(0);
 }
 

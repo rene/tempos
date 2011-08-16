@@ -40,7 +40,9 @@ c_llist *tasks = NULL;
 c_llist *cur_task = NULL;
 
 /**
- * Initialize the scheduler
+ * Initialize the scheduler. This function creates the circular
+ * linked list and call architecture specific code to initialize
+ * the scheduler.
  */
 void init_scheduler(void (*start_routine)(void*))
 {
@@ -56,23 +58,31 @@ void init_scheduler(void (*start_routine)(void*))
 
 
 /**
- * Decides what task to run and make the task switch.
- *
- * TempOS scheduler uses a round robin policy.
- *
- * \param p Scheduler Quantum (in ticks).
+ * Check if scheduler quantum is expired and
+ * make a context switch if necessary.
  */
-void schedule(pt_regs *regs)
+void do_schedule(pt_regs *regs)
 {
-	task_t *current_task;
-	c_llist *next;
-
 	/* Check if the quantum has exceeded */
 	if( !time_after(jiffies, sched_cnt) ) {
 		return;
 	} else {
 		sched_cnt = jiffies + scheduler_quantum;
 	}
+
+	schedule();
+}
+
+
+/**
+ * Decides what task to run and make the task switch.
+ *
+ * TempOS scheduler uses a round robin policy.
+ */
+void schedule(void)
+{
+	task_t *current_task;
+	c_llist *next;
 
 	/* do schedule */
 	if (cur_task == NULL) {

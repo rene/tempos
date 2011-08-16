@@ -29,17 +29,16 @@
 #include <linkedl.h>
 #include <string.h>
 
-void fail(void)
+void force_kthread_exit(void)
 {
-	kprintf("FAILLLLLLLLLLLLL\n");
-	while(1);
+	kernel_thread_exit(0);
 }
-
 
 task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *arg)
 {
 	task_t *newth = NULL;
 	char *new_kstack = NULL;
+	uint32_t udata;
 
 	/* Alloc memory for task structure */
 	newth = (task_t*)kmalloc(sizeof(task_t), GFP_NORMAL_Z);
@@ -62,13 +61,12 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 	newth->kstack = (char*)((uint32_t)new_kstack + PROCESS_STACK_SIZE);
 
 	/* "push" start_routine argument */
-	newth->kstack -= sizeof(uint32_t);
-	memcpy(newth->kstack, arg, sizeof(uint32_t));
+	udata = (uint32_t)arg;
+	push_into_stack(newth->kstack, udata);
 
 	/* "push" return address */
-	newth->kstack -= sizeof(uint32_t);
-	uint32_t ret = (uint32_t)fail;
-	memcpy(newth->kstack, &ret, sizeof(uint32_t));
+	udata = (uint32_t)force_kthread_exit; 
+	push_into_stack(newth->kstack, udata);
 
 	/* Architecture specific */
 	setup_task(newth, start_routine);
@@ -90,7 +88,8 @@ void kernel_thread_exit(int return_code)
 	current_task = GET_TASK(cur_task);
 	current_task->state = TASK_ZOMBIE;
 	current_task->return_code = return_code;
-	kfree(current_task->kstack);
+	//kfree(current_task->kstack);
+	schedule();
 	sti();
 }
 

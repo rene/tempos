@@ -26,7 +26,7 @@ ABOUT:
 		- A poor video (text mode) driver
 		- System calls support
 		- Generic ATA driver
-
+		- Kernel Multithreading
 
 HISTORY:
 	TempOS was born as an undergraduate project designed by
@@ -48,9 +48,9 @@ AUTHOR:
                    rene@grad.icmc.usp.br
                    http://renesp.com.br (in portuguese)
 
-	PhD teacher: Francisco José Monaco
-                 monaco@icmc.usp.br
-                 http://www.icmc.usp.br/~monaco
+	PhD professor: Francisco José Monaco
+                   monaco@icmc.usp.br
+                   http://www.icmc.usp.br/~monaco
 
 
 BUILD AND INSTALL:

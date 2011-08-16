@@ -54,6 +54,11 @@
 	/** Return cur_task circular linked list element (or NULL) */
 	#define GET_TASK(a) (a == NULL ? NULL : (task_t*)a->element)
 
+	/** Push data into user's proccess stack */
+	#define push_into_stack(tstack, data) { tstack -= sizeof(data); \
+										memcpy(tstack, &data, sizeof(data)); }
+
+
 	/**
 	 * Process structure. This structure holds all information about a
 	 * process, PID, state, and also its context.
@@ -82,10 +87,14 @@
 
 	void init_scheduler(void (*start_routine)(void*));
 
-	void schedule(pt_regs *regs);
+	void do_schedule(pt_regs *regs);
+
+	void schedule(void);
 
 	task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *arg);
+	
 	void kernel_thread_exit(int return_code);
+	
 	int kernel_thread_wait(task_t *th);
 
 
