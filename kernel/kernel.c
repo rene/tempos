@@ -111,18 +111,12 @@ void kernel_main_thread(void *arg)
 	/* Mount root file system */
 	/* ... */
 	//mdelay(1000);
-	for(;;) {
-		mdelay(100);
-		kprintf("Hello foo!\n");
-	}
+	for(;;);
 }
 
 void idle_thread(void *arg)
 {
-	while(!thread_done) {
-		mdelay(20);
-		kprintf("Hello bar!\n");
-	}
-	//kernel_thread_exit(0);
+	while(!thread_done);
+	kernel_thread_exit(0);
 }
 
