@@ -54,7 +54,7 @@
 	/** Return cur_task circular linked list element (or NULL) */
 	#define GET_TASK(a) (a == NULL ? NULL : (task_t*)a->element)
 
-	/** Push data into user's proccess stack */
+	/** Push data into user's process stack */
 	#define push_into_stack(tstack, data) { tstack -= sizeof(data); \
 										memcpy(tstack, &data, sizeof(data)); }
 
@@ -79,11 +79,16 @@
 		/** Architecture dependent */
 		arch_tss_t arch_tss;
 	};
-
 	typedef struct _task_struct task_t;
 
+	/** Circular linked list of all process */
 	extern c_llist *tasks;
+
+	/** Points to the current running process */
 	extern c_llist *cur_task;
+
+
+	/* Prototypes */
 
 	void init_scheduler(void (*start_routine)(void*));
 
@@ -96,7 +101,6 @@
 	void kernel_thread_exit(int return_code);
 	
 	int kernel_thread_wait(task_t *th);
-
 
 	/* These are Architecture specific */
 	void arch_init_scheduler(void (*start_routine)(void*));

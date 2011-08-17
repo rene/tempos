@@ -39,11 +39,17 @@
 /** information passed from first stage */
 karch_t kinfo;
 
+/** kernel stack */
 extern uint32_t stack;
+
+/** kernel main thread */
 void kernel_main_thread(void *arg);
+
+/** idle thread */
 void idle_thread(void *arg);
 
-int thread_done = 0;
+/** indicates when idle_thread should exit */
+static int thread_done = 0;
 
 /**
  * tempos_main : Second stage
@@ -78,14 +84,13 @@ void tempos_main(karch_t kinf)
 	panic("Error on initialize scheduler!");
 }
 
-void panic(const char *str)
-{
-	kprintf(KERN_CRIT "%s\n", str);
-	for(;;); /* FIXME: dump_cpu(); halt_cpu(); */
-}
-
-extern void teste(void *);
-
+/**
+ * This is the main kernel thread. When TempOS initializes his scheduler
+ * the kernel process becomes a kernel thread (running this function). So
+ * this thread executes all functions after scheduler initialization.
+ *
+ * \param arg Not used.
+ */
 void kernel_main_thread(void *arg)
 {
 	kprintf(KERN_INFO "Hello, I'm the main kernel process!\n");
@@ -114,9 +119,31 @@ void kernel_main_thread(void *arg)
 	for(;;);
 }
 
+/**
+ * This function does nothing.
+ * \note This function will run as a kernel thread just to keep another
+ * process running when the main kernel thread goes to sleep
+ * at system initialization, when there is no user process running yet.
+ *
+ * \param arg Not used.
+ */
 void idle_thread(void *arg)
 {
 	while(!thread_done);
 	kernel_thread_exit(0);
+}
+
+/**
+ * Show error message and dump CPU information.
+ * This function should be used when something goes really wrong.
+ * System will hang out without any chance of recovery.
+ *
+ * \param str Error message.
+ */
+void panic(const char *str)
+{
+	kprintf(KERN_CRIT "%s\n", str);
+	/* FIXME: dump_cpu(); halt_cpu(); */
+	for(;;);
 }
 

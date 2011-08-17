@@ -88,7 +88,6 @@ void kernel_thread_exit(int return_code)
 	current_task = GET_TASK(cur_task);
 	current_task->state = TASK_ZOMBIE;
 	current_task->return_code = return_code;
-	//kfree(current_task->kstack);
 	schedule();
 	sti();
 }
@@ -105,6 +104,7 @@ int kernel_thread_wait(task_t *th)
 	if (th->state == TASK_ZOMBIE) {
 		ret = th->return_code;
 		c_llist_remove(&tasks, th);
+		kfree(th->kstack);
 	}
 	sti();
 

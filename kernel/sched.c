@@ -60,6 +60,7 @@ void init_scheduler(void (*start_routine)(void*))
 /**
  * Check if scheduler quantum is expired and
  * make a context switch if necessary.
+ * \note This function is executed on each IRQ0 interrupt.
  */
 void do_schedule(pt_regs *regs)
 {
@@ -68,9 +69,8 @@ void do_schedule(pt_regs *regs)
 		return;
 	} else {
 		sched_cnt = jiffies + scheduler_quantum;
+		schedule();
 	}
-
-	schedule();
 }
 
 
@@ -84,20 +84,25 @@ void schedule(void)
 	task_t *current_task;
 	c_llist *next;
 
-	/* do schedule */
 	if (cur_task == NULL) {
 		return;
 	}
 
-	next = cur_task->next;
-	if (next != NULL) {
-		if (next != cur_task) {
-			current_task = GET_TASK(next);
-			if (current_task->state == TASK_RUNNING || 
-					current_task->state == TASK_READY_TO_RUN) {
-				switch_to(next);
+	/* do schedule */
+	do {
+		next = cur_task->next;
+		if (next != NULL) {
+			if (next != cur_task) {
+				current_task = GET_TASK(next);
+				if (current_task->state == TASK_RUNNING || 
+						current_task->state == TASK_READY_TO_RUN) {
+					switch_to(next);
+					break;
+				} else {
+					continue;
+				}
 			}
 		}
-	}
+	} while(next == NULL);
 }
 

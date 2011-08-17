@@ -132,17 +132,17 @@ void init_pg(karch_t *kinf)
 	}
 
 	/* Map kernel memory
-	  NOTE: Here we also map the phisical kernel pages 
+	  NOTE: Here we also map the physical kernel pages 
 	        to the same real address, why?
 	        Simple, because here we are still using
 	        GDT trick, even when we enable the paging system
 	        GDT remains configured with 1GB+1MB as segment base,
 	        which means that processor will sum 1GB+1MB on
 	        each address, so, only after reload of GDT, we can
-	        safetly "unmap" the virtual phisical addresses of kernel 
+	        safely "unmap" the virtual physical addresses of kernel 
 	        pages.
 	 
-	    PS: If you understood this comment, you realy knows what
+	    PS: If you understood this comment, you really knows what
 	        is happening here, so you can go ahead and change
 	        the code whatever you want. Otherwise, DO NOT touch
 	        in this code! */
@@ -216,7 +216,7 @@ void init_pg(karch_t *kinf)
 	for(i=0; i<kinf->mmap_size; i++) {
 		mmap = &(kinf->mmap_table[i]);
 
-		/* Map only avaliable memory */
+		/* Map only available memory */
 		if(mmap->type == MTYPE_AVALIABLE) {
 			m_end   = mmap->base_addr_low + mmap->length_low;
 			address = PAGE_ALIGN(mmap->base_addr_low);
@@ -235,7 +235,7 @@ void init_pg(karch_t *kinf)
 	/* Reload GDT */
 	setup_GDT();
 
-	/* Unmap the phisical addresses kernel pages from virtual address
+	/* Unmap the physical addresses kernel pages from virtual address
 	   because kernel is mapped to 3GB :)*/
 	for (i = oldk; i < (kpages / TABLE_SIZE); i++) {
 		table2 = kerneldir->tables[i];
