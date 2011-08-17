@@ -90,7 +90,7 @@ void kernel_main_thread(void *arg)
 {
 	kprintf(KERN_INFO "Hello, I'm the main kernel process!\n");
 
-	kernel_thread_create(DEFAULT_PRIORITY, idle_thread, (void*)0x2525);
+	kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
 
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
@@ -121,7 +121,7 @@ void idle_thread(void *arg)
 {
 	while(!thread_done) {
 		mdelay(20);
-		kprintf("Hello bar! 0x%x\n", (uint32_t)arg);
+		kprintf("Hello bar!\n");
 	}
 	//kernel_thread_exit(0);
 }
