@@ -32,7 +32,6 @@ use_grub1() {
 		errorlog="/tmp/$$"
 	fi
 
-
 	echo -n " + Creating floppy root directory..."
 	TMPDIR=$($mktemp -d)
 	if [ $? != 0 ]; then
@@ -87,9 +86,44 @@ EOF
 
 # Make image using grub 2
 use_grub2() {
-	echo "Sorry. TempOS does not support GRUB2 yet."
-	false
+	# FIXME: This is a workaround to make floppy disk with
+	#        GRUB1 on systems with GRUB2 installed.
+
+	mktemp=$(which mktemp)
+	if [ -n $mktemp ]; then
+		errorlog=$($mktemp)
+	else
+		errorlog="/tmp/$$"
+	fi
+
+	echo -n " + Creating floppy root directory..."
+	TMPDIR=$($mktemp -d)
+	if [ $? != 0 ]; then
+		TMPDIR=/tmp/$$-dir
+		mkdir $TMPDIR 2>>$errorlog
+	fi
 	check_result
+
+	echo -n " + Copying TempOS kernel image..."
+	mkdir -p $TMPDIR/boot
+	cp $TEMPOSFILE $TMPDIR/boot 2>>$errorlog
+	check_result
+	
+	echo -n " + Uncompressing GRUB1 files..."
+	tar -xjf $GRUB1TARBALL -C $TMPDIR/boot
+	mv $TMPDIR/boot/grub1.bin /tmp
+	check_result
+
+	echo -n " + Creating ext2 file system image..."
+	$GENEXT2FS -d $TMPDIR -b1536 $IMGFILE >>$errorlog 2>&1
+	check_result
+
+	echo -n " + Installing GRUB..."
+	dd if=/tmp/grub1.bin of=$IMGFILE conv=notrunc bs=512 count=1 >>$errorlog 2>&1
+	check_result
+
+	rm /tmp/grub1.bin
+	rm -rf $TMPDIR
 }
 
 # main
@@ -103,6 +137,9 @@ else
 	IMGFILE=$2
 	GENEXT2FS=$3
 fi
+
+# GRUB1 files
+GRUB1TARBALL=scripts/grub1.tar.bz2
 
 # Check grub's version
 GRUBI=$(which grub-install)
