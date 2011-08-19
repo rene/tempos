@@ -29,12 +29,22 @@
 	#include <tempos/sched.h>
 	#include <linkedl.h>
 
+	/** Number of wait addresses */
+	#define WAIT_ADDRESS_SIZE 256
+
 	/* Sleep addresses */
 
 	/** Wait for disk block buffer */
 	#define WAIT_DISK_BUFFER 0x01
 
+
+	/* Prototypes */
+
+	void init_wait_queues(void);
+
 	void sleep_on(int sleep_addr);
+
+	void wakeup(int sleep_addr);
 
 #endif /* WAIT_H */
 

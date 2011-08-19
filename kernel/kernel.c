@@ -28,6 +28,7 @@
 #include <tempos/jiffies.h>
 #include <tempos/delay.h>
 #include <tempos/sched.h>
+#include <tempos/wait.h>
 #include <drv/i8042.h>
 #include <drv/ata_generic.h>
 #include <fs/vfs.h>
@@ -71,13 +72,16 @@ void tempos_main(karch_t kinf)
 	/* ATA controller */
 	init_ata_generic();
 
-	/* Init Virtual File System layer */
+	/* Initialize Virtual File System layer */
 	register_all_fs_types();
+
+	/* Initialize wait queues */
+	init_wait_queues();
 
 	/* Show command line */
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 
-	/* Init scheduler */
+	/* Initialize the scheduler */
 	init_scheduler(kernel_main_thread);
 
 	/* Should never reaches here! */
@@ -93,10 +97,12 @@ void tempos_main(karch_t kinf)
  */
 void kernel_main_thread(void *arg)
 {
-	kprintf(KERN_INFO "Hello, I'm the main kernel process!\n");
+	task_t *idle_th;
 
-	kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
+	idle_th = kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
 
+
+	/* kprintf(KERN_INFO "Hello, I'm the main kernel process!\n"); */
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
 	/*asm volatile("movl $4,  %%eax  \n" // syscall number

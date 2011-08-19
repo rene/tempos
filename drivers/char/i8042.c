@@ -175,6 +175,8 @@ static void keyboard_handler(int i, pt_regs *regs)
 	uchar8_t key = read_key();
 
 	kprintf("IRQ %d REGS: 0x%x 0x%x 0x%x K: %lx \n", i, regs->cs, regs->ds, regs->eflags, key );
+
+	//wakeup(1);
 }
 
 
