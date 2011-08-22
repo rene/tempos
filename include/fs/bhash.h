@@ -26,30 +26,56 @@
 	#define BHASH_H
 
 	#include <linkedl.h>
-	#include <tempos/mm.h>
 	#include <unistd.h>
+	#include <tempos/mm.h>
+	#include <fs/device.h>
 
 	/* Block buffer: possible status */
-	#define BUFF_ST_LOCKED  0x01 /* Buffer is locked (busy) */
-	#define BUFF_ST_VALID   0x02 /* The buffer contains valid data */
-	#define BUFF_ST_FLUSH   0x04 /* Must be flushed to device */
-	#define BUFF_ST_BUSY    0x08 /* Kernel is reading or writing to device */
-	#define BUFF_ST_WAITING 0x0F /* A process is currently waiting for the buffer to become free */
 	
+ 	/** Buffer is locked (busy) */
+	#define BUFF_ST_LOCKED  0x01
+	/** The buffer contains valid data */
+	#define BUFF_ST_VALID   0x02 
+	/** Must be flushed to device */
+	#define BUFF_ST_FLUSH   0x04
+	/** Kernel is reading or writing to device */
+	#define BUFF_ST_BUSY    0x08 	
+	/** A process is currently waiting for the buffer to become free */
+	#define BUFF_ST_WAITING 0x0F
+
+	/** Buffer size */
+	#define BUFF_SIZE 		512
+
+
 	/** Buffer structure */
 	struct _buffer_header_t {
-		uint64_t block_num;
-		int status;
-		char *data;
+		uint64_t addr;
+		char status;
+		char data[BUFF_SIZE+2];
+		/* links to make a circular linked list into hash queue */
+		struct _buffer_header_t *prev;
+		struct _buffer_header_t *next;
+		/* links to make a circular linked list into free list */
+		struct _buffer_header_t *free_prev;
+		struct _buffer_header_t *free_next;
 	};
 
-	struct _hash_queue_t {
+	/** Buffer hash queue. Each device should have one of this. */
+	struct _buff_hash_queue_t {
+		/** How many position are in hash table. */
 		uint64_t size;
-		int device;
-		c_llist *blocks;
+		/** The size (in bytes) of each buffer. */
+		uint64_t buffer_size;
+		/** Device */
+		dev_t device;
+		/** Each position has a circular linked list of buffer headers. */
+		struct _buffer_header_t *hashtable;
+		/** Free list head */
+		struct _buffer_header_t *freelist_head;
 	};
 
-	//typedef struct buffer
+	typedef struct _buffer_header_t   buff_header_t;
+	typedef struct _buff_hash_queue_t buff_hashq_t;
 
 #endif /* BHASH_H */
 

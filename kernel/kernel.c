@@ -69,17 +69,8 @@ void tempos_main(karch_t kinf)
 	/* Keyboard */
 	init_8042();
 
-	/* ATA controller */
-	init_ata_generic();
-
-	/* Initialize Virtual File System layer */
-	register_all_fs_types();
-
 	/* Initialize wait queues */
 	init_wait_queues();
-
-	/* Show command line */
-	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 
 	/* Initialize the scheduler */
 	init_scheduler(kernel_main_thread);
@@ -98,8 +89,20 @@ void tempos_main(karch_t kinf)
 void kernel_main_thread(void *arg)
 {
 	task_t *idle_th;
-
+	
+	/* Create idle thread */
 	idle_th = kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
+
+	/* ATA controller */
+	init_ata_generic();
+
+	/* Initialize Virtual File System layer */
+	register_all_fs_types();
+
+	/* Show command line */
+	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
+
+
 
 
 	/* kprintf(KERN_INFO "Hello, I'm the main kernel process!\n"); */

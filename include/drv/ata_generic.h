@@ -26,9 +26,13 @@
 	#define BLK_ATA_GENERIC_H
 
 	#include <unistd.h>
+	#include <fs/bhash.h>
 
-	#define ATA_DEVICE	0x8000
-	#define REM_MEDIA	0x00FF
+	/** Buffer size must have the same size of disk sectors */
+	#define SECTOR_SIZE  	BUFF_SIZE
+
+	#define ATA_DEVICE		0x8000
+	#define REM_MEDIA		0x00FF
 
 	#define SUPPORT_LBA		0x0300
 	#define SUPPORT_DMA		0x0100
@@ -71,8 +75,15 @@
 
 	typedef struct _ata_dev_info ata_dev_info;
 
+	/* Prototypes */
 
 	void init_ata_generic(void);
+
+	int read_ata_sector(int major, int device, buff_header_t *buf);
+
+	//int write_async_ata_block(buffer_header_t *buf);
+
+	//int write_sync_ata_block(buffer_header_t *buf);
 
 #endif /* BLK_ATA_GENERIC_H */
 

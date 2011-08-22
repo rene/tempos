@@ -27,14 +27,15 @@
 #include <tempos/timer.h>
 #include <tempos/jiffies.h>
 #include <tempos/delay.h>
-/*#include <tempos/fs/bcache.h>*/
-#include <fs/devices.h>
+#include <tempos/wait.h>
+#include <fs/device.h>
+#include <fs/dev_numbers.h>
 #include <drv/ata_generic.h>
 #include <drv/i8042.h>
 #include <arch/irq.h>
 #include <arch/io.h>
+#include <linkedl.h>
 
-#define SECTOR_SIZE      512
 #define SECTOR_HALF_SIZE (SECTOR_SIZE / 2)
 
 #define TIMEOUT		(jiffies + (HZ / 40)) /* timeout in 40ms */
@@ -64,6 +65,7 @@
 #define BSY_BIT		0x80
 #define DF_BIT		0x20
 #define DRDY_BIT	0x40
+#define DRQ_BIT     0x08
 #define ABRT_BIT	0x04
 
 #define CMD_RESET				0x08
@@ -78,8 +80,16 @@
 /** ATA devices information */
 static ata_dev_info ata_devices[4];
 
-/* Linked list to blocks request */
-//static 
+/**
+ * Linked list to blocks operation requests.
+ * There is one list for each device:
+ * 0 - hda
+ * 1 - hdb
+ * 2 - hdc
+ * 3 - hdd
+ */
+static llist *blk_queue[4];
+
 
 /** Default I/O ports for ATA controller */
 static uint16_t pio_ports[2][9] = {
@@ -102,11 +112,9 @@ static void ata_handler1(int id, pt_regs *regs);
 
 static void ata_handler2(int id, pt_regs *regs);
 
-int read_hd_sector(int major, int device, uint64_t addr);
-int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector);
+static int read_hd_sector(int major, int device, uint64_t addr);
 
-uint16_t setor[256];
-char read_done;
+static int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector);
 
 /**
  * Initialize the generic driver for ATA controllers.
@@ -120,6 +128,7 @@ void init_ata_generic(void)
 	uint64_t size;
 	uchar8_t dev, bus;
 	uchar8_t sc, saddr1, saddr2, saddr3;
+	buff_header_t mbr;	
 
 	kprintf(KERN_INFO "Initializing generic ATA controller...\n");
 
@@ -227,6 +236,11 @@ void init_ata_generic(void)
 		}
 	}
 
+	/* Block requests lists */
+	for (i = 0; i < 4; i++) {
+		llist_create(&blk_queue[i]);
+	}
+
 	/* Register IRQs */
 	if( request_irq(ATA_PRI_IRQ, ata_handler1, SA_SHIRQ, "ata-primary") < 0) {
 		kprintf(KERN_ERROR "Error on register IRQ %d\n", ATA_PRI_IRQ);
@@ -235,10 +249,19 @@ void init_ata_generic(void)
 		kprintf(KERN_ERROR "Error on register IRQ %d\n", ATA_SEC_IRQ);
 	}
 
-	/*read_done = 0;
-	read_hd_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, 0);
-	while(!read_done);
-	write_hd_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, 1, setor);*/
+	/* Now, parse partition table for each found device */
+	/** FIXME: TempOS supports only one device per bus.
+	 *  To support more devices we need to check PCI bus to
+	 *  know which device generates the interrupt */
+	mbr.addr = 0;
+	if ((ata_devices[0].flags & PRESENT) != 0) {
+		read_ata_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, &mbr);
+		//parse_mbr(&mbr);
+	}
+	if ((ata_devices[2].flags & PRESENT) != 0) {
+		read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, &mbr);
+		//parse_mbr(&mbr);
+	}
 }
 
 
@@ -444,7 +467,7 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
 
 
 /**
- * Read a sector from device
+ * Read a sector from device (low level function)
  *
  * \param major Bus - Primary or Secondary IDE
  * \param device Master or Slave
@@ -453,7 +476,7 @@ static int get_dev_info(uchar8_t bus, ata_dev_info *devinfo)
  * \note This function will just request to read the sector.
  * ATA controller will generate a interrupt when it's done.
  */
-int read_hd_sector(int major, int device, uint64_t addr)
+static int read_hd_sector(int major, int device, uint64_t addr)
 {
 	uchar8_t dc;
 	uchar8_t bus, dev;
@@ -520,7 +543,7 @@ int read_hd_sector(int major, int device, uint64_t addr)
 
 
 /**
- * Write sectors to device
+ * Write sectors to device (low level function)
  *
  * \param major Bus - Primary or Secondary IDE
  * \param device Master or Slave
@@ -528,7 +551,7 @@ int read_hd_sector(int major, int device, uint64_t addr)
  *
  * \note This function write a sector to device.
  */
-int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector)
+static int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector)
 {
 	int i;
 	uchar8_t dc;
@@ -593,48 +616,153 @@ int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector)
 	}
 	
 	for(i=0; i<SECTOR_HALF_SIZE; i++) {
-		wait_bus(SEC_BUS);
-		kprintf("ata: %x %x ", (setor[i] & 0xFF), (setor[i] >> 8));
-		outw(setor[i], pio_ports[SEC_BUS][REG_DATA]);
+		wait_bus(bus);
+		outw(sector[i], pio_ports[bus][REG_DATA]);
 		udelay(1);
 	}
-	send_cmd(SEC_BUS, CMD_CACHE_FLUSH);
-	wait_bus(SEC_BUS);
+	send_cmd(bus, CMD_CACHE_FLUSH);
+	wait_bus(bus);
 
 	return 0;
 }
 
 
+/**
+ * Handler for disk controller interrupts.
+ * This function just receive the block from controller, remove
+ * it from blocks queue and if necessary, tell the controller
+ * to read the next block of the list.
+ * \note If you are going to implement a arm's disk algorithm, DO NOT change
+ * this function, but do it in read_ata_sector, so you can rearrange the list
+ * on each block read request. This way makes more sense, and it's more sane.
+ */
 static void ata_handler1(int id, pt_regs *regs)
 {
 	uint16_t data, i;
+	buff_header_t *buf;
 
-	kprintf("PRIM: %d -- %d\n", id, regs->ds);
+	cli();
 
-	for(i=0; i<SECTOR_HALF_SIZE; i++) {
-		wait_bus(PRI_BUS);
-		data = inw(pio_ports[PRI_BUS][REG_DATA]);
-		//kprintf("%x %x ", (data & 0xFF), (data >> 8));
-		setor[i] = data;
+	/* DRQ bit is set when disk has PIO data to transfer */
+	
+	/* Primary */
+	if( (inb(pio_ports[PRI_BUS][REG_CMD]) & DRQ_BIT) != 0 ) {
+		buf = (buff_header_t*)blk_queue[0]->element;
+		for(i=0; i<SECTOR_SIZE; i+=2) {
+			wait_bus(PRI_BUS);
+			data = inw(pio_ports[PRI_BUS][REG_DATA]);
+			buf->data[i+1] = (uchar8_t)((data >> 0x08) & 0xFF);
+			buf->data[i]   = (uchar8_t)(data & 0xFF);  
+		}
+		buf->status = BUFF_ST_VALID;
+		llist_remove(&blk_queue[0], buf);
 	}
 
-	read_done = 1;
+	/* Wakeup process waiting for this interrupt */
+	sti();
+	wakeup(WAIT_INT_IDE_PRI);
 }
 
 static void ata_handler2(int id, pt_regs *regs)
 {
-	//uint16_t i, p;
+	uint16_t data, i;
+	buff_header_t *buf;
 
-	kprintf("SEC: %d -- %d\n", id, regs->ds);
+	cli();
 
-	/*for(i=1, p=1; i<=256; i++, p+=2) {
-		wait_bus(SEC_BUS);
-		kprintf("ata: %x %x ", setor[p], setor[p+1]);
-		outw(((setor[p] << 8) & setor[p+1]), pio_ports[SEC_BUS][REG_DATA]);
-		udelay(1);
+	/* DRQ bit is set when disk has PIO data to transfer */
+	
+	/* Secondary */
+	if( (inb(pio_ports[SEC_BUS][REG_CMD]) & DRQ_BIT) != 0 ) {
+		buf = (buff_header_t*)blk_queue[2]->element;
+		for(i=0; i<SECTOR_SIZE; i+=2) {
+			wait_bus(SEC_BUS);
+			data = inw(pio_ports[SEC_BUS][REG_DATA]);
+			buf->data[i+1] = (uchar8_t)((data >> 0x08) & 0xFF);
+			buf->data[i]   = (uchar8_t)(data & 0xFF);  
+		}
+		buf->status = BUFF_ST_VALID;
+		llist_remove(&blk_queue[2], buf);
 	}
 
-	send_cmd(SEC_BUS, CMD_CACHE_FLUSH);
-	wait_bus(SEC_BUS);*/
+	/* Wakeup process waiting for this interrupt */
+	sti();
+	wakeup(WAIT_INT_IDE_PRI);
 }
+
+/**
+ * Read a sector from hard disk.
+ *
+ * \param major Bus - Primary or Secondary IDE
+ * \param device Master or Slave
+ * \param buf Buffer structure that should contains block address, 
+ *            and space for block data.
+ * \note This function will sleep until the block becomes available.
+ */
+int read_ata_sector(int major, int device, buff_header_t *buf)
+{
+	uchar8_t dev;
+
+	if (major == DEVMAJOR_ATA_PRI) {
+		switch(device) {
+			case DEVNUM_HDA:
+				dev = 0;
+				break;
+
+			case DEVNUM_HDB:
+				dev = 1;
+				break;
+
+			default:
+				return -1;
+		}
+	} else if(major == DEVMAJOR_ATA_SEC) {
+		switch(device) {
+			case DEVNUM_HDC:
+				dev = 2;
+				break;
+
+			case DEVNUM_HDD:
+				dev = 3;
+				break;
+
+			default:
+				return -1;
+		}
+	} else {
+		return -1;
+	}
+
+
+	cli();
+	/* First, mark block as busy */
+	buf->status = BUFF_ST_BUSY;
+
+	if (blk_queue[dev] == NULL) {
+		/** The queue is empty, so we can process this block now! */
+		llist_add(&blk_queue[dev], buf); 
+		read_hd_sector(major, device, buf->addr);
+	} else {
+		/** The queue is not empty, we will just add the block to the queue,
+		 *  so it will be process later, by interrupt handler */
+		llist_add(&blk_queue[dev], buf);
+	}
+	sti();
+	
+
+	/** Wait block to become available */
+	if (major == DEVMAJOR_ATA_PRI) {
+		while(buf->status == BUFF_ST_BUSY)
+			sleep_on(WAIT_INT_IDE_PRI);
+	} else {
+		while(buf->status == BUFF_ST_BUSY)
+			sleep_on(WAIT_INT_IDE_SEC);
+	}
+
+	return 0;
+}
+
+int write_async_ata_block(int major, int device, buff_header_t *buf);
+
+int write_sync_ata_block(int major, int device, buff_header_t *buf);
 

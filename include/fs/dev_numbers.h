@@ -2,7 +2,7 @@
  * Copyright (C) 2009-2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: devices.h
+ * File: dev_numbers.h
  *
  * This file is part of TempOS.
  *

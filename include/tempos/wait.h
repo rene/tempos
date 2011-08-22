@@ -34,9 +34,10 @@
 
 	/* Sleep addresses */
 
-	/** Wait for disk block buffer */
-	#define WAIT_DISK_BUFFER 0x01
-
+	/** Wait for disk operation at primary IDE */
+	#define WAIT_INT_IDE_PRI  14
+	/** Wait for disk operation at secondary IDE */
+	#define WAIT_INT_IDE_SEC  15
 
 	/* Prototypes */
 

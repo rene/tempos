@@ -2,8 +2,8 @@
  * Copyright (C) 2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: bhash.c
- * Desc: Implements the buffer hash queue for block devices
+ * File: devices.c
+ * Desc: Implements the API to register device drivers
  *
  * This file is part of TempOS.
  *
@@ -22,15 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <fs/bhash.h>
+#include <tempos/kernel.h>
+#include <fs/vfs.h>
+#include <fs/device.h>
 
+/** Table of device drivers for character devices */
+dev_driver_t char_dev_drivers[MAX_DEVCHAR_DRIVERS];
 
-/**
- * Function to initialize the hash queue. Size will be:
- * LAST_DEVICE_BLOC % 4
- */
-int init_hash_queue(int device, uint64_t size)
-{
-	return(-1);
-}
+/** Table of device drivers for block devices */
+dev_driver_t block_dev_drivers[MAX_DEVBLOCK_DRIVERS];
+
 
