@@ -30,6 +30,7 @@
 #include <tempos/wait.h>
 #include <fs/device.h>
 #include <fs/dev_numbers.h>
+#include <fs/partition.h>
 #include <drv/ata_generic.h>
 #include <drv/i8042.h>
 #include <arch/irq.h>
@@ -256,7 +257,7 @@ void init_ata_generic(void)
 	mbr.addr = 0;
 	if ((ata_devices[0].flags & PRESENT) != 0) {
 		read_ata_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, &mbr);
-		//parse_mbr(&mbr);
+		parse_mbr(&mbr.data);
 	}
 	if ((ata_devices[2].flags & PRESENT) != 0) {
 		read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, &mbr);
@@ -656,6 +657,12 @@ static void ata_handler1(int id, pt_regs *regs)
 		}
 		buf->status = BUFF_ST_VALID;
 		llist_remove(&blk_queue[0], buf);
+
+		/* Process the next block on queue */
+		if (blk_queue[0] != NULL) {
+			buf = (buff_header_t*)blk_queue[0]->element;
+			read_hd_sector(DEVMAJOR_ATA_PRI, 0, buf->addr);
+		}
 	}
 
 	/* Wakeup process waiting for this interrupt */
@@ -683,6 +690,12 @@ static void ata_handler2(int id, pt_regs *regs)
 		}
 		buf->status = BUFF_ST_VALID;
 		llist_remove(&blk_queue[2], buf);
+
+		/* Process the next block on queue */
+		if (blk_queue[2] != NULL) {
+			buf = (buff_header_t*)blk_queue[2]->element;
+			read_hd_sector(DEVMAJOR_ATA_SEC, 0, buf->addr);
+		}
 	}
 
 	/* Wakeup process waiting for this interrupt */
