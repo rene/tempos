@@ -26,11 +26,75 @@
 
 
 /**
- * Function to initialize the hash queue. Size will be:
- * LAST_DEVICE_BLOC % 4
+ * Each disk of the system needs to have a buffer queue associated
+ * with him. For performance purposes (we need to have at least 
+ * a little performance concerns) all buffer queues will be located
+ * at a vector of MAX_BUFFER_QUEUES size.
  */
-int init_hash_queue(int device, uint64_t size)
+static buff_hashq_t *buffer_queues[MAX_BUFFER_QUEUES];
+
+
+/**
+ * Function to initialize the hash queues.
+ */
+void init_hash_queues(void)
 {
-	return(-1);
+	int i;
+
+	for (i = 0; i < MAX_BUFFER_QUEUES; i++) {
+		buffer_queues[i] = NULL;
+	}
+}
+
+
+/**
+ * Creates a buffer queue (cache of blocks) to a specific disk.
+ * \param major Major number of the device.
+ * \param size The size (in sectors) of the device.
+ * \return int -1 on error. Otherwise the number of the queue. 
+ * \note The returned number should be used as argument to cache 
+ *  block functions (getblk, etc).
+ */
+int create_hash_queue(int major, uint64_t size)
+{
+	uint64_t i, hq_size, hq_entries;
+	buff_hashq_t *hash_queue;
+	buff_header_t *buf, *prev;
+
+	/* Find a free position in the vector */
+	for (i = 0; i < MAX_BUFFER_QUEUES; i++) {
+		if (buffer_queues[i] == NULL) {
+			break;
+		}
+	}
+	if (i >= MAX_BUFFER_QUEUES) {
+		return -1;
+	}
+
+	/* Instead allocate each block structure, we allocate the whole
+	 * memory necessary to hold hash queue and all block structures. 
+	 * The layout is: hash queue structure followed by all block structures. */
+	hq_entries = size / 4;
+	hq_size    = sizeof(buff_hashq_t) + (2 * hq_entries * sizeof(buff_header_t*)) + (hq_entries * sizeof(buff_header_t)); 
+	hash_queue = (buff_hashq_t*)kmalloc(hq_size, GFP_NORMAL_Z);
+	
+	if (hash_queue == NULL) {
+		return -1;
+	}
+
+	hash_queue->size = hq_entries;
+	hash_queue->device.major = major;
+
+	/* Create each buffer structure */
+	buf = (buff_header_t*)((char*)hash_queue + sizeof(buff_hashq_t) + (2 * hq_entries + sizeof(buff_header_t)));
+	prev = buf;
+	for (i = 0; i < hq_entries; i++) {
+		//
+	}
+
+
+	buffer_queues[i] = hash_queue;
+
+	return i;
 }
 

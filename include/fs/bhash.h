@@ -46,12 +46,15 @@
 	/** Buffer size */
 	#define BUFF_SIZE 		512
 
+	/** Maximum of buffer queues */
+	#define MAX_BUFFER_QUEUES 50
+
 
 	/** Buffer structure */
 	struct _buffer_header_t {
 		uint64_t addr;
 		char status;
-		char data[BUFF_SIZE+2];
+		char data[BUFF_SIZE];
 		/* links to make a circular linked list into hash queue */
 		struct _buffer_header_t *prev;
 		struct _buffer_header_t *next;
@@ -64,8 +67,6 @@
 	struct _buff_hash_queue_t {
 		/** How many position are in hash table. */
 		uint64_t size;
-		/** The size (in bytes) of each buffer. */
-		uint64_t buffer_size;
 		/** Device */
 		dev_t device;
 		/** Each position has a circular linked list of buffer headers. */
@@ -76,6 +77,9 @@
 
 	typedef struct _buffer_header_t   buff_header_t;
 	typedef struct _buff_hash_queue_t buff_hashq_t;
+
+	/* Prototypes */
+	int create_hash_queue(int major, uint64_t size);
 
 #endif /* BHASH_H */
 

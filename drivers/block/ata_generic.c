@@ -256,10 +256,16 @@ void init_ata_generic(void)
 	 *  know which device generates the interrupt */
 	mbr.addr = 0;
 	if ((ata_devices[0].flags & PRESENT) != 0) {
+
+		create_hash_queue(DEVMAJOR_ATA_PRI, ata_devices[0].sectors);
+		
 		read_ata_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, &mbr);
 		parse_mbr(&mbr.data);
 	}
 	if ((ata_devices[2].flags & PRESENT) != 0) {
+		
+		create_hash_queue(DEVMAJOR_ATA_SEC, ata_devices[2].sectors);
+
 		read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, &mbr);
 		//parse_mbr(&mbr);
 	}
