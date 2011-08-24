@@ -57,9 +57,9 @@ void init_hash_queues(void)
  */
 int create_hash_queue(int major, uint64_t size)
 {
-	uint64_t i, hq_size, hq_entries;
+	uint64_t i, ht_entries;
 	buff_hashq_t *hash_queue;
-	buff_header_t *buf, *prev;
+	buff_header_t *head, *prev, *nblock;
 
 	/* Find a free position in the vector */
 	for (i = 0; i < MAX_BUFFER_QUEUES; i++) {
@@ -71,28 +71,42 @@ int create_hash_queue(int major, uint64_t size)
 		return -1;
 	}
 
-	/* Instead allocate each block structure, we allocate the whole
-	 * memory necessary to hold hash queue and all block structures. 
-	 * The layout is: hash queue structure followed by all block structures. */
-	hq_entries = size / 4;
-	hq_size    = sizeof(buff_hashq_t) + (2 * hq_entries * sizeof(buff_header_t*)) + (hq_entries * sizeof(buff_header_t)); 
-	hash_queue = (buff_hashq_t*)kmalloc(hq_size, GFP_NORMAL_Z);
-	
+	/* Alloc memory for blocks and structures */
+	hash_queue = (buff_hashq_t*)kmalloc(sizeof(buff_hashq_t), GFP_NORMAL_Z);
 	if (hash_queue == NULL) {
 		return -1;
 	}
+ 
+	/* Alloc memory for hashtable */
+	ht_entries = (size / 4);
+	hash_queue->hashtable = (buff_header_t*)kmalloc(ht_entries * sizeof(buff_header_t), GFP_NORMAL_Z);
 
-	hash_queue->size = hq_entries;
-	hash_queue->device.major = major;
-
-	/* Create each buffer structure */
-	buf = (buff_header_t*)((char*)hash_queue + sizeof(buff_hashq_t) + (2 * hq_entries + sizeof(buff_header_t)));
-	prev = buf;
-	for (i = 0; i < hq_entries; i++) {
-		//
+	if (hash_queue->hashtable == NULL) {
+		kfree(hash_queue);
+		return -1;
 	}
 
+	/* Initialize all blocks (put them into freelist)*/
+	memset(hash_queue, 0, sizeof(buff_hashq_t));
 
+	/* Free list head */
+	head = &hash_queue->blocks[0];
+	head->free_prev = head;
+	head->free_next = head;
+	prev = head;
+
+	/* Add each block to the "tail" of Free list */
+	for (i = 1; i < BUFF_QUEUE_SIZE; i++) {
+		nblock = &hash_queue->blocks[i];
+		nblock->free_prev = prev;
+		nblock->free_next = head;
+		head->free_prev = nblock;
+		prev->free_next = nblock;
+		prev = nblock;
+	}
+
+	hash_queue->freelist_head = head;
+	
 	buffer_queues[i] = hash_queue;
 
 	return i;

@@ -29,6 +29,7 @@
 	#include <unistd.h>
 	#include <tempos/mm.h>
 	#include <fs/device.h>
+	#include <config.h>
 
 	/* Block buffer: possible status */
 	
@@ -45,6 +46,14 @@
 
 	/** Buffer size */
 	#define BUFF_SIZE 		512
+
+	/** How many blocks has each buffer queue */
+	#ifdef CONFIG_BUFFER_QUEUE_SIZE
+		/** System frequency defined at kernel configuration file */
+		#define BUFF_QUEUE_SIZE CONFIG_BUFFER_QUEUE_SIZE
+	#else
+		#error "CONFIG_BUFFER_QUEUE_SIZE it's not defined. It should be defined at configuration file."
+	#endif
 
 	/** Maximum of buffer queues */
 	#define MAX_BUFFER_QUEUES 50
@@ -73,6 +82,8 @@
 		struct _buffer_header_t *hashtable;
 		/** Free list head */
 		struct _buffer_header_t *freelist_head;
+		/** Blocks */
+		struct _buffer_header_t blocks[BUFF_QUEUE_SIZE];
 	};
 
 	typedef struct _buffer_header_t   buff_header_t;
