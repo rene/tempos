@@ -276,6 +276,7 @@ void init_ata_generic(void)
 		}
 
 		read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, &mbr);
+		write_hd_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, 0, &mbr.data);
 		//parse_mbr(&mbr);
 	}
 }
@@ -693,7 +694,8 @@ static void ata_handler2(int id, pt_regs *regs)
 	cli();
 
 	/* DRQ bit is set when disk has PIO data to transfer */
-	
+	kprintf("HANDLER2\n");
+
 	/* Secondary */
 	if( (inb(pio_ports[SEC_BUS][REG_CMD]) & DRQ_BIT) != 0 ) {
 		buf = (buff_header_t*)blk_queue[2]->element;

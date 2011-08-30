@@ -57,7 +57,7 @@ $(MAKEGEN): \
 		kernel/Build.mk				\
 		kernel/mm/Build.mk
 	@$(ECHO) -n " + Generating dependencies..."
-	@for file in $?; do 					 			 \
+	@for file in $^; do 					 			 \
 		$(DEPTOOL) $$file $(CC) $(CFLAGS) >> $(MAKEGEN); \
 	done && echo "OK" || echo "ERROR"
 

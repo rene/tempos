@@ -84,6 +84,10 @@
 		struct _buffer_header_t *freelist_head;
 		/** Blocks */
 		struct _buffer_header_t blocks[BUFF_QUEUE_SIZE];
+		/** Disk operation: read() */
+		//int (*read_block)(int, int, buff_header_t*);
+		/** Disk operation: write_async() */
+		/** Disk operation: write_sync() */
 	};
 
 	typedef struct _buffer_header_t   buff_header_t;
