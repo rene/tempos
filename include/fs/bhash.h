@@ -79,15 +79,17 @@
 		/** Device */
 		dev_t device;
 		/** Each position has a circular linked list of buffer headers. */
-		struct _buffer_header_t *hashtable;
+		struct _buffer_header_t **hashtable;
 		/** Free list head */
 		struct _buffer_header_t *freelist_head;
 		/** Blocks */
 		struct _buffer_header_t blocks[BUFF_QUEUE_SIZE];
 		/** Disk operation: read() */
-		//int (*read_block)(int, int, buff_header_t*);
+		int (*read_block)(int, int, struct _buffer_header_t*);
 		/** Disk operation: write_async() */
+		int (*write_async_block)(int, int, struct _buffer_header_t*);
 		/** Disk operation: write_sync() */
+		int (*write_sync_block)(int, int, struct _buffer_header_t*);
 	};
 
 	typedef struct _buffer_header_t   buff_header_t;

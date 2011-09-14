@@ -81,9 +81,9 @@
 
 	int read_ata_sector(int major, int device, buff_header_t *buf);
 
-	//int write_async_ata_block(buffer_header_t *buf);
+	int write_async_ata_sector(int major, int device, buff_header_t *buf);
 
-	//int write_sync_ata_block(buffer_header_t *buf);
+	int write_sync_ata_sector(int major, int device, buff_header_t *buf);
 
 #endif /* BLK_ATA_GENERIC_H */
 

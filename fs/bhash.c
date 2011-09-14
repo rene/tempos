@@ -57,7 +57,7 @@ void init_hash_queues(void)
  */
 int create_hash_queue(int major, uint64_t size)
 {
-	uint64_t i, ht_entries;
+	uint64_t i, idx, ht_entries;
 	buff_hashq_t *hash_queue;
 	buff_header_t *head, *prev, *nblock;
 
@@ -67,8 +67,11 @@ int create_hash_queue(int major, uint64_t size)
 			break;
 		}
 	}
+	
 	if (i >= MAX_BUFFER_QUEUES) {
 		return -1;
+	} else {
+		idx = i;
 	}
 
 	/* Alloc memory for blocks and structures */
@@ -79,7 +82,7 @@ int create_hash_queue(int major, uint64_t size)
  
 	/* Alloc memory for hashtable */
 	ht_entries = (size / 4);
-	hash_queue->hashtable = (buff_header_t*)kmalloc(ht_entries * sizeof(buff_header_t), GFP_NORMAL_Z);
+	hash_queue->hashtable = (buff_header_t**)kmalloc(ht_entries * sizeof(buff_header_t*), GFP_NORMAL_Z);
 
 	if (hash_queue->hashtable == NULL) {
 		kfree(hash_queue);
@@ -88,6 +91,10 @@ int create_hash_queue(int major, uint64_t size)
 
 	/* Initialize all blocks (put them into freelist)*/
 	memset(hash_queue, 0, sizeof(buff_hashq_t));
+
+	for (i = 0; i < ht_entries; i++) {
+		hash_queue->hashtable[i] = NULL;
+	}
 
 	/* Free list head */
 	head = &hash_queue->blocks[0];
@@ -107,8 +114,8 @@ int create_hash_queue(int major, uint64_t size)
 
 	hash_queue->freelist_head = head;
 	
-	buffer_queues[i] = hash_queue;
+	buffer_queues[idx] = hash_queue;
 
-	return i;
+	return idx;
 }
 

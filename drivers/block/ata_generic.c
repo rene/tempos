@@ -75,11 +75,27 @@
 #define CMD_READ_SECTORS_EXT	0x24
 #define CMD_WRITE_SECTORS		0x30
 #define CMD_WRITE_SECTORS_EXT	0x34
-#define CMD_CACHE_FLUSH			0xE7
+#define CMD_FLUSH_CACHE			0xE7
+#define CMD_FLUSH_CACHE_EXT		0xEA
 
+#define OP_READ		0x01
+#define OP_WRITE	0x02
+
+#define ATA_DISCARD_NEXT_IRQ  0x01
+#define ATA_HANDLE_NEXT_IRQ   0x00
 
 /** ATA devices information */
 static ata_dev_info ata_devices[4];
+
+/**
+ * Block operation structure
+ */
+struct _block_op {
+	/** Type of operation: Read (OP_READ) or Write (OP_WRITE) */
+	char op;
+	/** Buffer */
+	buff_header_t *buff;
+};
 
 /**
  * Linked list to blocks operation requests.
@@ -90,6 +106,9 @@ static ata_dev_info ata_devices[4];
  * 3 - hdd
  */
 static llist *blk_queue[4];
+
+/** Indicate when we should discard a IRQ */
+char discard_irq[2];
 
 /** Hash queue indexes for each disk */
 static int blk_hash_queue[4];
@@ -117,7 +136,7 @@ static void ata_handler2(int id, pt_regs *regs);
 
 static int read_hd_sector(int major, int device, uint64_t addr);
 
-static int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector);
+static int write_hd_sector(int major, int device, uint64_t addr, char *sector);
 
 /**
  * Initialize the generic driver for ATA controllers.
@@ -252,6 +271,9 @@ void init_ata_generic(void)
 		kprintf(KERN_ERROR "Error on register IRQ %d\n", ATA_SEC_IRQ);
 	}
 
+	discard_irq[0] = ATA_HANDLE_NEXT_IRQ;
+	discard_irq[1] = ATA_HANDLE_NEXT_IRQ;
+
 	/* Now, parse partition table for each found device */
 	/** FIXME: TempOS supports only one device per bus.
 	 *  To support more devices we need to check PCI bus to
@@ -265,7 +287,7 @@ void init_ata_generic(void)
 		}
 
 		read_ata_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, &mbr);
-		//parse_mbr(&mbr.data);
+		parse_mbr(&mbr.data);
 
 	}
 	if ((ata_devices[2].flags & PRESENT) != 0) {
@@ -276,8 +298,7 @@ void init_ata_generic(void)
 		}
 
 		read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, &mbr);
-		write_hd_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, 0, &mbr.data);
-		//parse_mbr(&mbr);
+		parse_mbr(&mbr.data);
 	}
 }
 
@@ -568,9 +589,10 @@ static int read_hd_sector(int major, int device, uint64_t addr)
  *
  * \note This function write a sector to device.
  */
-static int write_hd_sector(int major, int device, uint64_t addr, uint16_t *sector)
+static int write_hd_sector(int major, int device, uint64_t addr, char *sector)
 {
 	int i;
+	uint16_t bword;
 	uchar8_t dc;
 	uchar8_t bus, dev;
 
@@ -632,13 +654,17 @@ static int write_hd_sector(int major, int device, uint64_t addr, uint16_t *secto
 		return -1;
 	}
 	
-	for(i=0; i<SECTOR_HALF_SIZE; i++) {
+	for(i=0; i<SECTOR_SIZE; i+=2) {
+		bword = (sector[i+1] << 8) | sector[i];
 		wait_bus(bus);
-		outw(sector[i], pio_ports[bus][REG_DATA]);
+		outw(bword, pio_ports[bus][REG_DATA]);
 		udelay(1);
 	}
-	send_cmd(bus, CMD_CACHE_FLUSH);
+	
+	/** Flush cache will generate a IRQ, that shall be discarded */
+	send_cmd(bus, CMD_FLUSH_CACHE_EXT);
 	wait_bus(bus);
+	udelay(1);
 
 	return 0;
 }
@@ -657,27 +683,54 @@ static void ata_handler1(int id, pt_regs *regs)
 {
 	uint16_t data, i;
 	buff_header_t *buf;
+	struct _block_op *bop;
 
 	cli();
+
+	/* Check if we need to handle this IRQ */
+	if (discard_irq[0] == ATA_DISCARD_NEXT_IRQ) {
+		discard_irq[0] = ATA_HANDLE_NEXT_IRQ;
+		sti();
+		return;
+	} 
 
 	/* DRQ bit is set when disk has PIO data to transfer */
 	
 	/* Primary */
-	if( (inb(pio_ports[PRI_BUS][REG_CMD]) & DRQ_BIT) != 0 ) {
-		buf = (buff_header_t*)blk_queue[0]->element;
+	bop = (struct _block_op *)blk_queue[0]->element;
+	buf = bop->buff;
+
+	if (bop->op == OP_READ) {
+		/* Read block */
+
 		for(i=0; i<SECTOR_SIZE; i+=2) {
 			wait_bus(PRI_BUS);
 			data = inw(pio_ports[PRI_BUS][REG_DATA]);
 			buf->data[i+1] = (uchar8_t)((data >> 0x08) & 0xFF);
 			buf->data[i]   = (uchar8_t)(data & 0xFF);  
 		}
-		buf->status = BUFF_ST_VALID;
-		llist_remove(&blk_queue[0], buf);
+	} else if (bop->op == OP_WRITE) {
+		/* Write is done. Just ignore next IRQ */
+		wait_bus(PRI_BUS);
+		discard_irq[0] = ATA_DISCARD_NEXT_IRQ;
+	} else {
+		kprintf(KERN_CRIT "Unknown ATA operation (should be Read or Write).");
+	}
+	buf->status = BUFF_ST_VALID; 
+	llist_remove(&blk_queue[0], bop);
+	kfree(bop);
 
-		/* Process the next block on queue */
-		if (blk_queue[0] != NULL) {
-			buf = (buff_header_t*)blk_queue[0]->element;
+	/* Process the next block on queue */
+	if (blk_queue[0] != NULL) {
+		bop = (struct _block_op*)blk_queue[0]->element;
+		buf = bop->buff;
+
+		if (bop->op == OP_READ) {
 			read_hd_sector(DEVMAJOR_ATA_PRI, 0, buf->addr);
+		} else if (bop->op == OP_WRITE) {
+			write_hd_sector(DEVMAJOR_ATA_PRI, 0, buf->addr, buf->data);
+		} else {
+			kprintf(KERN_CRIT "Unknown ATA operation (should be Read or Write).");
 		}
 	}
 
@@ -690,34 +743,60 @@ static void ata_handler2(int id, pt_regs *regs)
 {
 	uint16_t data, i;
 	buff_header_t *buf;
+	struct _block_op *bop;
 
 	cli();
 
-	/* DRQ bit is set when disk has PIO data to transfer */
-	kprintf("HANDLER2\n");
+	/* Check if we need to handle this IRQ */
+	if (discard_irq[1] == ATA_DISCARD_NEXT_IRQ) {
+		discard_irq[1] = ATA_HANDLE_NEXT_IRQ;
+		sti();
+		return;
+	} 
 
+	/* DRQ bit is set when disk has PIO data to transfer */
+	
 	/* Secondary */
-	if( (inb(pio_ports[SEC_BUS][REG_CMD]) & DRQ_BIT) != 0 ) {
-		buf = (buff_header_t*)blk_queue[2]->element;
+	bop = (struct _block_op *)blk_queue[2]->element;
+	buf = bop->buff;
+
+	if (bop->op == OP_READ) {
+		/* Read block */
+
 		for(i=0; i<SECTOR_SIZE; i+=2) {
 			wait_bus(SEC_BUS);
 			data = inw(pio_ports[SEC_BUS][REG_DATA]);
 			buf->data[i+1] = (uchar8_t)((data >> 0x08) & 0xFF);
 			buf->data[i]   = (uchar8_t)(data & 0xFF);  
 		}
-		buf->status = BUFF_ST_VALID;
-		llist_remove(&blk_queue[2], buf);
+	} else if (bop->op == OP_WRITE) {
+		/* Write is done. Just ignore next IRQ */
+		wait_bus(SEC_BUS);
+		discard_irq[1] = ATA_DISCARD_NEXT_IRQ;
+	} else {
+		kprintf(KERN_CRIT "Unknown ATA operation (should be Read or Write).");
+	}
+	buf->status = BUFF_ST_VALID;
+	llist_remove(&blk_queue[2], bop);
+	kfree(bop);
 
-		/* Process the next block on queue */
-		if (blk_queue[2] != NULL) {
-			buf = (buff_header_t*)blk_queue[2]->element;
-			read_hd_sector(DEVMAJOR_ATA_SEC, 0, buf->addr);
+	/* Process the next block on queue */
+	if (blk_queue[2] != NULL) {
+		bop = (struct _block_op*)blk_queue[2]->element;
+		buf = bop->buff;
+
+		if (bop->op == OP_READ) {
+			read_hd_sector(DEVMAJOR_ATA_SEC, 2, buf->addr);
+		} else if (bop->op == OP_WRITE) {
+			write_hd_sector(DEVMAJOR_ATA_SEC, 2, buf->addr, buf->data);
+		} else {
+			kprintf(KERN_CRIT "Unknown ATA operation (should be Read or Write).");
 		}
 	}
 
 	/* Wakeup process waiting for this interrupt */
 	sti();
-	wakeup(WAIT_INT_IDE_PRI);
+	wakeup(WAIT_INT_IDE_SEC);
 }
 
 /**
@@ -732,6 +811,7 @@ static void ata_handler2(int id, pt_regs *regs)
 int read_ata_sector(int major, int device, buff_header_t *buf)
 {
 	uchar8_t dev;
+	struct _block_op *bop;
 
 	if (major == DEVMAJOR_ATA_PRI) {
 		switch(device) {
@@ -768,14 +848,23 @@ int read_ata_sector(int major, int device, buff_header_t *buf)
 	/* First, mark block as busy */
 	buf->status = BUFF_ST_BUSY;
 
+	bop = kmalloc(sizeof(struct _block_op), GFP_NORMAL_Z);
+	if (bop == NULL) {
+		sti();
+		return -1;
+	} else {
+		bop->op   = OP_READ;
+		bop->buff = buf; 
+	}
+
 	if (blk_queue[dev] == NULL) {
 		/** The queue is empty, so we can process this block now! */
-		llist_add(&blk_queue[dev], buf); 
+		llist_add(&blk_queue[dev], bop); 
 		read_hd_sector(major, device, buf->addr);
 	} else {
 		/** The queue is not empty, we will just add the block to the queue,
 		 *  so it will be process later, by interrupt handler */
-		llist_add(&blk_queue[dev], buf);
+		llist_add(&blk_queue[dev], bop);
 	}
 	sti();
 	
@@ -792,7 +881,104 @@ int read_ata_sector(int major, int device, buff_header_t *buf)
 	return 0;
 }
 
-int write_async_ata_block(int major, int device, buff_header_t *buf);
+/** 
+ * Write a sector to hard disk asynchronously.
+ *
+ * \param major Bus - Primary or Secondary IDE
+ * \param device Master or Slave
+ * \param buf Buffer structure that should contains block address, 
+ *            and block data.
+ * \note This function will return as soon as possible, even if the write
+ *       operation was not yet completed by the kernel.
+ */
+int write_async_ata_sector(int major, int device, buff_header_t *buf)
+{
+	uchar8_t dev;
+	struct _block_op *bop;
 
-int write_sync_ata_block(int major, int device, buff_header_t *buf);
+	if (major == DEVMAJOR_ATA_PRI) {
+		switch(device) {
+			case DEVNUM_HDA:
+				dev = 0;
+				break;
+
+			case DEVNUM_HDB:
+				dev = 1;
+				break;
+
+			default:
+				return -1;
+		}
+	} else if(major == DEVMAJOR_ATA_SEC) {
+		switch(device) {
+			case DEVNUM_HDC:
+				dev = 2;
+				break;
+
+			case DEVNUM_HDD:
+				dev = 3;
+				break;
+
+			default:
+				return -1;
+		}
+	} else {
+		return -1;
+	}
+
+
+	cli();
+	/* First, mark block as busy */
+	buf->status = BUFF_ST_BUSY;
+
+	bop = kmalloc(sizeof(struct _block_op), GFP_NORMAL_Z);
+	if (bop == NULL) {
+		sti();
+		return -1;
+	} else {
+		bop->op   = OP_WRITE;
+		bop->buff = buf; 
+	}
+
+	if (blk_queue[dev] == NULL) {
+		/** The queue is empty, so we can process this block now! */
+		llist_add(&blk_queue[dev], bop); 
+		write_hd_sector(major, device, buf->addr, buf->data);
+	} else {
+		/** The queue is not empty, we will just add the block to the queue,
+		 *  so it will be process later, by interrupt handler */
+		llist_add(&blk_queue[dev], bop);
+	}
+	sti();
+	
+	return 0;
+}
+
+
+/**
+ * Write a sector to hard disk synchronously.
+ *
+ * \param major Bus - Primary or Secondary IDE
+ * \param device Master or Slave
+ * \param buf Buffer structure that should contains block address, 
+ *            and space for block data.
+ * \note This function will sleep until the write operation get done.
+ */
+int write_sync_ata_sector(int major, int device, buff_header_t *buf)
+{
+	int res;
+	
+	res = write_async_ata_sector(major, device, buf);
+
+	/** Wait block to become available */
+	if (major == DEVMAJOR_ATA_PRI) {
+		while(buf->status == BUFF_ST_BUSY)
+			sleep_on(WAIT_INT_IDE_PRI);
+	} else {
+		while(buf->status == BUFF_ST_BUSY)
+			sleep_on(WAIT_INT_IDE_SEC);
+	}
+
+	return res;
+}
 
