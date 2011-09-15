@@ -108,10 +108,10 @@ struct _block_op {
 static llist *blk_queue[4];
 
 /** Indicate when we should discard a IRQ */
-char discard_irq[2];
+static char discard_irq[2];
 
-/** Hash queue indexes for each disk */
-static int blk_hash_queue[4];
+/** Driver structure */
+dev_blk_driver_t ata_bus_drv[2];
 
 /** Default I/O ports for ATA controller */
 static uint16_t pio_ports[2][9] = {
@@ -138,6 +138,15 @@ static int read_hd_sector(int major, int device, uint64_t addr);
 
 static int write_hd_sector(int major, int device, uint64_t addr, char *sector);
 
+
+/** ATA block device operations (Read/Write) */
+struct _blk_dev_op ata_ops = {
+	.read_block        = read_ata_sector,
+	.write_async_block = write_async_ata_sector,
+	.write_sync_block  = write_sync_ata_sector,
+};
+
+
 /**
  * Initialize the generic driver for ATA controllers.
  * This function will look for disks connected to the bus
@@ -151,7 +160,7 @@ void init_ata_generic(void)
 	uchar8_t dev, bus;
 	uchar8_t sc, saddr1, saddr2, saddr3;
 	buff_header_t mbr;	
-
+	
 	kprintf(KERN_INFO "Initializing generic ATA controller...\n");
 
 
@@ -281,24 +290,38 @@ void init_ata_generic(void)
 	mbr.addr = 0;
 	if ((ata_devices[0].flags & PRESENT) != 0) {
 
-		blk_hash_queue[0] = create_hash_queue(DEVMAJOR_ATA_PRI, ata_devices[0].sectors);
-		if (blk_hash_queue[0] < 0) {
-			panic("Could not create hash queue for disk blocks!");
-		}
+		/* Register primary bus driver */
+		ata_bus_drv[0].major   = DEVMAJOR_ATA_PRI;
+		ata_bus_drv[0].size    = ata_devices[0].sectors;
+		ata_bus_drv[0].dev_ops = &ata_ops; 
 
 		read_ata_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, &mbr);
-		parse_mbr(&mbr.data);
+		//parse_mbr(&mbr.data);
 
+		//read_ata_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDB, &mbr);
+		//parse_mbr(&mbr.data);
+
+		if (register_block_driver(&ata_bus_drv[0]) < 0) {
+			panic("Could not register a driver for the bus!");
+		}
 	}
+
 	if ((ata_devices[2].flags & PRESENT) != 0) {
 		
-		blk_hash_queue[2] = create_hash_queue(DEVMAJOR_ATA_SEC, ata_devices[2].sectors);
-		if (blk_hash_queue[2] < 0) {
-			panic("Could not create hash queue for disk blocks!");
-		}
+		/* Register secondary bus driver */
+		ata_bus_drv[1].major   = DEVMAJOR_ATA_SEC;
+		ata_bus_drv[1].size    = ata_devices[2].sectors;
+		ata_bus_drv[1].dev_ops = &ata_ops; 
 
 		read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, &mbr);
-		parse_mbr(&mbr.data);
+		//parse_mbr(&mbr.data);
+
+		//read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDD, &mbr);
+		//parse_mbr(&mbr.data);
+
+		if (register_block_driver(&ata_bus_drv[1]) < 0) {
+			panic("Could not register a driver for the bus!");
+		}
 	}
 }
 

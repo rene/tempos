@@ -103,6 +103,7 @@ void kernel_main_thread(void *arg)
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 
 
+	getblk(3, 0, 0);
 	/* kprintf(KERN_INFO "Hello, I'm the main kernel process!\n"); */
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */

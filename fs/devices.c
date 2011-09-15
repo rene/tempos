@@ -27,9 +27,57 @@
 #include <fs/device.h>
 
 /** Table of device drivers for character devices */
-dev_driver_t char_dev_drivers[MAX_DEVCHAR_DRIVERS];
+dev_char_driver_t *char_dev_drivers[MAX_DEVCHAR_DRIVERS];
 
 /** Table of device drivers for block devices */
-dev_driver_t block_dev_drivers[MAX_DEVBLOCK_DRIVERS];
+dev_blk_driver_t *block_dev_drivers[MAX_DEVBLOCK_DRIVERS];
 
+
+/**
+ * Initialize drivers interface.
+ */
+void init_drivers_interface(void)
+{
+	int i;
+
+	/* Character drivers table */
+	for (i = 0; i < MAX_DEVCHAR_DRIVERS; i++) {
+		char_dev_drivers[i] = NULL;
+	}
+
+	/* Block drivers table */
+	for (i = 0; i < MAX_DEVBLOCK_DRIVERS; i++) {
+		block_dev_drivers[i] = NULL;
+	}
+}
+
+
+/**
+ * Register a block device driver.
+ *
+ * \param driver Block driver structure.
+ * \see fs/device.h
+ * \return int 0 on Success, -1 otherwise.
+ */
+int register_block_driver(dev_blk_driver_t *driver)
+{
+	if (driver == NULL) {
+		return -1;
+	}
+
+	/* Check if there is another registered driver with the same major number */
+	if (block_dev_drivers[driver->major] != NULL) {
+		return -1;
+	}
+
+	/* Create a block hash queue for the device */
+	driver->buffer_queue = create_hash_queue(driver->major, driver->size);
+	if (driver->buffer_queue == NULL) {
+		return -1;
+	}
+
+	block_dev_drivers[driver->major] = driver;
+
+	return 0;
+}
 

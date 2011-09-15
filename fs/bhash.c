@@ -23,29 +23,8 @@
  */
 
 #include <fs/bhash.h>
-
-
-/**
- * Each disk of the system needs to have a buffer queue associated
- * with him. For performance purposes (we need to have at least 
- * a little performance concerns) all buffer queues will be located
- * at a vector of MAX_BUFFER_QUEUES size.
- */
-static buff_hashq_t *buffer_queues[MAX_BUFFER_QUEUES];
-
-
-/**
- * Function to initialize the hash queues.
- */
-void init_hash_queues(void)
-{
-	int i;
-
-	for (i = 0; i < MAX_BUFFER_QUEUES; i++) {
-		buffer_queues[i] = NULL;
-	}
-}
-
+#include <fs/device.h>
+#include <tempos/wait.h>
 
 /**
  * Creates a buffer queue (cache of blocks) to a specific disk.
@@ -55,29 +34,16 @@ void init_hash_queues(void)
  * \note The returned number should be used as argument to cache 
  *  block functions (getblk, etc).
  */
-int create_hash_queue(int major, uint64_t size)
+buff_hashq_t *create_hash_queue(int major, uint64_t size)
 {
-	uint64_t i, idx, ht_entries;
+	uint64_t i, ht_entries;
 	buff_hashq_t *hash_queue;
 	buff_header_t *head, *prev, *nblock;
-
-	/* Find a free position in the vector */
-	for (i = 0; i < MAX_BUFFER_QUEUES; i++) {
-		if (buffer_queues[i] == NULL) {
-			break;
-		}
-	}
-	
-	if (i >= MAX_BUFFER_QUEUES) {
-		return -1;
-	} else {
-		idx = i;
-	}
 
 	/* Alloc memory for blocks and structures */
 	hash_queue = (buff_hashq_t*)kmalloc(sizeof(buff_hashq_t), GFP_NORMAL_Z);
 	if (hash_queue == NULL) {
-		return -1;
+		return NULL;
 	}
  
 	/* Alloc memory for hashtable */
@@ -86,7 +52,7 @@ int create_hash_queue(int major, uint64_t size)
 
 	if (hash_queue->hashtable == NULL) {
 		kfree(hash_queue);
-		return -1;
+		return NULL;
 	}
 
 	/* Initialize all blocks (put them into freelist)*/
@@ -114,8 +80,102 @@ int create_hash_queue(int major, uint64_t size)
 
 	hash_queue->freelist_head = head;
 	
-	buffer_queues[idx] = hash_queue;
+	return hash_queue;
+}
 
-	return idx;
+
+/**
+ * Search for a block on hash queue.
+ *
+ * \param queue The hash queue.
+ * \param blocknum Block number.
+ * \return buff_header_t The block (if was found), NULL otherwise.
+ */
+static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum)
+{
+	struct _buffer_header_t *head, *tmp;
+	uint64_t pos;
+
+	/* Find position based on block number.
+	   The hash algorithm is: (BLOCKNUM % 4) */
+	pos = blocknum % 4;
+
+	if (queue->hashtable[pos] == NULL) {
+		return NULL;
+	} else {
+		head = queue->hashtable[pos];
+	}
+
+	/* Search for the block */
+	tmp = head;
+	if (head->addr == blocknum) {
+		return head;
+	} else {
+		tmp = head->next;
+		while (tmp->addr != head->addr) {
+			if (tmp->addr == blocknum) {
+				break;
+			}
+			tmp = tmp->next;
+		}
+	}
+
+	if (tmp->addr == head->addr) {
+		return NULL;
+	} else {
+		return tmp;
+	}
+}
+
+
+/**
+ * Search and get a free block from free list.
+ *
+ * \param queue The hash queue.
+ */
+static buff_header_t *get_free_blk(buff_hashq_t *queue)
+{
+	return NULL;
+}
+
+
+/**
+ * getblk
+ *
+ * Each disk has a buffer queue of blocks. This function will search for a
+ * specific block in the disk's buffer queue. If the block is not present in the
+ * queue, it will be read from the disk. 
+ *
+ * \param major Major number of the device
+ * \param device Minor number (device number)
+ * \param blocknum Block number (address)
+ * \return buff_header_t* Pointer to the block
+ */
+buff_header_t *getblk(int major, int device, uint64_t blocknum)
+{
+	buff_header_t *buff;
+	dev_blk_driver_t *driver;
+	char buffer_not_found = 1;
+	
+	driver = block_dev_drivers[major];
+
+	while(buffer_not_found) {
+	
+		if ( (buff = search_blk(driver->buffer_queue, blocknum)) != NULL ) {
+			/* Block is on hash queue */
+			kprintf("Achou!\n");
+		} else {
+			/* Block is not on hash queue */ kprintf("Nao achou\n");
+			
+			/* There are no free buffers on free list */
+			if ( (buff = get_free_blk(driver->buffer_queue)) == NULL ) {
+				sleep_on(WAIT_BLOCK_BUFFER_GET_FREE);
+				continue;
+			}
+		}
+	
+	}
+
+	return NULL;
 }
 

@@ -25,6 +25,9 @@
 
 	#define VFS_DEVICE_H
 
+	#include <unistd.h>
+	#include <fs/bhash.h>
+
 	/** Number of maximum block device drivers */
 	#define MAX_DEVBLOCK_DRIVERS 256
 	/** Number of maximum character device drivers */
@@ -49,18 +52,57 @@
 		int major;
 		/** Minor number */
 		int minor;
-	};
-
-	/** Device driver structure */
-	struct _device_driver_t {
-		/** Major number */
-		int major;
-		/** Type of driver: Block, Character, Other */
+		/** Type: Block, Character */
 		char type;
 	};
 
+	/** Block device operations */
+	struct _blk_dev_op {
+		/** read(): Read a block */
+		int (*read_block) (int, int, buff_header_t *);
+		/** write_async(): Write asynchronously */
+		int (*write_async_block) (int, int, buff_header_t *);
+		/** write_sync(): Write synchronously */
+		int (*write_sync_block) (int, int, buff_header_t *);
+	};
+
+	/** Character device operations */
+	struct _char_dev_op {
+	};
+
+	/** Character device driver structure */
+	struct _char_device_driver_t {
+		/** Major number */
+		int major;
+	};
+
+	/** Block device driver structure */
+	struct _blk_device_driver_t {
+		/** Major number */
+		int major;
+		/** Device size (for block devices ) */
+		uint64_t size;
+		/** Buffer queue for block devices */
+		buff_hashq_t *buffer_queue;
+		/** Driver operations */
+		struct _blk_dev_op *dev_ops;
+	};
+
 	typedef struct _device_t dev_t;
-	typedef struct _device_driver_t dev_driver_t;
+	typedef struct _char_device_driver_t dev_char_driver_t;
+	typedef struct _blk_device_driver_t  dev_blk_driver_t;
+
+
+	/** Table of device drivers for character devices */
+	extern dev_char_driver_t *char_dev_drivers[MAX_DEVCHAR_DRIVERS];
+
+	/** Table of device drivers for block devices */
+	extern dev_blk_driver_t *block_dev_drivers[MAX_DEVBLOCK_DRIVERS];
+
+	/* Prototypes */
+	void init_drivers_interface(void);
+	
+	int register_block_driver(dev_blk_driver_t *driver);
 
 #endif /* VFS_DEVICE_H */
 

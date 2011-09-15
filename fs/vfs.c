@@ -24,6 +24,7 @@
 
 #include <tempos/kernel.h>
 #include <fs/vfs.h>
+#include <fs/device.h>
 
 /**
  * This function initializes all File System types recognized
@@ -34,6 +35,9 @@
 void register_all_fs_types(void)
 {
 	kprintf(KERN_INFO "Initializing VFS...\n");
+
+	init_drivers_interface();
+
 	return;
 }
 

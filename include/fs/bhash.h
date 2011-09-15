@@ -28,7 +28,7 @@
 	#include <linkedl.h>
 	#include <unistd.h>
 	#include <tempos/mm.h>
-	#include <fs/device.h>
+	//#include <fs/device.h>
 	#include <config.h>
 
 	/* Block buffer: possible status */
@@ -71,32 +71,27 @@
 		struct _buffer_header_t *free_prev;
 		struct _buffer_header_t *free_next;
 	};
+	
+	typedef struct _buffer_header_t buff_header_t;
 
 	/** Buffer hash queue. Each device should have one of this. */
 	struct _buff_hash_queue_t {
 		/** How many position are in hash table. */
 		uint64_t size;
-		/** Device */
-		dev_t device;
 		/** Each position has a circular linked list of buffer headers. */
 		struct _buffer_header_t **hashtable;
 		/** Free list head */
 		struct _buffer_header_t *freelist_head;
 		/** Blocks */
 		struct _buffer_header_t blocks[BUFF_QUEUE_SIZE];
-		/** Disk operation: read() */
-		int (*read_block)(int, int, struct _buffer_header_t*);
-		/** Disk operation: write_async() */
-		int (*write_async_block)(int, int, struct _buffer_header_t*);
-		/** Disk operation: write_sync() */
-		int (*write_sync_block)(int, int, struct _buffer_header_t*);
 	};
 
-	typedef struct _buffer_header_t   buff_header_t;
 	typedef struct _buff_hash_queue_t buff_hashq_t;
 
 	/* Prototypes */
-	int create_hash_queue(int major, uint64_t size);
+	buff_hashq_t  *create_hash_queue(int major, uint64_t size);
+	
+	buff_header_t *getblk(int major, int device, uint64_t blocknum);
 
 #endif /* BHASH_H */
 
