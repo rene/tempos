@@ -27,6 +27,14 @@
 #include <tempos/wait.h>
 #include <arch/io.h>
 
+/* Prototypes */
+static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum);
+static void remove_from_freelist(buff_hashq_t *queue, uint64_t blocknum);
+static buff_header_t *get_free_blk(buff_hashq_t *queue, uint64_t blocknum);
+static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, uint64_t blocknum);
+static buff_header_t *getblk(int major, int device, uint64_t blocknum);
+
+
 /**
  * Creates a buffer queue (cache of blocks) to a specific disk.
  * \param size The size (in sectors) of the device.
@@ -343,20 +351,67 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
  */
 void brelse(int major, int device, buff_header_t *buff)
 {
+	buff_header_t *head, *last, *next;
+	dev_blk_driver_t *driver;
+	driver = block_dev_drivers[major]; 
 
 	wakeup(WAIT_BLOCK_BUFFER_GET_FREE);
 	wakeup(WAIT_THIS_BLOCK_BUFFER_GET_FREE);
 	
 	cli();
 
+	head = driver->buffer_queue->freelist_head;
+
 	if (buff->status == BUFF_ST_VALID) {
 		/* enqueue buffer at end of free list */
+		last = head->prev;
+
+		head->prev = buff;
+		last->next = buff;
+		buff->next = head;
+		buff->prev = last;
 	} else {
 		/* enqueue buffer at beginning of free list */
+		next = head->next;
+		head->next = buff;
+		next->prev = buff;
+		buff->next = next;
+		buff->prev = head;
 	}
 
 	sti();
 
 	buff->status = BUFF_ST_UNLOCKED;
+}
+
+
+/**
+ * bread
+ *
+ * Read a block from a specific device.
+ */
+buff_header_t *bread(int major, int device, uint64_t blocknum)
+{
+	buff_header_t *buff;
+	dev_blk_driver_t *driver;
+
+	driver = block_dev_drivers[major]; 
+
+	buff = getblk(major, device, blocknum);
+	if (buff == NULL) {
+		return NULL;
+	} else {
+		if (buff->status == BUFF_ST_VALID) {
+			return buff;
+		} else {
+			/* Read the block from device */
+			if (driver->dev_ops->read_block(major, device, buff) < 0) {
+				kprintf(KERN_ERROR "Error on reading block from device: MAJOR = %d | MINOR = %d", major, device);
+				return NULL;
+			} else {
+				return buff;
+			}
+		}
+	}
 }
 
