@@ -71,11 +71,11 @@ int register_block_driver(dev_blk_driver_t *driver)
 	}
 
 	/* Create a block hash queue for the device */
-	driver->buffer_queue = create_hash_queue(driver->major, driver->size);
+	driver->buffer_queue = create_hash_queue(driver->size);
 	if (driver->buffer_queue == NULL) {
 		return -1;
 	}
-
+	
 	block_dev_drivers[driver->major] = driver;
 
 	return 0;

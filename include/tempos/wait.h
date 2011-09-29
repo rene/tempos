@@ -34,8 +34,11 @@
 
 	/* Sleep addresses */
 
+	/** Some block buffer becomes free */
+	#define WAIT_THIS_BLOCK_BUFFER_GET_FREE 1
+
 	/** Any free block buffer becomes free */
-	#define WAIT_BLOCK_BUFFER_GET_FREE 1
+	#define WAIT_BLOCK_BUFFER_GET_FREE 2
 
 	/** Wait for disk operation at primary IDE */
 	#define WAIT_INT_IDE_PRI  14

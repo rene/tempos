@@ -90,20 +90,26 @@ void kernel_main_thread(void *arg)
 {
 	task_t *idle_th;
 	
+	/* NOTE: keep calling order for the functions below */
+
 	/* Create idle thread */
 	idle_th = kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
 
-	/* ATA controller */
-	init_ata_generic();
-
 	/* Initialize Virtual File System layer */
 	register_all_fs_types();
+
+	/* ATA controller */
+	init_ata_generic();
 
 	/* Show command line */
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 
 
-	getblk(3, 0, 0);
+	getblk(3, 0, 24);
+	getblk(3, 0, 4);
+	getblk(3, 0, 8);
+	getblk(3, 0, 16);
+	getblk(3, 0, 24);
 	/* kprintf(KERN_INFO "Hello, I'm the main kernel process!\n"); */
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */

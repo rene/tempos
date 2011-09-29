@@ -25,16 +25,16 @@
 #include <fs/bhash.h>
 #include <fs/device.h>
 #include <tempos/wait.h>
+#include <arch/io.h>
 
 /**
  * Creates a buffer queue (cache of blocks) to a specific disk.
- * \param major Major number of the device.
  * \param size The size (in sectors) of the device.
  * \return int -1 on error. Otherwise the number of the queue. 
  * \note The returned number should be used as argument to cache 
  *  block functions (getblk, etc).
  */
-buff_hashq_t *create_hash_queue(int major, uint64_t size)
+buff_hashq_t *create_hash_queue(uint64_t size)
 {
 	uint64_t i, ht_entries;
 	buff_hashq_t *hash_queue;
@@ -66,9 +66,11 @@ buff_hashq_t *create_hash_queue(int major, uint64_t size)
 	head = &hash_queue->blocks[0];
 	head->free_prev = head;
 	head->free_next = head;
-	prev = head;
+	head->status = BUFF_ST_HEAD;
 
 	/* Add each block to the "tail" of Free list */
+	hash_queue->freelist_head = head;
+	prev = hash_queue->freelist_head;
 	for (i = 1; i < BUFF_QUEUE_SIZE; i++) {
 		nblock = &hash_queue->blocks[i];
 		nblock->free_prev = prev;
@@ -78,8 +80,6 @@ buff_hashq_t *create_hash_queue(int major, uint64_t size)
 		prev = nblock;
 	}
 
-	hash_queue->freelist_head = head;
-	
 	return hash_queue;
 }
 
@@ -99,32 +99,58 @@ static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum)
 	/* Find position based on block number.
 	   The hash algorithm is: (BLOCKNUM % 4) */
 	pos = blocknum % 4;
+	head = queue->hashtable[pos];
 
-	if (queue->hashtable[pos] == NULL) {
+	if (head == NULL) {
 		return NULL;
-	} else {
-		head = queue->hashtable[pos];
 	}
-
+	
 	/* Search for the block */
 	tmp = head;
-	if (head->addr == blocknum) {
-		return head;
-	} else {
-		tmp = head->next;
-		while (tmp->addr != head->addr) {
-			if (tmp->addr == blocknum) {
-				break;
-			}
-			tmp = tmp->next;
+	while (tmp != NULL) {
+		if (tmp->addr == blocknum) {
+			break;
 		}
+		tmp = tmp->next;
 	}
 
-	if (tmp->addr == head->addr) {
-		return NULL;
-	} else {
-		return tmp;
+	return tmp;
+}
+
+/**
+ * Remove a block from free list
+ *
+ * \param queue The hash queue.
+ * \param blocknum Block number.
+ * \return buff_header_t The block (if was found), NULL otherwise.
+ */
+static void remove_from_freelist(buff_hashq_t *queue, uint64_t blocknum)
+{
+	struct _buffer_header_t *head, *tmp, *prev, *next;
+
+	/* Search for the block */
+	head = queue->freelist_head; 
+	tmp = head->free_next;
+	while (tmp != head) {
+		if (tmp->addr == blocknum) {
+			break;
+		}
+		tmp = tmp->free_next;
 	}
+	if (tmp == head) {
+		/* Block is not on free list */
+		return;
+	}
+	
+	/* Remove the block */
+	cli();
+	prev = tmp->free_prev;
+	next = tmp->free_next;
+
+	next->prev = prev;
+	prev->next = next;
+	sti();
+	return;
 }
 
 
@@ -132,10 +158,115 @@ static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum)
  * Search and get a free block from free list.
  *
  * \param queue The hash queue.
+ * \param blocknum Try to find (and retrieve) a particular block (blocknum) on the list.
  */
-static buff_header_t *get_free_blk(buff_hashq_t *queue)
+static buff_header_t *get_free_blk(buff_hashq_t *queue, uint64_t blocknum)
 {
-	return NULL;
+	struct _buffer_header_t *head, *tmp, *prev, *next;
+
+	/* Search for the block */
+	head = queue->freelist_head; 
+	tmp = head->free_next;
+
+	if (tmp == head) {
+		/* there are no free buffers on the list */
+		return NULL;
+	}
+
+	/* try to find the block on the free list */
+	while (tmp != head) {
+		if (tmp->addr == blocknum) {
+			break;
+		}
+		tmp = tmp->free_next;
+	}
+	if (tmp == head) {
+		/* Block is not on free list, pick up any block */
+		tmp = head->free_next;
+	}
+	
+	/* remove block from free list */
+	cli();
+	prev = tmp->free_prev;
+	next = tmp->free_next;
+	prev->free_next = next;
+	next->free_prev = prev;
+	sti();
+
+	return tmp;
+}
+
+
+/**
+ * Remove buffer from old hash queue and insert onto new hash queue
+ *
+ * \param queue The new hash queue.
+ * \param buff The Buffer.
+ * \param blocknum New block number.
+ */
+static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, uint64_t blocknum)
+{
+	struct _buffer_header_t *head, *tmp, *prev, *next;
+	uint64_t pos;
+
+	pos = buff->addr % 4;
+	head = queue->hashtable[pos];
+	if (head != NULL) {
+		if (search_blk(queue, buff->addr) != NULL) {
+			/* Remove from old hash queue */
+			tmp = head;
+			if (tmp->next == NULL) {
+				queue->hashtable[pos] = NULL;
+			} else {
+				while(tmp->next != NULL) {
+					if (tmp->addr == buff->addr) {
+						cli();
+						prev = tmp->prev;
+						if (tmp->next == NULL) {
+							next = NULL;
+						} else {
+							next = tmp->next;
+							next->prev = prev;
+						}
+						prev->next = next;
+						sti();
+					}
+					tmp = tmp->next;
+				}
+			}
+		}
+	}
+	
+	/* Add to new hash queue */
+	pos  = blocknum % 4;
+	head = queue->hashtable[pos];
+	buff->addr = blocknum;
+
+	if (head == NULL) {
+		buff->next = NULL;
+		buff->prev = buff;
+		queue->hashtable[pos] = buff; 
+		return;
+	} else if(head->next == NULL) {
+		cli(); 
+		head->next = buff;
+		head->prev = NULL;
+		buff->next = NULL;
+		buff->prev = head;
+		sti();
+		return;
+	}
+
+	tmp = head;
+	while(tmp->next != NULL) tmp = tmp->next;
+
+	cli();
+	buff->prev = tmp;
+	buff->next = NULL;
+	tmp->next  = buff;
+	sti();
+
+	return;
 }
 
 
@@ -156,26 +287,76 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 	buff_header_t *buff;
 	dev_blk_driver_t *driver;
 	char buffer_not_found = 1;
-	
-	driver = block_dev_drivers[major];
+
+	driver = block_dev_drivers[major]; 
 
 	while(buffer_not_found) {
 	
 		if ( (buff = search_blk(driver->buffer_queue, blocknum)) != NULL ) {
-			/* Block is on hash queue */
-			kprintf("Achou!\n");
+			/* Block is in hash queue */
+			
+			if (buff->status == BUFF_ST_BUSY) {
+				sleep_on(WAIT_THIS_BLOCK_BUFFER_GET_FREE);
+				continue;
+			}
+			
+			/* Remove buffer from free list and set as busy */
+			cli();
+			buff->status = BUFF_ST_BUSY;
+			sti();
+			remove_from_freelist(driver->buffer_queue, blocknum);
+			return buff;
 		} else {
-			/* Block is not on hash queue */ kprintf("Nao achou\n");
+			/* Block is not on hash queue */
 			
 			/* There are no free buffers on free list */
-			if ( (buff = get_free_blk(driver->buffer_queue)) == NULL ) {
+			if ( (buff = get_free_blk(driver->buffer_queue, blocknum)) == NULL ) {
 				sleep_on(WAIT_BLOCK_BUFFER_GET_FREE);
 				continue;
+			} else {
+
+				/* Buffer should be flushed to disk */
+				if (buff->status == BUFF_ST_FLUSH) {
+					/* asynchronous wirte buffer to disk */
+					driver->dev_ops->write_async_block(major, device, buff);
+					continue;
+				}
+
+				/* Remove buffer from old hash queue and put block
+				   onto new hash queue */
+				add_to_buff_queue(driver->buffer_queue, buff, blocknum);
+
+				return buff;
 			}
 		}
 	
 	}
 
 	return NULL;
+}
+
+
+/**
+ * brelse
+ *
+ * Release a locked buffer.
+ */
+void brelse(int major, int device, buff_header_t *buff)
+{
+
+	wakeup(WAIT_BLOCK_BUFFER_GET_FREE);
+	wakeup(WAIT_THIS_BLOCK_BUFFER_GET_FREE);
+	
+	cli();
+
+	if (buff->status == BUFF_ST_VALID) {
+		/* enqueue buffer at end of free list */
+	} else {
+		/* enqueue buffer at beginning of free list */
+	}
+
+	sti();
+
+	buff->status = BUFF_ST_UNLOCKED;
 }
 

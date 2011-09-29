@@ -92,7 +92,6 @@
 	typedef struct _char_device_driver_t dev_char_driver_t;
 	typedef struct _blk_device_driver_t  dev_blk_driver_t;
 
-
 	/** Table of device drivers for character devices */
 	extern dev_char_driver_t *char_dev_drivers[MAX_DEVCHAR_DRIVERS];
 

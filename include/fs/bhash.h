@@ -33,16 +33,18 @@
 
 	/* Block buffer: possible status */
 	
- 	/** Buffer is locked (busy) */
-	#define BUFF_ST_LOCKED  0x01
+ 	/** Buffer is unlocked (not busy) */
+	#define BUFF_ST_UNLOCKED  	0x01
 	/** The buffer contains valid data */
-	#define BUFF_ST_VALID   0x02 
+	#define BUFF_ST_VALID   	0x02 
 	/** Must be flushed to device */
-	#define BUFF_ST_FLUSH   0x04
+	#define BUFF_ST_FLUSH   	0x04
 	/** Kernel is reading or writing to device */
-	#define BUFF_ST_BUSY    0x08 	
+	#define BUFF_ST_BUSY    	0x08 	
 	/** A process is currently waiting for the buffer to become free */
-	#define BUFF_ST_WAITING 0x0F
+	#define BUFF_ST_WAITING 	0x0F
+	/** The buffer contains invalid data (circular list head) */
+	#define BUFF_ST_HEAD 		0x40
 
 	/** Buffer size */
 	#define BUFF_SIZE 		512
@@ -89,7 +91,7 @@
 	typedef struct _buff_hash_queue_t buff_hashq_t;
 
 	/* Prototypes */
-	buff_hashq_t  *create_hash_queue(int major, uint64_t size);
+	buff_hashq_t  *create_hash_queue(uint64_t size);
 	
 	buff_header_t *getblk(int major, int device, uint64_t blocknum);
 
