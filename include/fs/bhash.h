@@ -93,7 +93,7 @@
 	/* Prototypes */
 	buff_hashq_t  *create_hash_queue(uint64_t size);
 	
-	buff_header_t *getblk(int major, int device, uint64_t blocknum);
+	buff_header_t *bread(int major, int device, uint64_t blocknum);
 
 	void brelse(int major, int device, buff_header_t *buff);
 

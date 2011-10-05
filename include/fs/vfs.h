@@ -25,6 +25,8 @@
 
 	#define VFS_H
 
+	#include <fs/bhash.h>
+
 	/** Register all know File System types */
 	void register_all_fs_types(void);
 

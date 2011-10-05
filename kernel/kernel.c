@@ -104,7 +104,7 @@ void kernel_main_thread(void *arg)
 	/* Show command line */
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 
-
+	/* tests */
 	buff_header_t *buff;
 	buff = bread(3, 0, 2416);
 	int i;

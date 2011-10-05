@@ -27,6 +27,14 @@
 #include <tempos/wait.h>
 #include <arch/io.h>
 
+/* Prototypes */
+static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum);
+static void remove_from_freelist(buff_hashq_t *queue, uint64_t blocknum);
+static buff_header_t *get_free_blk(buff_hashq_t *queue, uint64_t blocknum);
+static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, uint64_t blocknum);
+static buff_header_t *getblk(int major, int device, uint64_t blocknum);
+
+
 /**
  * Creates a buffer queue (cache of blocks) to a specific disk.
  * \param size The size (in sectors) of the device.
@@ -352,6 +360,7 @@ void brelse(int major, int device, buff_header_t *buff)
 	cli();
 
 	head = driver->buffer_queue->freelist_head;
+	
 	if (buff->status == BUFF_ST_VALID) {
 		/* enqueue buffer at end of free list */
 		tmp = head->free_prev;
@@ -387,13 +396,15 @@ buff_header_t *bread(int major, int device, uint64_t blocknum)
 	driver = block_dev_drivers[major]; 
 
 	if ((buff = getblk(major, device, blocknum)) == NULL) {
-		kprintf(KERN_ERROR "bread(): Error on read device block.\n");
+		kprintf(KERN_ERROR "bread(): Error on get cached block.\n");
 		return NULL;
 	}
 
 	if (buff->status != BUFF_ST_VALID) {
 		/* Read from device (synchronous) */
-		driver->dev_ops->read_block(major, device, buff);
+		if (driver->dev_ops->read_block(major, device, buff) < 0) {
+			kprintf(KERN_ERROR "Error on reading block from device: MAJOR = %d | MINOR = %d", major, device);
+		}
 	}
 
 	return buff;
