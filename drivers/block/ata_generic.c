@@ -579,14 +579,14 @@ static int read_hd_sector(int major, int device, uint64_t addr)
 	set_device(bus, dev);
 
 	outb(0x00, pio_ports[bus][REG_SC]);
-	outb(LBA_BYTE(addr, 4), pio_ports[bus][REG_SADDR1]);
-	outb(LBA_BYTE(addr, 5), pio_ports[bus][REG_SADDR2]);
-	outb(LBA_BYTE(addr, 6), pio_ports[bus][REG_SADDR3]);
+	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(addr, 4), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 5), pio_ports[bus][REG_SADDR3]);
 
 	outb(0x01, pio_ports[bus][REG_SC]);
 	outb(LBA_BYTE(addr, 0), pio_ports[bus][REG_SADDR1]);
-	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR2]);
-	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR3]);
+	outb(LBA_BYTE(addr, 1), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR3]);
 
 	dc = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
 	outb(dc, pio_ports[bus][REG_DC]);
@@ -656,14 +656,14 @@ static int write_hd_sector(int major, int device, uint64_t addr, char *sector)
 	set_device(bus, dev);
 
 	outb(0x00, pio_ports[bus][REG_SC]);
-	outb(LBA_BYTE(addr, 4), pio_ports[bus][REG_SADDR1]);
-	outb(LBA_BYTE(addr, 5), pio_ports[bus][REG_SADDR2]);
-	outb(LBA_BYTE(addr, 6), pio_ports[bus][REG_SADDR3]);
+	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(addr, 4), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 5), pio_ports[bus][REG_SADDR3]);
 
 	outb(0x01, pio_ports[bus][REG_SC]);
 	outb(LBA_BYTE(addr, 0), pio_ports[bus][REG_SADDR1]);
-	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR2]);
-	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR3]);
+	outb(LBA_BYTE(addr, 1), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR3]);
 
 	dc = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
 	outb(dc, pio_ports[bus][REG_DC]);
@@ -730,7 +730,7 @@ static void ata_handler1(int id, pt_regs *regs)
 			wait_bus(PRI_BUS);
 			data = inw(pio_ports[PRI_BUS][REG_DATA]);
 			buf->data[i+1] = (uchar8_t)((data >> 0x08) & 0xFF);
-			buf->data[i]   = (uchar8_t)(data & 0xFF);  
+			buf->data[i]   = (uchar8_t)(data & 0xFF);
 		}
 	} else if (bop->op == OP_WRITE) {
 		/* Write is done. Just ignore next IRQ */
@@ -746,7 +746,7 @@ static void ata_handler1(int id, pt_regs *regs)
 	/* Process the next block on queue */
 	if (blk_queue[0] != NULL) {
 		bop = (struct _block_op*)blk_queue[0]->element;
-		buf = bop->buff;
+		buf = bop->buff; 
 
 		if (bop->op == OP_READ) {
 			read_hd_sector(DEVMAJOR_ATA_PRI, 0, buf->addr);

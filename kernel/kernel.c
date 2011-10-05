@@ -105,12 +105,18 @@ void kernel_main_thread(void *arg)
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 
 
-	getblk(3, 0, 24);
+	buff_header_t *buff;
+	buff = bread(3, 0, 2416);
+	int i;
+	for (i = 0; i < 512; i++) {
+		kprintf("%c ", buff->data[i]);
+	}
+	/*getblk(3, 0, 24);
 	getblk(3, 0, 4);
 	getblk(3, 0, 8);
 	getblk(3, 0, 16);
 	getblk(3, 0, 24);
-	/* kprintf(KERN_INFO "Hello, I'm the main kernel process!\n"); */
+	 kprintf(KERN_INFO "Hello, I'm the main kernel process!\n"); */
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
 	/*asm volatile("movl $4,  %%eax  \n" // syscall number

@@ -274,8 +274,7 @@ static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, uint64_t
  * getblk
  *
  * Each disk has a buffer queue of blocks. This function will search for a
- * specific block in the disk's buffer queue. If the block is not present in the
- * queue, it will be read from the disk. 
+ * specific block in the disk's buffer queue.
  *
  * \param major Major number of the device
  * \param device Minor number (device number)
@@ -286,11 +285,10 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 {
 	buff_header_t *buff;
 	dev_blk_driver_t *driver;
-	char buffer_not_found = 1;
 
 	driver = block_dev_drivers[major]; 
 
-	while(buffer_not_found) {
+	while(1) {
 	
 		if ( (buff = search_blk(driver->buffer_queue, blocknum)) != NULL ) {
 			/* Block is in hash queue */
@@ -329,10 +327,7 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 				return buff;
 			}
 		}
-	
 	}
-
-	return NULL;
 }
 
 
@@ -340,23 +335,67 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
  * brelse
  *
  * Release a locked buffer.
+ * \param major Major number of the device
+ * \param device Minor number (device number)
+ * \param buff The buffer to be released.
  */
 void brelse(int major, int device, buff_header_t *buff)
 {
+	dev_blk_driver_t *driver;
+	buff_header_t *head, *tmp;
+
+	driver = block_dev_drivers[major]; 
 
 	wakeup(WAIT_BLOCK_BUFFER_GET_FREE);
 	wakeup(WAIT_THIS_BLOCK_BUFFER_GET_FREE);
 	
 	cli();
 
+	head = driver->buffer_queue->freelist_head;
 	if (buff->status == BUFF_ST_VALID) {
 		/* enqueue buffer at end of free list */
+		tmp = head->free_prev;
+		buff->free_prev = tmp;
+		buff->free_next = head;
+		head->free_prev = buff;
+		tmp->free_next  = buff;
 	} else {
 		/* enqueue buffer at beginning of free list */
+		tmp = head->free_next;
+		buff->free_next = tmp;
+		buff->free_prev = head;
+		head->free_next = buff;
+		tmp->free_prev  = buff;
 	}
 
 	sti();
 
 	buff->status = BUFF_ST_UNLOCKED;
+}
+
+
+/**
+ * bread
+ *
+ * Read a specific block from device (handling the cache).
+ */
+buff_header_t *bread(int major, int device, uint64_t blocknum)
+{
+	buff_header_t *buff;
+	dev_blk_driver_t *driver;
+
+	driver = block_dev_drivers[major]; 
+
+	if ((buff = getblk(major, device, blocknum)) == NULL) {
+		kprintf(KERN_ERROR "bread(): Error on read device block.\n");
+		return NULL;
+	}
+
+	if (buff->status != BUFF_ST_VALID) {
+		/* Read from device (synchronous) */
+		driver->dev_ops->read_block(major, device, buff);
+	}
+
+	return buff;
 }
 

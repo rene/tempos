@@ -95,5 +95,9 @@
 	
 	buff_header_t *getblk(int major, int device, uint64_t blocknum);
 
+	void brelse(int major, int device, buff_header_t *buff);
+
+	buff_header_t *bread(int major, int device, uint64_t blocknum);
+
 #endif /* BHASH_H */
 
