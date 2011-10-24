@@ -27,17 +27,148 @@
 #include <fs/vfs.h>
 #include <fs/partition.h>
 
-int parse_mbr(char *user_mbr)
+part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device)
 {
+	buff_header_t sec;
+	mbr_st mbr;
+	ebr_st ebr;
+	part_table_st *ptable;
+	part_st *part, *epart;
+	partition_st *partitions;
 	int i;
-	partition_st *part, *epart;
+	uint32_t fsector, pos, count, exnum;
+
+
+	/* Read MBR */
+	sec.addr = 0;
+	blk_drv.dev_ops->read_block(blk_drv.major, device, &sec);
+	memcpy(&mbr, sec.data, sizeof(mbr));
+
+	/* Check for boot signature */
+	if (mbr.boot_signature[0] != 0x55 || mbr.boot_signature[1] != 0xaa) {
+		return NULL;
+	}
+	
+	/* Alloc partition table structure */
+	ptable = (part_table_st*)kmalloc(sizeof(part_table_st), GFP_NORMAL_Z);
+	if (ptable == NULL) {
+		return NULL;
+	}
+
+	/* Disk ID */
+	ptable->diskid_low  = mbr.diskid_low;
+	ptable->diskid_high = mbr.diskid_high;
+
+	/* First, count how many partition are in the disk (primary and extended) */
+	count = 0;
+	for (i = 0; i < 4; i++) {
+		part = &mbr.partition[i];
+		if (part->sysid != 0x00) {
+			if (part->sysid == 0x05 || part->sysid == 0x0f) {
+				/* Extended, read logic partitions  */
+				epart = part;
+				fsector = epart->LBA_first_sector;
+				while(epart->sysid != 0) {
+
+					/* Read the first EBR from extended partition */
+					sec.addr = fsector;
+					blk_drv.dev_ops->read_block(blk_drv.major, device, &sec);
+					memcpy(&ebr, sec.data, sizeof(ebr));
+				
+					if (ebr.boot_signature[0] == 0x55 && ebr.boot_signature[1] == 0xaa) {
+						epart = &ebr.partition;
+						count++;
+					}
+				
+					epart = &ebr.next_ebr;
+					fsector += epart->LBA_first_sector;
+				}
+			}
+			count++;
+		}
+	}
+
+	/* Alloc memory for each partition of table */
+	ptable->size = count;
+	partitions = (partition_st*)kmalloc(sizeof(partition_st) * count, GFP_NORMAL_Z);
+	if (partitions == NULL) {
+		kfree(ptable);
+		return NULL;
+	}
+	
+	/* Now, parse partitions again to fill table with information */
+	pos = 0;
+	for (i = 0; i < 4; i++) {
+		part = &mbr.partition[i];
+		if (part->sysid != 0x00) {
+			if (part->sysid == 0x05 || part->sysid == 0x0f) {
+				/* Extended, read logic partitions  */
+				partitions[pos].init   = part->LBA_first_sector;
+				partitions[pos].length = part->total_sectors;
+				partitions[pos].id     = part->sysid;
+				partitions[pos].type   = PART_TYPE_EXTENDED;
+				partitions[pos].number = i+1;
+				pos++;
+
+				exnum   = 5;
+				epart   = part;
+				fsector = epart->LBA_first_sector;
+				while(epart->sysid != 0) {
+
+					/* Read the first EBR from extended partition */
+					sec.addr = fsector;
+					blk_drv.dev_ops->read_block(blk_drv.major, device, &sec);
+					memcpy(&ebr, sec.data, sizeof(ebr));
+				
+					if (ebr.boot_signature[0] == 0x55 && ebr.boot_signature[1] == 0xaa) {
+						epart = &ebr.partition;
+						partitions[pos].init   = fsector;
+						partitions[pos].length = (uint64_t)epart->total_sectors;
+						partitions[pos].id     = epart->sysid;
+						partitions[pos].type   = PART_TYPE_LOGIC;
+						partitions[pos].number = exnum++;
+						pos++;
+					}
+				
+					epart = &ebr.next_ebr;
+					fsector += epart->LBA_first_sector;
+				}
+			} else {
+				/* Primary */
+				partitions[pos].init   = part->LBA_first_sector;
+				partitions[pos].length = part->total_sectors;
+				partitions[pos].id     = part->sysid;
+				partitions[pos].type   = PART_TYPE_PRIMARY;
+				partitions[pos].number = i+1;
+				pos++;
+			}
+		}
+	}
+	ptable->partitions = partitions;
+
+	return ptable;
+}
+
+void print_partition_table(part_table_st *ptable, char *devstr)
+{
+	uint32_t i;
+	partition_st *part;
+
+	for (i = 0; i < ptable->size; i++) {
+		part = &ptable->partitions[i];
+		kprintf("%s%d ", devstr, part->number);
+	}
+
+	/*
+	int i;
+	part_st *part, *epart;
 	mbr_st mbr;
 	ebr_st ebr;
 
-	memcpy(&mbr, user_mbr, sizeof(mbr));
+	memcpy(&mbr, dev_mbr, sizeof(mbr));
 
 	if (mbr.boot_signature[0] != 0x55 || mbr.boot_signature[1] != 0xaa) {
-		return -1;
+		return NULL;
 	}
 	
 	kprintf("DiskID: 0x%x\n", (mbr.diskid_high << 4) | mbr.diskid_low);
@@ -56,7 +187,7 @@ int parse_mbr(char *user_mbr)
 		kprintf("%d  ", part->LBA_first_sector);
 		kprintf("%d  \n", part->total_sectors);
 	
-		/*
+		*
 		if (part->sysid == 0x05 || part->sysid == 0x0f) {
 			printf("Extendida    ");
 			
@@ -100,8 +231,9 @@ int parse_mbr(char *user_mbr)
 			printf("0x%x", part->sysid);
 		}
 		printf("\n");*/
-	}
+	//}
 
-	return 0;
+
+	return;
 }
 

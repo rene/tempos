@@ -87,6 +87,9 @@
 /** ATA devices information */
 static ata_dev_info ata_devices[4];
 
+/** Partition tables from devices */
+part_table_st *ptable[4];
+
 /**
  * Block operation structure
  */
@@ -295,14 +298,16 @@ void init_ata_generic(void)
 		ata_bus_drv[0].size    = ata_devices[0].sectors;
 		ata_bus_drv[0].dev_ops = &ata_ops; 
 
-		read_ata_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDA, &mbr);
-		//parse_mbr(&mbr.data);
-
-		//read_ata_sector(DEVMAJOR_ATA_PRI, DEVNUM_HDB, &mbr);
-		//parse_mbr(&mbr.data);
-
 		if (register_block_driver(&ata_bus_drv[0]) < 0) {
 			panic("Could not register a driver for the bus!");
+		} else {
+			if ((ptable[0] = parse_mbr(ata_bus_drv[0], DEVNUM_HDA)) == NULL) {
+				kprintf(KERN_ERROR "No partitions found on disk %d:%d\n", DEVMAJOR_ATA_PRI, DEVNUM_HDA);
+			} else {
+				kprintf(" Found: ");
+				print_partition_table(ptable[0], "hda");
+				kprintf("\n");
+			}
 		}
 	}
 
@@ -313,14 +318,16 @@ void init_ata_generic(void)
 		ata_bus_drv[1].size    = ata_devices[2].sectors;
 		ata_bus_drv[1].dev_ops = &ata_ops; 
 
-		read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDC, &mbr);
-		//parse_mbr(&mbr.data);
-
-		//read_ata_sector(DEVMAJOR_ATA_SEC, DEVNUM_HDD, &mbr);
-		//parse_mbr(&mbr.data);
-
 		if (register_block_driver(&ata_bus_drv[1]) < 0) {
 			panic("Could not register a driver for the bus!");
+		} else {
+			if ((ptable[2] = parse_mbr(ata_bus_drv[1], DEVNUM_HDC)) == NULL) {
+				kprintf(KERN_INFO "No partitions found on disk %d:%d\n", DEVMAJOR_ATA_SEC, DEVNUM_HDC);
+			} else {
+				kprintf(" Found: ");
+				print_partition_table(ptable[2], "hdb");
+				kprintf("\n");
+			}
 		}
 	}
 }
