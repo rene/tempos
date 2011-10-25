@@ -27,6 +27,13 @@
 #include <fs/vfs.h>
 #include <fs/partition.h>
 
+/**
+ * Parses the MBR table from block device.
+ *
+ * \param blk_drv Driver structure of block device.
+ * \param device Device number.
+ * \return The partition table (\see fs/partition.h)
+ */
 part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device)
 {
 	buff_header_t sec;
@@ -149,6 +156,13 @@ part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device)
 	return ptable;
 }
 
+
+/**
+ * Print partition numbers from partition table.
+ * \param ptable Partition table.
+ * \param devstr String to precede the number (i.e. sdaX, hdaX, ..., where X is
+ * the partition number).
+ */
 void print_partition_table(part_table_st *ptable, char *devstr)
 {
 	uint32_t i;
@@ -158,82 +172,38 @@ void print_partition_table(part_table_st *ptable, char *devstr)
 		part = &ptable->partitions[i];
 		kprintf("%s%d ", devstr, part->number);
 	}
+}
 
-	/*
-	int i;
-	part_st *part, *epart;
-	mbr_st mbr;
-	ebr_st ebr;
 
-	memcpy(&mbr, dev_mbr, sizeof(mbr));
+/**
+ * Translate partition block address to disk sector address.
+ *
+ * \param diskaddr Disk address (sector number converted from partition address).
+ * \param ptable Partition table.
+ * \param pnumber Partition number.
+ * \param paddress Partition address.
+ * \return 0 on success (it's a valid partition address), -1 otherwise.
+ */
+int translate_part_address(uint64_t *diskaddr, part_table_st *ptable, uint32_t pnumber, uint64_t paddress)
+{
+	uint32_t i;
+	uint64_t newaddr;
+	partition_st *part;
 
-	if (mbr.boot_signature[0] != 0x55 || mbr.boot_signature[1] != 0xaa) {
-		return NULL;
+	for (i = 0; i < ptable->size; i++) {
+		part = &ptable->partitions[i];
+		if (part->number == pnumber) { 
+			/* Check limits */
+			if (paddress > part->length) {
+				return -1;
+			} else {
+				newaddr = part->init + paddress;
+				*diskaddr = newaddr;
+				return 0;
+			}
+		}
 	}
 	
-	kprintf("DiskID: 0x%x\n", (mbr.diskid_high << 4) | mbr.diskid_low);
-
-	kprintf("Part. BF   SH    SS     SC  EH   ES   EC  LFS  TS\n");
-	for (i = 0; i < 4; i++) {
-		part = &mbr.partition[i];
-		kprintf("%d    ", i+1);
-		kprintf("%x  ", part->bootable);
-		kprintf("%d  ", part->starting_head);
-		kprintf("%d  ", part->starting_sector);
-		kprintf("%d  ", part->starting_cylinder);
-		kprintf("%d  ", part->ending_head);
-		kprintf("%d  ", part->ending_sector);
-		kprintf("%d  ", part->ending_cylinder);
-		kprintf("%d  ", part->LBA_first_sector);
-		kprintf("%d  \n", part->total_sectors);
-	
-		*
-		if (part->sysid == 0x05 || part->sysid == 0x0f) {
-			printf("Extendida    ");
-			
-			* Faz a leitura das partições extendidas *
-			epart = part;
-			j = 5;
-			while(epart->sysid != 0) {
-				printf("\n");
-
-				* Lê o primeiro EBR da partição extendida *
-				lseek(fd, ((unsigned long)epart->LBA_first_sector*512), SEEK_SET);
-				read(fd, &ebr, sizeof(ebr));
-				
-				fsector = epart->LBA_first_sector;
-
-				if (ebr.boot_signature[0] != 0x55 && ebr.boot_signature[1] != 0xaa) {
-					printf("    Código de Boot NÃO encontrado!\n");
-				} else {
-					epart = &ebr.partition;
-					printf("%d    ", j);
-					printf("%x  ", epart->bootable);
-					printf("%d  ", epart->starting_head);
-					printf("%d  ", epart->starting_sector);
-					printf("%d  ", epart->starting_cylinder);
-					printf("%d  ", epart->ending_head);
-					printf("%d  ", epart->ending_sector);
-					printf("%d  ", epart->ending_cylinder);
-					printf("%d  ", epart->LBA_first_sector);
-					printf("%d  ", epart->total_sectors);
-					printf("0x%x", epart->sysid);
-				}
-				
-				epart = &ebr.next_ebr;
-				epart->LBA_first_sector += fsector;
-				j++;
-			};
-
-		} else if (part->sysid == 0x00) {
-			printf("VAZIA        ");
-		} else {
-			printf("0x%x", part->sysid);
-		}
-		printf("\n");*/
-	//}
-
-
-	return;
+	return -1;
 }
 

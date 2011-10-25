@@ -115,7 +115,10 @@
 
 	/* Prototypes */
 	part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device);
+
 	void print_partition_table(part_table_st *ptable, char *devstr);
+	
+	int translate_part_address(uint64_t *diskaddr, part_table_st *ptable, uint32_t pnumber, uint64_t paddress);
 
 #endif /* VFS_PARTITION_H */
 

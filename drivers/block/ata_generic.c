@@ -96,6 +96,8 @@ part_table_st *ptable[4];
 struct _block_op {
 	/** Type of operation: Read (OP_READ) or Write (OP_WRITE) */
 	char op;
+	/** Device */
+	int device;
 	/** Buffer */
 	buff_header_t *buff;
 };
@@ -548,37 +550,42 @@ static int read_hd_sector(int major, int device, uint64_t addr)
 {
 	uchar8_t dc;
 	uchar8_t bus, dev;
+	uint64_t newaddr;
+
+	newaddr = addr;
 
 	if (major == DEVMAJOR_ATA_PRI) {
 		bus = PRI_BUS;
+		
+		if (device >= DEVNUM_HDA && device < DEVNUM_HDB) {
+			dev = 0;
 
-		switch(device) {
-			case DEVNUM_HDA:
-				dev = MASTER_DEV;
-				break;
+			if (device != DEVNUM_HDA) {
+				if (translate_part_address(&newaddr, ptable[0], device, addr) < 0)
+					return -1;
+			}
+		} else if (device >= DEVNUM_HDB) {
+			dev = 1;
 
-			case DEVNUM_HDB:
-				dev = SLAVE_DEV;
-				break;
-
-			default:
-				return -1;
+			if (device != DEVNUM_HDB) {
+				if (translate_part_address(&newaddr, ptable[1], device, addr) < 0)
+					return -1;
+			}
+		} else {
+			return -1;
 		}
+		
 	} else if(major == DEVMAJOR_ATA_SEC) {
 		bus = SEC_BUS;
 
-		switch(device) {
-			case DEVNUM_HDC:
-				dev = MASTER_DEV;
-				break;
-
-			case DEVNUM_HDD:
-				dev = SLAVE_DEV;
-				break;
-
-			default:
-				return -1;
+		if (device >= DEVNUM_HDC && device < DEVNUM_HDD) {
+			dev = 2;
+		} else if (device >= DEVNUM_HDD) {
+			dev = 3;
+		} else {
+			return -1;
 		}
+
 	} else {
 		return -1;
 	}
@@ -586,14 +593,14 @@ static int read_hd_sector(int major, int device, uint64_t addr)
 	set_device(bus, dev);
 
 	outb(0x00, pio_ports[bus][REG_SC]);
-	outb(LBA_BYTE(addr, 3), pio_ports[bus][REG_SADDR1]);
-	outb(LBA_BYTE(addr, 4), pio_ports[bus][REG_SADDR2]);
-	outb(LBA_BYTE(addr, 5), pio_ports[bus][REG_SADDR3]);
+	outb(LBA_BYTE(newaddr, 3), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(newaddr, 4), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(newaddr, 5), pio_ports[bus][REG_SADDR3]);
 
 	outb(0x01, pio_ports[bus][REG_SC]);
-	outb(LBA_BYTE(addr, 0), pio_ports[bus][REG_SADDR1]);
-	outb(LBA_BYTE(addr, 1), pio_ports[bus][REG_SADDR2]);
-	outb(LBA_BYTE(addr, 2), pio_ports[bus][REG_SADDR3]);
+	outb(LBA_BYTE(newaddr, 0), pio_ports[bus][REG_SADDR1]);
+	outb(LBA_BYTE(newaddr, 1), pio_ports[bus][REG_SADDR2]);
+	outb(LBA_BYTE(newaddr, 2), pio_ports[bus][REG_SADDR3]);
 
 	dc = (inb(pio_ports[bus][REG_DC]) & 0xF0) | 0x40;
 	outb(dc, pio_ports[bus][REG_DC]);
@@ -756,9 +763,9 @@ static void ata_handler1(int id, pt_regs *regs)
 		buf = bop->buff; 
 
 		if (bop->op == OP_READ) {
-			read_hd_sector(DEVMAJOR_ATA_PRI, 0, buf->addr);
+			read_hd_sector(DEVMAJOR_ATA_PRI, bop->device, buf->addr);
 		} else if (bop->op == OP_WRITE) {
-			write_hd_sector(DEVMAJOR_ATA_PRI, 0, buf->addr, buf->data);
+			write_hd_sector(DEVMAJOR_ATA_PRI, bop->device, buf->addr, buf->data);
 		} else {
 			kprintf(KERN_CRIT "Unknown ATA operation (should be Read or Write).");
 		}
@@ -816,9 +823,9 @@ static void ata_handler2(int id, pt_regs *regs)
 		buf = bop->buff;
 
 		if (bop->op == OP_READ) {
-			read_hd_sector(DEVMAJOR_ATA_SEC, 2, buf->addr);
+			read_hd_sector(DEVMAJOR_ATA_SEC, bop->device, buf->addr);
 		} else if (bop->op == OP_WRITE) {
-			write_hd_sector(DEVMAJOR_ATA_SEC, 2, buf->addr, buf->data);
+			write_hd_sector(DEVMAJOR_ATA_SEC, bop->device, buf->addr, buf->data);
 		} else {
 			kprintf(KERN_CRIT "Unknown ATA operation (should be Read or Write).");
 		}
@@ -832,8 +839,8 @@ static void ata_handler2(int id, pt_regs *regs)
 /**
  * Read a sector from hard disk.
  *
- * \param major Bus - Primary or Secondary IDE
- * \param device Master or Slave
+ * \param major Bus - Primary or Secondary IDE.
+ * \param device Device number.
  * \param buf Buffer structure that should contains block address, 
  *            and space for block data.
  * \note This function will sleep until the block becomes available.
@@ -844,31 +851,25 @@ int read_ata_sector(int major, int device, buff_header_t *buf)
 	struct _block_op *bop;
 
 	if (major == DEVMAJOR_ATA_PRI) {
-		switch(device) {
-			case DEVNUM_HDA:
-				dev = 0;
-				break;
-
-			case DEVNUM_HDB:
-				dev = 1;
-				break;
-
-			default:
-				return -1;
+		
+		if (device >= DEVNUM_HDA && device < DEVNUM_HDB) {
+			dev = 0;
+		} else if (device >= DEVNUM_HDB) {
+			dev = 1;
+		} else {
+			return -1;
 		}
+		
 	} else if(major == DEVMAJOR_ATA_SEC) {
-		switch(device) {
-			case DEVNUM_HDC:
-				dev = 2;
-				break;
 
-			case DEVNUM_HDD:
-				dev = 3;
-				break;
-
-			default:
-				return -1;
+		if (device >= DEVNUM_HDC && device < DEVNUM_HDD) {
+			dev = 2;
+		} else if (device >= DEVNUM_HDD) {
+			dev = 3;
+		} else {
+			return -1;
 		}
+
 	} else {
 		return -1;
 	}
@@ -883,8 +884,9 @@ int read_ata_sector(int major, int device, buff_header_t *buf)
 		sti();
 		return -1;
 	} else {
-		bop->op   = OP_READ;
-		bop->buff = buf; 
+		bop->op     = OP_READ;
+		bop->buff   = buf;
+		bop->device = device;
 	}
 
 	if (blk_queue[dev] == NULL) {
