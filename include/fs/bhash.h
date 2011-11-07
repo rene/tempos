@@ -63,8 +63,13 @@
 
 	/** Buffer structure */
 	struct _buffer_header_t {
+		/* Block address */
 		uint64_t addr;
+		/* Device number */
+		int device;
+		/* Status of the buffer */
 		char status;
+		/* The data of the block */
 		char data[BUFF_SIZE];
 		/* links to make a circular linked list into hash queue */
 		struct _buffer_header_t *prev;

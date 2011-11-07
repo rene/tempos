@@ -28,10 +28,10 @@
 #include <arch/io.h>
 
 /* Prototypes */
-static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum);
-static void remove_from_freelist(buff_hashq_t *queue, uint64_t blocknum);
-static buff_header_t *get_free_blk(buff_hashq_t *queue, uint64_t blocknum);
-static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, uint64_t blocknum);
+static buff_header_t *search_blk(buff_hashq_t *queue, int device, uint64_t blocknum);
+static void remove_from_freelist(buff_hashq_t *queue, int device, uint64_t blocknum);
+static buff_header_t *get_free_blk(buff_hashq_t *queue, int device, uint64_t blocknum);
+static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, int device, uint64_t blocknum);
 static buff_header_t *getblk(int major, int device, uint64_t blocknum);
 
 
@@ -97,9 +97,10 @@ buff_hashq_t *create_hash_queue(uint64_t size)
  *
  * \param queue The hash queue.
  * \param blocknum Block number.
+ * \param device Device number.
  * \return buff_header_t The block (if was found), NULL otherwise.
  */
-static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum)
+static buff_header_t *search_blk(buff_hashq_t *queue, int device, uint64_t blocknum)
 {
 	struct _buffer_header_t *head, *tmp;
 	uint64_t pos;
@@ -116,7 +117,7 @@ static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum)
 	/* Search for the block */
 	tmp = head;
 	while (tmp != NULL) {
-		if (tmp->addr == blocknum) {
+		if (tmp->addr == blocknum && tmp->device == device) {
 			break;
 		}
 		tmp = tmp->next;
@@ -130,9 +131,10 @@ static buff_header_t *search_blk(buff_hashq_t *queue, uint64_t blocknum)
  *
  * \param queue The hash queue.
  * \param blocknum Block number.
+ * \param device Device number.
  * \return buff_header_t The block (if was found), NULL otherwise.
  */
-static void remove_from_freelist(buff_hashq_t *queue, uint64_t blocknum)
+static void remove_from_freelist(buff_hashq_t *queue, int device, uint64_t blocknum)
 {
 	struct _buffer_header_t *head, *tmp, *prev, *next;
 
@@ -140,7 +142,7 @@ static void remove_from_freelist(buff_hashq_t *queue, uint64_t blocknum)
 	head = queue->freelist_head; 
 	tmp = head->free_next;
 	while (tmp != head) {
-		if (tmp->addr == blocknum) {
+		if (tmp->addr == blocknum && tmp->device == device) {
 			break;
 		}
 		tmp = tmp->free_next;
@@ -166,9 +168,10 @@ static void remove_from_freelist(buff_hashq_t *queue, uint64_t blocknum)
  * Search and get a free block from free list.
  *
  * \param queue The hash queue.
+ * \param device Device number.
  * \param blocknum Try to find (and retrieve) a particular block (blocknum) on the list.
  */
-static buff_header_t *get_free_blk(buff_hashq_t *queue, uint64_t blocknum)
+static buff_header_t *get_free_blk(buff_hashq_t *queue, int device, uint64_t blocknum)
 {
 	struct _buffer_header_t *head, *tmp, *prev, *next;
 
@@ -183,7 +186,7 @@ static buff_header_t *get_free_blk(buff_hashq_t *queue, uint64_t blocknum)
 
 	/* try to find the block on the free list */
 	while (tmp != head) {
-		if (tmp->addr == blocknum) {
+		if (tmp->addr == blocknum && tmp->device == device) {
 			break;
 		}
 		tmp = tmp->free_next;
@@ -210,9 +213,10 @@ static buff_header_t *get_free_blk(buff_hashq_t *queue, uint64_t blocknum)
  *
  * \param queue The new hash queue.
  * \param buff The Buffer.
+ * \param device Device number.
  * \param blocknum New block number.
  */
-static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, uint64_t blocknum)
+static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, int device, uint64_t blocknum)
 {
 	struct _buffer_header_t *head, *tmp, *prev, *next;
 	uint64_t pos;
@@ -220,14 +224,14 @@ static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, uint64_t
 	pos = buff->addr % 4;
 	head = queue->hashtable[pos];
 	if (head != NULL) {
-		if (search_blk(queue, buff->addr) != NULL) {
+		if (search_blk(queue, device, buff->addr) != NULL) {
 			/* Remove from old hash queue */
 			tmp = head;
 			if (tmp->next == NULL) {
 				queue->hashtable[pos] = NULL;
 			} else {
 				while(tmp->next != NULL) {
-					if (tmp->addr == buff->addr) {
+					if (tmp->addr == buff->addr && tmp->device == device) {
 						cli();
 						prev = tmp->prev;
 						if (tmp->next == NULL) {
@@ -248,7 +252,8 @@ static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, uint64_t
 	/* Add to new hash queue */
 	pos  = blocknum % 4;
 	head = queue->hashtable[pos];
-	buff->addr = blocknum;
+	buff->addr   = blocknum;
+	buff->device = device;
 
 	if (head == NULL) {
 		buff->next = NULL;
@@ -298,7 +303,7 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 
 	while(1) {
 	
-		if ( (buff = search_blk(driver->buffer_queue, blocknum)) != NULL ) {
+		if ( (buff = search_blk(driver->buffer_queue, device, blocknum)) != NULL ) {
 			/* Block is in hash queue */
 			
 			if (buff->status == BUFF_ST_BUSY) {
@@ -310,13 +315,13 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 			cli();
 			buff->status = BUFF_ST_BUSY;
 			sti();
-			remove_from_freelist(driver->buffer_queue, blocknum);
+			remove_from_freelist(driver->buffer_queue, device, blocknum);
 			return buff;
 		} else {
 			/* Block is not on hash queue */
 			
 			/* There are no free buffers on free list */
-			if ( (buff = get_free_blk(driver->buffer_queue, blocknum)) == NULL ) {
+			if ( (buff = get_free_blk(driver->buffer_queue, device, blocknum)) == NULL ) {
 				sleep_on(WAIT_BLOCK_BUFFER_GET_FREE);
 				continue;
 			} else {
@@ -330,7 +335,7 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 
 				/* Remove buffer from old hash queue and put block
 				   onto new hash queue */
-				add_to_buff_queue(driver->buffer_queue, buff, blocknum);
+				add_to_buff_queue(driver->buffer_queue, buff, device, blocknum);
 
 				return buff;
 			}
