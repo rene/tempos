@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Renê de Souza Pinto
+ * Copyright (C) 2009-2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
  * File: task.S
@@ -34,9 +34,9 @@ initial_task:
 	movl 4(%esp), %eax
 	/**
 	 * Since this function should be called just once at kernel
-	 * initialization, and so at the kernel mode, we doesn't
-	 * need to make level switch, because we are already in kernel mode,
-	 * so here all we need it's ajust stack and jmp to main thread function
+	 * initialization, thus at the kernel mode, we doesn't
+	 * need to make level switch because we are already in kernel mode,
+	 * so here all we need it's adjust stack and jmp to main thread function
 	 */
 	movl 34(%eax), %ebx /* arch_tss.regs.esp    */
 	movl 72(%eax), %ecx /* arch_tss.regs.eflags */

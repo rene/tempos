@@ -2,7 +2,8 @@
  * Copyright (C) 2009-2011 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: semaphore.h
+ * File: ext2.c
+ * Desc: Implements the Extended File System Version 2 (EXT2) File System
  *
  * This file is part of TempOS.
  *
@@ -21,20 +22,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SEMAPHORE_H
+#include <fs/vfs.h>
+#include <fs/ext2/ext2.h>
 
-	#define SEMAPHORE_H
 
-	#include <unistd.h>
+/**
+ * Division a/b with rounded up.
+ * \param a Value of a.
+ * \param b Value of b.
+ * \return Result of division a/b with rounded up.
+ **/
+uint32_t div_rup(uint32_t a, uint32_t b)
+{
+	uint32_t res = (a/b);
+	if ((res*b) < a) {
+		res++;
+	}
+	return res;
+}
 
-	/** Semaphore structure */
-	typedef uint32_t sem_t;
 
-	/* prototypes */
-	int mutex_init(sem_t *mutex);
-	int mutex_is_locked(sem_t mutex);
-	void mutex_spin_down(sem_t *mutex);
-	void mutex_up(sem_t *mutex);
+/**
+ * Return block size in bytes.
+ * \param sb Super block.
+ * \return Block size in bytes.
+ */
+uint32_t get_block_size(superblock_st sb)
+{
+	uint32_t size = 1024; /* default */
 
-#endif /* SEMAPHORE_H */
+	switch(sb.s_log_block_size) {
+		case BLOCK_SIZE_2k:
+			size = 2048;
+			break;
+
+		case BLOCK_SIZE_4k:
+			size = 4096;
+			break;
+	}
+
+	return size;
+}
 

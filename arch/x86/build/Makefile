@@ -54,6 +54,7 @@ $(MAKEGEN): \
 		drivers/char/Build.mk		\
 		drivers/block/Build.mk		\
 		fs/Build.mk					\
+		fs/ext2/Build.mk			\
 		kernel/Build.mk				\
 		kernel/mm/Build.mk
 	@$(ECHO) -n " + Generating dependencies..."
