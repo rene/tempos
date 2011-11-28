@@ -108,7 +108,6 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.eflags = 0x2020000;
 	
 	/* Setup thread context into stack */
-	task->kstack -= 2; /* FIXME: I've figure out that some how stack is "shifted" by 2 bytes, why? I have no idea :'( */
 	task->arch_tss.regs.esp = (uint32_t)task->kstack - sizeof(arch_tss_t);
 	
 	/* Configure thread's stack */
