@@ -41,11 +41,13 @@ void calibrate_delay(void)
 	bogomips = 0;
 
 	kprintf(KERN_INFO "Calibrating loop delay...");
-	timeout = jiffies + ((HZ / 1000)); /* Calibration takes 1ms */
-	while( !time_after(jiffies, timeout) )
+	timeout = jiffies + ((HZ / 10)); /* Calibration takes 100ms */
+	
+	while( !time_after_eq(jiffies, timeout) )
 			bogomips++;
-
-	bogomips = bogomips / 1000; /* microsecond precision */
+	
+	/* FIXME: 3 it's a factor correction */
+	bogomips = bogomips / 300000; /* microsecond precision (us) */
 
 	kprintf(KERN_INFO "%d BogoMIPS\n", bogomips);
 }
