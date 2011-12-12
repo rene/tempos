@@ -24,6 +24,7 @@
 
 #include <tempos/sched.h>
 #include <tempos/kernel.h>
+#include <tempos/wait.h>
 #include <tempos/mm.h>
 #include <arch/io.h>
 #include <linkedl.h>
@@ -88,8 +89,9 @@ void kernel_thread_exit(int return_code)
 	current_task = GET_TASK(cur_task);
 	current_task->state = TASK_ZOMBIE;
 	current_task->return_code = return_code;
-	schedule();
+	wakeup(WAIT_KERNEL_THREAD);
 	sti();
+	schedule();
 }
 
 int kernel_thread_wait(task_t *th)
@@ -100,11 +102,14 @@ int kernel_thread_wait(task_t *th)
 		return -1;
 	}
 
+	sleep_on(WAIT_KERNEL_THREAD);
+
 	cli();
 	if (th->state == TASK_ZOMBIE) {
 		ret = th->return_code;
 		c_llist_remove(&tasks, th);
 		kfree(th->kstack);
+		kfree(th);
 	}
 	sti();
 

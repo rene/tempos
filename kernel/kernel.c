@@ -79,6 +79,25 @@ void tempos_main(karch_t kinf)
 	panic("Error on initialize scheduler!");
 }
 
+void fth1(void *arg)
+{
+	int i;
+	//while(1) {
+	for (i = 0; i < 10; i++) {
+		mdelay(10);
+		kprintf("Eu sou a thread 1\n");
+	}
+	kernel_thread_exit(0);
+}
+void fth2(void *arg)
+{
+	task_t *kth = (task_t*)arg;
+	kprintf("Eu sou a thread 2, aguardando termino da thread 1\n");
+	kernel_thread_wait(kth);
+	kprintf("Legal, Thread 1 acabou!\n");
+	kernel_thread_exit(0);
+}
+
 /**
  * This is the main kernel thread. When TempOS initializes his scheduler
  * the kernel process becomes a kernel thread (running this function). So
@@ -120,8 +139,9 @@ void kernel_main_thread(void *arg)
 	 kprintf(KERN_INFO "Hello, I'm the main kernel process!\n"); */
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
-	/*asm volatile("movl $4,  %%eax  \n" // syscall number
-				 "movl $12, %%ebx  \n" // count
+	/*char *hello = "Ola Mundo!\n";
+	asm volatile("movl $4,  %%eax  \n" // syscall number
+				 "movl $11, %%ebx  \n" // count
 				 "movl %0,  %%ecx  \n" // hello
 				 "movl $0,  %%edx  \n" // fd
 				 "int $0x85" : : "g" (hello) );
@@ -133,6 +153,14 @@ void kernel_main_thread(void *arg)
 	kprintf(KERN_INFO "2 ");
 	mdelay(1000);
 	kprintf(KERN_INFO "3 ");*/
+
+	task_t *th1, *th2;
+
+	th1 = kernel_thread_create(DEFAULT_PRIORITY, fth1, NULL);
+	th2 = kernel_thread_create(DEFAULT_PRIORITY, fth2, th1);
+
+	//kernel_thread_wait(th1);
+	//kprintf("Thread 1 acabou!\n");
 
 	/* Mount root file system */
 	/* ... */

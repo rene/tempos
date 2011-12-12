@@ -65,7 +65,7 @@ void sleep_on(int sleep_addr)
 	schedule();
 
 	/* Process resumes execution from here when it wakes up */
-	llist_remove(&wait_queues[sleep_addr], current_task);
+	/*llist_remove(&wait_queues[sleep_addr], current_task);*/
 	
 	sti();
 

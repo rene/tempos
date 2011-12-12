@@ -45,6 +45,9 @@
 	/** Wait for disk operation at secondary IDE */
 	#define WAIT_INT_IDE_SEC  15
 
+	/* Wait for proccess */
+	#define WAIT_KERNEL_THREAD 50
+
 	/* Prototypes */
 
 	void init_wait_queues(void);
