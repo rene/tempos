@@ -39,7 +39,7 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 {
 	task_t *newth = NULL;
 	char *new_kstack = NULL;
-	uint32_t udata;
+	void *udata;
 
 	/* Alloc memory for task structure */
 	newth = (task_t*)kmalloc(sizeof(task_t), GFP_NORMAL_Z);
@@ -59,14 +59,14 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 	newth->pid = KERNEL_PID;
 	newth->return_code = 0;
 	newth->wait_queue = 0;
-	newth->kstack = (char*)((uint32_t)new_kstack + PROCESS_STACK_SIZE);
+	newth->kstack = (char*)((void*)new_kstack + PROCESS_STACK_SIZE);
 
 	/* "push" start_routine argument */
-	udata = (uint32_t)arg;
+	udata = arg;
 	push_into_stack(newth->kstack, udata);
 
 	/* "push" return address */
-	udata = (uint32_t)force_kthread_exit; 
+	udata = force_kthread_exit; 
 	push_into_stack(newth->kstack, udata);
 
 	/* Architecture specific */
