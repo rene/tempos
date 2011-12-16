@@ -95,5 +95,12 @@
 
 	void tempos_main(karch_t kinf);
 
+	/** Although is defined here, this function is architecture dependent, so it
+	    shall be implemented on each architecture port code. */
+	void dump_cpu(void);
+
+	/** As dump_cpu(), halt_cpu() is architecture dependent. */
+	void halt_cpu(void);
+
 #endif /* KERNEL_H */
 

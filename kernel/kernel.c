@@ -112,6 +112,7 @@ void kernel_main_thread(void *arg)
 	for (i = 0; i < 512; i++) {
 		kprintf("%c ", buff->data[i]);
 	}
+	panic("Testing panic function!");
 	/*getblk(3, 0, 24);
 	getblk(3, 0, 4);
 	getblk(3, 0, 8);
@@ -167,8 +168,9 @@ void idle_thread(void *arg)
  */
 void panic(const char *str)
 {
-	kprintf(KERN_CRIT "%s\n", str);
-	/* FIXME: dump_cpu(); halt_cpu(); */
+	kprintf(KERN_CRIT "\nPANIC: %s\n", str);
+	dump_cpu();
+	halt_cpu();
 	for(;;);
 }
 
