@@ -26,7 +26,7 @@
 #include <tempos/error.h>
 #include <tempos/kernel.h>
 
-int sys_exit(int status)
+_pushargs int sys_exit(int status)
 {
 	kprintf(KERN_DEBUG "sys_exit %d\n", status);
 

@@ -24,7 +24,7 @@
 
 #include <tempos/syscall.h>
 
-void sys_fork(void)
+_pushargs void sys_fork(void)
 {
 }
 

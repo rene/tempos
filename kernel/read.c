@@ -25,7 +25,7 @@
 #include <tempos/syscall.h>
 #include <tempos/kernel.h>
 
-ssize_t sys_read(int fd, void *buf, size_t count)
+_pushargs ssize_t sys_read(int fd, void *buf, size_t count)
 {
 	kprintf(KERN_DEBUG "read: %d -- %s -- %d", fd, buf, count);
 

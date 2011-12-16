@@ -107,6 +107,7 @@ void ex_stack()
 void ex_gp(int code)
 {
 	kprintf("EXCEP: GP - %d\n", code);
+	panic("GENERAL PROTECTION FAULT");
 }
 
 

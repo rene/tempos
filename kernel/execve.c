@@ -25,7 +25,7 @@
 #include <tempos/syscall.h>
 #include <tempos/kernel.h>
 
-int sys_execve(const char *filename, char *const argv[], char *const envp[])
+_pushargs int sys_execve(const char *filename, char *const argv[], char *const envp[])
 {
 
 	kprintf(KERN_DEBUG "%s -- %s -- %s\n", filename, argv[0], envp[0]);

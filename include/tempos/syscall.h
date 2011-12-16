@@ -30,6 +30,8 @@
 #ifndef ASM
 	#include <unistd.h>
 
+	#define _pushargs __attribute__((regparm(0)))
+
 	int      sys_exit(int status);
 	void     sys_fork(void);
 	int      sys_execve(const char *filename, char *const argv[], char *const envp[]);

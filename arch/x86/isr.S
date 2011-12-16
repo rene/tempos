@@ -65,7 +65,6 @@ no_error_code:
 	pushl  $0x00 /* Error code */
 
 	/* Move to kernel mode */
-
 	movw $KERNEL_DS, %dx
 	movw %dx, %ds
 	movw %dx, %fs
@@ -93,7 +92,6 @@ no_error_code:
 	popl %ecx
 	popl %eax
 
-	sti
 	iret
 
 

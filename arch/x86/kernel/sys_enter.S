@@ -39,16 +39,19 @@ _sys_enter:
 	pushw %gs
 	pushl %edx /* Save EDX argument */
 
-	/* Context switch */
+	/* Move to kernel mode */
 	movw $KERNEL_DS, %dx
 	movw %dx, %ds
+	movw %dx, %fs
+	movw %dx, %gs
+	movw %dx, %ss
 	movw %dx, %es
-
+	
 	popl %edx
 
 	pushl $exit_syscall
 
-	cmpl SYSCALL_COUNT, %eax
+	cmpl $SYSCALL_COUNT, %eax
 	jae  exit_syscall
 
 	/* Push syscall arguments */
@@ -56,14 +59,15 @@ _sys_enter:
 	pushl %ecx
 	pushl %edx
 
+	/* Now the proccess is ready to make the syscall, so
+	   we can enable interrupts again. */
+	sti
 	call *syscall_table(,%eax,4)
 	addl $4*3,%esp
 	ret
 
 exit_syscall:
 	/*pushl %eax*/
-	/**/
-
 	cli
 	popw  %gs
 	popw  %fs

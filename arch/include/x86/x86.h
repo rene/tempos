@@ -27,9 +27,8 @@
 
 #ifndef ASM
 	#include <unistd.h>
-
-	#define _pushargs __attribute__((regparm(0)))
-
+	#include <tempos/syscall.h>
+	
 	/**
 	 * Registers saved at interrupt trapping.
 	 *

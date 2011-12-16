@@ -112,7 +112,7 @@ void kernel_main_thread(void *arg)
 	for (i = 0; i < 512; i++) {
 		kprintf("%c ", buff->data[i]);
 	}
-	panic("Testing panic function!");
+	/*panic("Testing panic function!");*/
 	/*getblk(3, 0, 24);
 	getblk(3, 0, 4);
 	getblk(3, 0, 8);
@@ -122,12 +122,12 @@ void kernel_main_thread(void *arg)
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
 	/*char *hello = "Ola Mundo!\n";
-	asm volatile("movl $4,  %%eax  \n" // syscall number
-				 "movl $11, %%ebx  \n" // count
-				 "movl %0,  %%ecx  \n" // hello
-				 "movl $0,  %%edx  \n" // fd
-				 "int $0x85" : : "g" (hello) );
-
+	asm("movl $4,  %%eax  \n" // syscall number
+		 "movl $11, %%ebx  \n" // count
+		 "movl %0,  %%ecx  \n" // hello
+		 "movl $0,  %%edx  \n" // fd
+		 "pushl %%eax\n"
+		 "int $0x85" : : "g" (hello) : "eax", "ebx", "ecx", "edx");
 	kprintf(KERN_INFO "\nI'am back from syscall!!\n");*/
 	/*
 	kprintf(KERN_INFO "\n1 ");
