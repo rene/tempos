@@ -11,6 +11,20 @@ static unsigned char px        = 0;
 static unsigned char py        = 0;
 static unsigned char c_attr    = LIGHT_GRAY;
 
+/**
+ * Set video memory
+ * \param
+ */
+void set_videomem(unsigned char *addr)
+{
+	if (addr == (unsigned char*)VIDEO_MEM_ADDR || 
+			addr == (unsigned char*)VIDEO_MEM_VIRT_ADDR) {
+		videomem = addr;
+	} else {
+		videomem = (unsigned char*)VIDEO_MEM_ADDR;
+	}
+}
+
 
 /**
  * clrscr

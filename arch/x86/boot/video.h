@@ -9,9 +9,10 @@
 
 	#define VIDEO_H_ 1
 
-	#define VIDEO_MEM_ADDR 0xB8000
-	#define VIDEO_COLS     80
-	#define VIDEO_ROWS     25
+	#define VIDEO_MEM_ADDR 		0xB8000
+	#define VIDEO_MEM_VIRT_ADDR 0xBFFB8000
+	#define VIDEO_COLS     		80
+	#define VIDEO_ROWS     		25
 	#define VIDEO_MEM_SIZE VIDEO_COLS * VIDEO_ROWS * 2
 
 	/* Video color attributes */
@@ -33,6 +34,7 @@
 	#define WHITE          0x0F
 
 	/* Prototypes */
+	void set_videomem(unsigned char *addr);
 	void clrscr(void);
 	void gotoxy(unsigned char x, unsigned char y);
 	void setattr(unsigned char attr);

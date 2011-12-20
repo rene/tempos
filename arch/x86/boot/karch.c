@@ -50,6 +50,11 @@ void karch(unsigned long magic, unsigned long addr)
 	char8_t *mtypes[] = { "Avaliable", "Reserved", "ACPI", "ACPI NVS", "Unknown" };
 
 
+	/* TODO: start console */
+    set_videomem((unsigned char*)VIDEO_MEM_VIRT_ADDR);
+	clrscr();
+	setattr(LIGHT_GRAY);
+
 	/* Here the address translation it's done by GDT trick, we need to
 	   take care about addresses passed by multiboot structures (physical)
 	   and translate them to virtual address */
@@ -103,6 +108,9 @@ void karch(unsigned long magic, unsigned long addr)
 	   enable the paging system and reload de GDT with
 	   base 0, after that, we can continue to load the kernel */
 	init_pg(&kinf);
+ 	
+	set_videomem((unsigned char*)VIDEO_MEM_ADDR);
+
 
 	/* Init the Memory Manager */
 	init_mm();
@@ -115,11 +123,7 @@ void karch(unsigned long magic, unsigned long addr)
 	set_picmask(0x00, PIC_MASTER);
 	set_picmask(0x00, PIC_SLAVE);
 	sti();
-
-	/* TODO: start console */
-    clrscr();
-	setattr(LIGHT_GRAY);
-
+	
 	/* This is the first message from kernel =:) */
 	kprintf(KERN_INFO "TempOS\n");
 

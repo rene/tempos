@@ -83,6 +83,5 @@ void mutex_spin_down(sem_t *mutex)
 void mutex_up(sem_t *mutex)
 {
 	atomic_incl((int32_t*)mutex);
-	//atomic_addl((int32_t*)mutex, 10);
 }
 
