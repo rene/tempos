@@ -55,7 +55,7 @@ buff_hashq_t *create_hash_queue(uint64_t size)
 	}
  
 	/* Alloc memory for hashtable */
-	ht_entries = (size / 4);
+	ht_entries = 4; /*(size / 4);*/
 	hash_queue->hashtable = (buff_header_t**)kmalloc(ht_entries * sizeof(buff_header_t*), GFP_NORMAL_Z);
 
 	if (hash_queue->hashtable == NULL) {
