@@ -27,7 +27,6 @@
 
 	/**
 	 \file
-	 \verbatim
 	   This file contains the list of device numbers.
 	   All numbers placed here follows the LINUX ALLOCATED DEVICES
 	   list, revised at 6th April 2009. For more information, please
@@ -38,6 +37,23 @@
 	   used in device file name (e.g. /dev/<NAME>)
 	 \endverbatim
 	 */
+
+
+	/** Device structure */
+	struct _device_t {
+		/** Major number */
+		int major;
+		/** Minor number */
+		int minor;
+		/** Type: Block, Character */
+		char type;
+	};
+	
+	typedef struct _device_t dev_t;
+
+
+	/** Maximum minor devices */
+	#define MAX_MINOR_DEVICES	255
 
 	/* 1 char - Memory Devices */
 	#define DEVNUM_NULL          3

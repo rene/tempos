@@ -26,8 +26,9 @@
 	#define VFS_DEVICE_H
 
 	#include <unistd.h>
+	#include <fs/dev_numbers.h>
 	#include <fs/bhash.h>
-
+	#include <fs/vfs.h>
 
 	/** Number of maximum block device drivers */
 	#define MAX_DEVBLOCK_DRIVERS 256
@@ -46,16 +47,6 @@
 	/** Block device type */
 	#define DEV_TYPE_BLOCK DRIVER_TYPE_BLOCK
 
-
-	/** Device structure */
-	struct _device_t {
-		/** Major number */
-		int major;
-		/** Minor number */
-		int minor;
-		/** Type: Block, Character */
-		char type;
-	};
 
 	/** Block device operations */
 	struct _blk_dev_op {
@@ -85,11 +76,12 @@
 		uint64_t size;
 		/** Buffer queue for block devices */
 		buff_hashq_t *buffer_queue;
+		/** Hash queue for i-nodes */
+		struct _vfs_inode_st *inodes_hash_table[MAX_MINOR_DEVICES];
 		/** Driver operations */
 		struct _blk_dev_op *dev_ops;
 	};
 
-	typedef struct _device_t dev_t;
 	typedef struct _char_device_driver_t dev_char_driver_t;
 	typedef struct _blk_device_driver_t  dev_blk_driver_t;
 

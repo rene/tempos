@@ -28,7 +28,6 @@
 	#include <linkedl.h>
 	#include <unistd.h>
 	#include <tempos/mm.h>
-	//#include <fs/device.h>
 	#include <config.h>
 
 	/* Block buffer: possible status */
@@ -49,9 +48,9 @@
 	/** Buffer size */
 	#define BUFF_SIZE 		512
 
-	/** How many blocks has each buffer queue */
+	/** How many blocks has each buffer queue? */
 	#ifdef CONFIG_BUFFER_QUEUE_SIZE
-		/** System frequency defined at kernel configuration file */
+		/** Buffer queue size defined at kernel configuration file */
 		#define BUFF_QUEUE_SIZE CONFIG_BUFFER_QUEUE_SIZE
 	#else
 		#error "CONFIG_BUFFER_QUEUE_SIZE it's not defined. It should be defined at configuration file."
@@ -71,7 +70,7 @@
 		char status;
 		/* The data of the block */
 		char data[BUFF_SIZE];
-		/* links to make a circular linked list into hash queue */
+		/* links to make a double linked list into hash queue */
 		struct _buffer_header_t *prev;
 		struct _buffer_header_t *next;
 		/* links to make a circular linked list into free list */
@@ -85,7 +84,7 @@
 	struct _buff_hash_queue_t {
 		/** How many position are in hash table. */
 		uint64_t size;
-		/** Each position has a circular linked list of buffer headers. */
+		/** Each position has a linked list of buffer headers. */
 		struct _buffer_header_t **hashtable;
 		/** Free list head */
 		struct _buffer_header_t *freelist_head;

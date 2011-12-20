@@ -38,7 +38,10 @@
 	#define VFS_NAME_LEN 512
 	
 	/** Maximum open files */
-	#define VFS_MAX_OPEN_FILES 32767
+	#define VFS_MAX_OPEN_FILES 4000
+
+	/** Maximum file system mounted */
+	#define VFS_MAX_MOUNTED_FS 512
 
 	/**
 	 * Super Block structure
@@ -113,6 +116,12 @@
 		int reference;
 		/** i-node number */
 		uint32_t number;
+		/** links to make a double linked list */
+		struct _vfs_inode_st *prev;
+		struct _vfs_inode_st *next;
+		/** links to free list */
+		struct _vfs_inode_st *free_next;
+		struct _vfs_inode_st *free_prev;
 	};
 
 	/**
@@ -131,12 +140,35 @@
 		char name[VFS_NAME_LEN];
 	};
 
+	/**
+	 * Mount table entry
+	 */
+	struct _vfs_mount_table_entry {
+		/** Mounted device */
+		dev_t device;
+		/** Super block of mounted device */
+		struct _vfs_superblock_st *sb;
+		/** Root i-node of mounted device */
+		struct _vfs_inode_st *root_inode;
+		/** Directory i-node where device is mounted on */
+		struct _vfs_inode_st *mnt_on_inode;
+		/** File system type */
+		char *fs_type;
+	};
+
 	
-	typedef struct _vfs_superblock_st vfs_superblock;
-	typedef struct _vfs_inode_st      vfs_inode;
-	typedef struct _vfs_directory_st  vfs_directory;
+	typedef struct _vfs_superblock_st 		vfs_superblock;
+	typedef struct _vfs_inode_st      		vfs_inode;
+	typedef struct _vfs_directory_st  		vfs_directory;
+	typedef struct _vfs_mount_table_entry 	vfs_mount_table;
 
+	/** Global free i-nodes queue */
+	extern vfs_inode *free_inodes_head;
 
+	/** Global mount table */
+	extern vfs_mount_table mount_table[VFS_MAX_MOUNTED_FS];
+
+	
 	/* Prototypes */
  
 	/** Register all know File System types */

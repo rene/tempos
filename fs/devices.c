@@ -61,6 +61,8 @@ void init_drivers_interface(void)
  */
 int register_block_driver(dev_blk_driver_t *driver)
 {
+	int i;
+
 	if (driver == NULL) {
 		return -1;
 	}
@@ -76,6 +78,11 @@ int register_block_driver(dev_blk_driver_t *driver)
 		return -1;
 	}
 	
+	/* Initialize i-nodes hash queue for this device */
+	for (i = 0; i < MAX_MINOR_DEVICES; i++) {
+		driver->inodes_hash_table[i] = NULL;
+	}
+
 	block_dev_drivers[driver->major] = driver;
 
 	return 0;

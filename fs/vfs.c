@@ -26,6 +26,15 @@
 #include <fs/vfs.h>
 #include <fs/device.h>
 
+/** Global list of free i-nodes */
+vfs_inode *free_inodes;
+/** Head of the free i-nodes list */
+vfs_inode *free_inodes_head;
+
+/** Global mount table */
+vfs_mount_table mount_table[VFS_MAX_MOUNTED_FS];
+
+
 /**
  * This function initializes all File System types recognized
  * by TempOS.
@@ -34,8 +43,34 @@
  */
 void register_all_fs_types(void)
 {
+	int i;
+	vfs_inode *head, *inode, *prev;
+
 	kprintf(KERN_INFO "Initializing VFS...\n");
 
+	free_inodes = (vfs_inode*)kmalloc(sizeof(vfs_inode) * VFS_MAX_OPEN_FILES, GFP_NORMAL_Z);
+	if (free_inodes == NULL) {
+		panic("Could not allocate memory for i-node system queue.");
+	}
+
+	/* Make circular linked list of free i-nodes */
+	head = &free_inodes[0];
+	head->free_next = head;
+	head->free_prev = head;
+	prev = head;
+	
+	for (i = 1; i < VFS_MAX_OPEN_FILES; i++) {
+		inode = &free_inodes[i];
+		inode->free_prev = prev;
+		inode->free_next = head;
+		head->free_prev = inode;
+		prev->free_next = inode;
+		prev = inode;
+	}
+	
+	free_inodes_head = head;
+
+	/* Initialize device drivers interface */
 	init_drivers_interface();
 
 	return;

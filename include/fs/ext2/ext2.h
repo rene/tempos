@@ -21,7 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
+/**
+ * \file
  * The structures declared here are based on John's spec 
  * of the second extended filesystem. For more information,
  * see http://uranus.chrysocome.net/explore2fs/es2fs.htm
