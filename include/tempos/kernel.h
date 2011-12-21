@@ -81,9 +81,15 @@
 		struct _mmap_tentry mmap_table[MBOOT_MMAP_MAXREG];
 	};
 
+	/** Command line argument: key-value pair */
+	struct _cmdline_arg {
+		char *key;
+		char *value;
+	};
+
 	typedef struct _karch_t karch_t;
 	typedef struct _mmap_tentry mmap_tentry;
-
+	typedef struct _cmdline_arg cmdline_arg_t;
 
 	int vsprintf(char *str, const char *format, va_list ap);
 
@@ -94,6 +100,11 @@
 	void panic(const char *str);
 
 	void tempos_main(karch_t kinf);
+
+	/* command line functions */
+	int parse_cmdline(char *cmdline);
+
+	char *cmdline_get_value(char *key);
 
 	/** Although is defined here, this function is architecture dependent, so it
 	    shall be implemented on each architecture port code. */

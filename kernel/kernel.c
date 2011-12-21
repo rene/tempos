@@ -101,8 +101,9 @@ void kernel_main_thread(void *arg)
 	/* ATA controller */
 	init_ata_generic();
 
-	/* Show command line */
+	/* Show and parse command line */
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
+	parse_cmdline((char*)kinfo.cmdline);
 
 	/* tests */
 	buff_header_t *buff;
