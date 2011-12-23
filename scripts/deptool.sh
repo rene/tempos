@@ -44,8 +44,8 @@ IFS=$LF
 
 for line in $targets; do
 
-	target=$(echo $line | sed -ne "s# \{0,\}\(\w\+\) \{0,\}[+:]=.*#\1#gp")
-
+	target=$(echo $line | sed -ne "s# \{0,\}\(.*\) \{0,\}[+:]=.*#\1#gp" | tr -d "[ ]")
+	
 	if [ -z "$target" ]; then
 		target=$oldtarget
 	else

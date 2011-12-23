@@ -36,6 +36,7 @@
 	#define EXT2_MAGIC		0xEF53
 
 	#define SUPERBLOCK_OFFSET 1024
+	#define SUPERBLOCK_SECTOR (SUPERBLOCK_OFFSET/512)
 
 	#define BLOCK_SIZE_1k	0
 	#define BLOCK_SIZE_2k	1
@@ -225,7 +226,10 @@
 
 
 	/* Prototypes */
+	void register_ext2(void);
+
 	uint32_t div_rup(uint32_t a, uint32_t b);
+
 	uint32_t get_block_size(superblock_st sb);
 
 #endif /* VFS_FS_EXT2 */

@@ -25,6 +25,7 @@
 #include <tempos/kernel.h>
 #include <fs/vfs.h>
 #include <fs/device.h>
+#include <fs/ext2/ext2.h>
 
 /** Global list of free i-nodes */
 vfs_inode *free_inodes;
@@ -72,6 +73,11 @@ void register_all_fs_types(void)
 
 	/* Initialize device drivers interface */
 	init_drivers_interface();
+
+	/* Register all supported file systems by the kernel */
+	#ifdef CONFIG_FS_EXT2
+		register_ext2();
+	#endif
 
 	return;
 }

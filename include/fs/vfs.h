@@ -44,6 +44,17 @@
 	#define VFS_MAX_MOUNTED_FS 512
 
 	/**
+	 * File system type
+	 */
+	struct _vfs_fs_type_st {
+		/** File System name */
+		char *name;
+		/** Check if such device is this file system valid */
+		int (*check_fs_type) (dev_t);
+	};
+
+
+	/**
 	 * Super Block structure
 	 */
 	struct _vfs_superblock_st {
@@ -63,8 +74,8 @@
 		uint32_t s_wtime;
 		/** The number of times the file system has been mounted */
 		uint16_t s_mnt_count;
-		/** File System Magic number */
-		uint16_t s_magic;
+		/** File System type */
+		struct _vfs_fs_type_st type;
 		/** Flags indicating the current state of the filesystem */
 		uint16_t s_state;
 		/** Flags indicating the procedures for error reporting */
@@ -77,6 +88,11 @@
 		uchar8_t s_uuid[16];
 		/** volume name */
 		uchar8_t s_volume_name[16];
+
+		/* attributes present only at memory */
+
+		/** Super block operations for this kind of file system */
+		struct _vfs_sb_operations *sb_op;
 	};
 
 	/**
@@ -122,6 +138,8 @@
 		/** links to free list */
 		struct _vfs_inode_st *free_next;
 		struct _vfs_inode_st *free_prev;
+		/** Associated super block */
+		struct _vfs_superblock_st *sb;
 	};
 
 	/**
@@ -138,6 +156,8 @@
 		uchar8_t file_type;
 		/** File name */
 		char name[VFS_NAME_LEN];
+		/** Super block of file */
+		struct _vfs_superblock_st *d_sb;
 	};
 
 	/**
@@ -156,11 +176,22 @@
 		char *fs_type;
 	};
 
-	
+	/**
+	 * Super block operations
+	 */
+	struct _vfs_sb_operations {
+		/** get an i-node from disk */
+		int (*get_inode) (struct _vfs_inode_st *);
+		/** write an i-node to disk */
+		int (*put_inode) (struct _vfs_inode_st *);
+	};
+
+
 	typedef struct _vfs_superblock_st 		vfs_superblock;
 	typedef struct _vfs_inode_st      		vfs_inode;
 	typedef struct _vfs_directory_st  		vfs_directory;
 	typedef struct _vfs_mount_table_entry 	vfs_mount_table;
+	typedef struct _vfs_fs_type_st			vfs_fs_type;
 
 	/** Global free i-nodes queue */
 	extern vfs_inode *free_inodes_head;

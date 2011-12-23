@@ -25,6 +25,21 @@
 #include <fs/vfs.h>
 #include <fs/ext2/ext2.h>
 
+/**
+ * This function registers EXT2 file system in VFS.
+ */
+void register_ext2(void)
+{
+	kprintf("REGISTER EXT2\n");
+}
+
+/**
+ * Check if some device is formated as EXT2
+ */
+int check_is_ext2(dev_t device)
+{
+	return -1;
+}
 
 /**
  * Division a/b with rounded up.

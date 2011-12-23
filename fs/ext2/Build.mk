@@ -5,5 +5,5 @@
 # TBS - Build configuration file
 #
 
-obj-y += ext2.o
+obj-$(CONFIG_FS_EXT2) += ext2.o
 
