@@ -102,15 +102,14 @@ int kernel_thread_wait(task_t *th)
 		return -1;
 	}
 
-	sleep_on(WAIT_KERNEL_THREAD);
+	while(th->state != TASK_ZOMBIE)
+		sleep_on(WAIT_KERNEL_THREAD);
 
 	cli();
-	if (th->state == TASK_ZOMBIE) {
-		ret = th->return_code;
-		c_llist_remove(&tasks, th);
-		kfree(th->kstack);
-		kfree(th);
-	}
+	ret = th->return_code;
+	c_llist_remove(&tasks, th);
+	kfree(th->kstack);
+	kfree(th);
 	sti();
 
 	return ret;

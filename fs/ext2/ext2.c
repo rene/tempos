@@ -25,12 +25,20 @@
 #include <fs/vfs.h>
 #include <fs/ext2/ext2.h>
 
+vfs_fs_type ext2_fs_type;
+
+/* Prototypes */
+int check_is_ext2(dev_t device);
+
+
 /**
  * This function registers EXT2 file system in VFS.
  */
 void register_ext2(void)
 {
-	kprintf("REGISTER EXT2\n");
+	ext2_fs_type.name = "ext2";
+	ext2_fs_type.check_fs_type = check_is_ext2;
+	register_fs_type(&ext2_fs_type);
 }
 
 /**

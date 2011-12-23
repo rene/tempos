@@ -43,6 +43,18 @@
 	/** Maximum file system mounted */
 	#define VFS_MAX_MOUNTED_FS 512
 
+	/** I-node hash table entries */
+	#define INODE_HASH_TABLE_SIZE VFS_MAX_OPEN_FILES
+
+	/** Number of file systems supported by TempOS */
+	#define SUPPORTED_FS 1
+
+	/* i-node flags */
+
+	/** i-node is a mount point */
+	#define IFLAG_MOUNT_POINT  0x01
+
+
 	/**
 	 * File system type
 	 */
@@ -58,29 +70,29 @@
 	 * Super Block structure
 	 */
 	struct _vfs_superblock_st {
-		/** Count of inodes in the filesystem */
+		/** Count of i-nodes in the file system */
 		uint32_t s_inodes_count;
-		/** Count of blocks in the filesystem */
+		/** Count of blocks in the file system */
 		uint32_t s_blocks_count;
 		/** Count of the number of free blocks */
 		uint32_t s_free_blocks_count;   
-		/** Count of the number of free inodes */
+		/** Count of the number of free i-nodes */
 		uint32_t s_free_inodes_count;
 		/** Indicator of the block size */
 		uint32_t s_log_block_size;  	
-		/** The time that the filesystem was last mounted */
+		/** The time that the file system was last mounted */
 		uint32_t s_mtime;
-		/** The time that the filesystem was last written to */
+		/** The time that the file system was last written to */
 		uint32_t s_wtime;
 		/** The number of times the file system has been mounted */
 		uint16_t s_mnt_count;
 		/** File System type */
 		struct _vfs_fs_type_st type;
-		/** Flags indicating the current state of the filesystem */
+		/** Flags indicating the current state of the file system */
 		uint16_t s_state;
 		/** Flags indicating the procedures for error reporting */
 		uint16_t s_errors;
-		/** The time that the filesystem was last checked */
+		/** The time that the file system was last checked */
 		uint32_t s_lastcheck;
 		/** The maximum time permissible between checks */
 		uint32_t s_checkinterval;		
@@ -91,6 +103,10 @@
 
 		/* attributes present only at memory */
 
+		/** Device */
+		dev_t device;
+		/** Flags */
+		uint16_t flags;
 		/** Super block operations for this kind of file system */
 		struct _vfs_sb_operations *sb_op;
 	};
@@ -113,7 +129,7 @@
 		uint32_t i_mtime;              
 		/** Group id */
 		uint16_t i_gid;                
-		/** Number of (hard) links to this inode */
+		/** Number of (hard) links to this i-node */
 		uint16_t i_links_count;        
 		/** Number of blocks used */
 		uint32_t i_blocks;             
@@ -128,6 +144,8 @@
 		sem_t lock;
 		/** Device which i-node belongs */
 		dev_t device;
+		/** Flags */
+		uint16_t flags;
 		/** Reference count */
 		int reference;
 		/** i-node number */
@@ -177,13 +195,29 @@
 	};
 
 	/**
+	 * File structure. Represents a file only at system runtime.
+	 */
+	struct _vfs_file_st {
+		/** File i-node */
+		struct _vfs_inode_st *inode;
+	};
+
+	/**
 	 * Super block operations
 	 */
 	struct _vfs_sb_operations {
 		/** get an i-node from disk */
 		int (*get_inode) (struct _vfs_inode_st *);
-		/** write an i-node to disk */
+		/** Update disk i-node with current information */
+		int (*write_inode) (struct _vfs_inode_st *);
+		/** write an i-node to disk and free i-node object */
 		int (*put_inode) (struct _vfs_inode_st *);
+		/** Alloc new i-node */
+		int (*alloc_inode) (struct _vfs_superblock_st *, struct _vfs_inode_st *);
+		/** Delete a i-node and all block associated with it */
+		int (*free_inode) (struct _vfs_superblock_st *, struct _vfs_inode_st *);
+		/** Update super block disk with current information */
+		int (*write_super) (struct _vfs_superblock_st*);
 	};
 
 
@@ -192,6 +226,7 @@
 	typedef struct _vfs_directory_st  		vfs_directory;
 	typedef struct _vfs_mount_table_entry 	vfs_mount_table;
 	typedef struct _vfs_fs_type_st			vfs_fs_type;
+	typedef struct _vfs_file_st				vfs_file;
 
 	/** Global free i-nodes queue */
 	extern vfs_inode *free_inodes_head;
@@ -199,11 +234,17 @@
 	/** Global mount table */
 	extern vfs_mount_table mount_table[VFS_MAX_MOUNTED_FS];
 
-	
+	/** Global system's file table */
+	extern vfs_file *file_table;
+
+
 	/* Prototypes */
  
-	/** Register all know File System types */
 	void register_all_fs_types(void);
+
+	void register_fs_type(vfs_fs_type *type);
+
+	int vfs_mount_root(dev_t device);
 
 #endif /* VFS_H */
 

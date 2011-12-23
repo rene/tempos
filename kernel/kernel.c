@@ -32,6 +32,7 @@
 #include <drv/i8042.h>
 #include <drv/ata_generic.h>
 #include <fs/vfs.h>
+#include <fs/device.h>
 #include <string.h>
 #include <stdlib.h>
 #include <linkedl.h>
@@ -88,6 +89,9 @@ void tempos_main(karch_t kinf)
  */
 void kernel_main_thread(void *arg)
 {
+	char rdev_str[10];
+	dev_t rootdev;
+	size_t i, rdev_len;
 	task_t *idle_th;
 	
 	/* NOTE: keep calling order for the functions below */
@@ -105,14 +109,31 @@ void kernel_main_thread(void *arg)
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 	parse_cmdline((char*)kinfo.cmdline);
 
+	/* Mount root file system */
+	strcpy(rdev_str, cmdline_get_value("root"));
+	rdev_len = strlen(rdev_str);
+	for (i = 0; i < rdev_len; i++) {
+		if (rdev_str[i] == ':') {
+			rdev_str[i] = '\0';
+			rootdev.major = atoi(rdev_str);
+			rootdev.minor = atoi(&rdev_str[i+1]);
+			break;
+		}
+	}
+	if (i == rdev_len) {
+		panic("Kernel command line root argument bad formated.");
+	}
+	if (vfs_mount_root(rootdev) < 0) {
+		panic("VFS ERROR: Could not mount root file system.");
+	}
+
 	/* tests */
-	buff_header_t *buff;
-	/*buff = bread(3, 0, 2416);*/
+	/*buff_header_t *buff;
 	buff = bread(3, 1, 368);
 	int i;
 	for (i = 0; i < 512; i++) {
 		kprintf("%c ", buff->data[i]);
-	}
+	}*/
 	/*panic("Testing panic function!");*/
 	/*getblk(3, 0, 24);
 	getblk(3, 0, 4);
@@ -137,12 +158,6 @@ void kernel_main_thread(void *arg)
 	mdelay(1000);
 	kprintf(KERN_INFO "3 ");*/
 
-	//kernel_thread_wait(th1);
-	//kprintf("Thread 1 acabou!\n");
-
-	/* Mount root file system */
-	/* ... */
-	//mdelay(1000);
 	for(;;);
 }
 
@@ -169,7 +184,7 @@ void idle_thread(void *arg)
  */
 void panic(const char *str)
 {
-	kprintf(KERN_CRIT "\nPANIC: %s\n", str);
+	kprintf(KERN_CRIT "\nPANIC: %s\n\nDEBUG INFORMATION:\n", str);
 	dump_cpu();
 	halt_cpu();
 	for(;;);
