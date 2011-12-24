@@ -75,6 +75,8 @@
 	/* Prototypes */
 	void dump_cpu(void);
 
+	void dump_cpu_regs(pt_regs *regs);
+
 #endif
 
 	#define KERNEL_DPL 0x00

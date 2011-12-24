@@ -284,8 +284,6 @@ static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, int devi
 
 
 /**
- * getblk
- *
  * Each disk has a buffer queue of blocks. This function will search for a
  * specific block in the disk's buffer queue.
  *
@@ -345,8 +343,6 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 
 
 /**
- * brelse
- *
  * Release a locked buffer.
  * \param major Major number of the device
  * \param device Minor number (device number)

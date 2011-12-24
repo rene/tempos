@@ -27,16 +27,15 @@
 #include <x86/exceptions.h>
 
 
-void ex_div()
+void ex_div(pt_regs regs)
 {
-	dump_cpu();
+	dump_cpu_regs(&regs);
 	panic("Division by ZERO!");
 }
 
 
 void ex_debug()
 {
-	dump_cpu();
 	kprintf("EXCEP: DEBUG\n");
 }
 
@@ -77,39 +76,39 @@ void ex_device()
 }
 
 
-void ex_dfault()
+void ex_dfault(int code)
 {
 	kprintf("EXCEP: DEFAULT\n");
 }
 
 
-void ex_coproc()
+void ex_coproc(int code)
 {
 	kprintf("EXCEP: COPROC\n");
 }
 
 
-void ex_inv_tss()
+void ex_inv_tss(int code)
 {
 	kprintf("EXCEP: INVALID TSS\n");
 }
 
 
-void ex_segnp()
+void ex_segnp(int code)
 {
 	kprintf("EXCEP: SEGNP\n");
 }
 
 
-void ex_stack()
+void ex_stack(int code)
 {
 	kprintf("EXCEP: STACK\n");
 }
 
 
-void ex_gp(int code)
+void ex_gp(int code, pt_regs regs)
 {
-	dump_cpu();
+	dump_cpu_regs(&regs);
 	panic("GENERAL PROTECTION FAULT: code %d", code);
 }
 
@@ -117,10 +116,10 @@ void ex_gp(int code)
 /**
  * Page fault - This fault should be handle by mm 
  */
-void ex_pfault()
+void ex_pfault(int code, pt_regs regs)
 {
-	dump_cpu();
-	panic("PAGE FAULT\n");
+	dump_cpu_regs(&regs);
+	panic("PAGE FAULT");
 }
 
 
@@ -130,7 +129,7 @@ void ex_floatp()
 }
 
 
-void ex_align()
+void ex_align(int code)
 {
 	kprintf("EXCEP: ALIGN\n");
 }

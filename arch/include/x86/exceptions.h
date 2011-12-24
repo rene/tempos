@@ -25,7 +25,7 @@
 
 	#define ARCH_X86_EXCEPTIONS_H
 
-	void ex_div();
+	void ex_div(pt_regs regs);
 	void ex_debug();
 	void ex_nmi();
 	void ex_break();
@@ -33,15 +33,15 @@
 	void ex_bounds();
 	void ex_inv_op();
 	void ex_device();
-	void ex_dfault();
+	void ex_dfault(int code);
 	void ex_coproc();
-	void ex_inv_tss();
-	void ex_segnp();
-	void ex_stack();
-	void ex_gp(int code);
-	void ex_pfault();
+	void ex_inv_tss(int code);
+	void ex_segnp(int code);
+	void ex_stack(int code);
+	void ex_gp(int code, pt_regs regs);
+	void ex_pfault(int code, pt_regs regs);
 	void ex_floatp();
-	void ex_align();
+	void ex_align(int code);
 	void ex_machine();
 	void ex_simd();
 

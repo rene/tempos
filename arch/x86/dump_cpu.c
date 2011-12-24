@@ -25,6 +25,9 @@
 #include <tempos/kernel.h>
 #include <x86/x86.h>
 
+/**
+ * Dump CPU information with current register values.
+ */
 void dump_cpu(void)
 {
 	pt_regs regs;
@@ -47,16 +50,25 @@ void dump_cpu(void)
 		"movl %%edi, %3  \n":
 		"=r" (regs.gs), "=r" (regs.ss), "=r" (regs.esi), "=r" (regs.edi) ::);
 
+	dump_cpu_regs(&regs);
+}
+
+/**
+ * Dump CPU passing registers values.
+ * \param regs Value of each register.
+ */
+void dump_cpu_regs(pt_regs *regs)
+{
 	kprintf("\nDEBUG INFORMATION:\n");
-	kprintf("EAX: %.9x    CS: %.5x\n", regs.eax, regs.cs);
-	kprintf("EBX: %.9x    DS: %.5x\n", regs.ebx, regs.ds);
-	kprintf("ECX: %.9x    ES: %.5x\n", regs.ecx, regs.es);
-	kprintf("EDX: %.9x    FS: %.5x\n", regs.edx, regs.fs);
-	kprintf("ESP: %.9x    GS: %.5x\n", regs.esp, regs.gs);
-	kprintf("EBP: %.9x    SS: %.5x\n", regs.ebp, regs.ss);
-	kprintf("ESI: %.9x\n", regs.esi);
-	kprintf("EDI: %.9x\n", regs.edi);
-	kprintf("EFLAGS: %09x\n", regs.eflags);
+	kprintf("EAX: %.9x    CS: %.5x\n", regs->eax, regs->cs);
+	kprintf("EBX: %.9x    DS: %.5x\n", regs->ebx, regs->ds);
+	kprintf("ECX: %.9x    ES: %.5x\n", regs->ecx, regs->es);
+	kprintf("EDX: %.9x    FS: %.5x\n", regs->edx, regs->fs);
+	kprintf("ESP: %.9x    GS: %.5x\n", regs->esp, regs->gs);
+	kprintf("EBP: %.9x    SS: %.5x\n", regs->ebp, regs->ss);
+	kprintf("ESI: %.9x\n", regs->esi);
+	kprintf("EDI: %.9x\n", regs->edi);
+	kprintf("EFLAGS: %09x\n", regs->eflags);
 }
 
 /**
