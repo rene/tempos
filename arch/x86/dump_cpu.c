@@ -47,6 +47,7 @@ void dump_cpu(void)
 		"movl %%edi, %3  \n":
 		"=r" (regs.gs), "=r" (regs.ss), "=r" (regs.esi), "=r" (regs.edi) ::);
 
+	kprintf("\nDEBUG INFORMATION:\n");
 	kprintf("EAX: %.9x    CS: %.5x\n", regs.eax, regs.cs);
 	kprintf("EBX: %.9x    DS: %.5x\n", regs.ebx, regs.ds);
 	kprintf("ECX: %.9x    ES: %.5x\n", regs.ecx, regs.es);

@@ -45,11 +45,13 @@
 	#define KERN_INFO			"!3!"
 	#define KERN_DEBUG			"!4!"
 
+	/** Maximum string size for kprintf */
+	#define MAX_KPRINTF_SIZE 	1024
 
-	/* Command line max size */
+	/** Command line max size */
 	#define CMDLINE_MAX			1024
 
-	/* Max memory regions */
+	/** Max memory regions */
 	#define MBOOT_MMAP_MAXREG	  40
 
 	/* Memory map structure
@@ -97,7 +99,7 @@
 
 	int kprintf(const char *format, ...);
 
-	void panic(const char *str);
+	void panic(const char *format, ...);
 
 	void tempos_main(karch_t kinf);
 
@@ -108,9 +110,6 @@
 
 	/** Although is defined here, this function is architecture dependent, so it
 	    shall be implemented on each architecture port code. */
-	void dump_cpu(void);
-
-	/** As dump_cpu(), halt_cpu() is architecture dependent. */
 	void halt_cpu(void);
 
 #endif /* KERNEL_H */

@@ -23,17 +23,20 @@
  */
 
 #include <tempos/kernel.h>
+#include <x86/x86.h>
 #include <x86/exceptions.h>
 
 
 void ex_div()
 {
-	panic("EXCEP: Division by ZERO! :(!\n");
+	dump_cpu();
+	panic("Division by ZERO!");
 }
 
 
 void ex_debug()
 {
+	dump_cpu();
 	kprintf("EXCEP: DEBUG\n");
 }
 
@@ -106,8 +109,8 @@ void ex_stack()
 
 void ex_gp(int code)
 {
-	kprintf("EXCEP: GP - %d\n", code);
-	panic("GENERAL PROTECTION FAULT");
+	dump_cpu();
+	panic("GENERAL PROTECTION FAULT: code %d", code);
 }
 
 
@@ -116,7 +119,8 @@ void ex_gp(int code)
  */
 void ex_pfault()
 {
-	kprintf("EXCEP: PAGE FAULT\n");
+	dump_cpu();
+	panic("PAGE FAULT\n");
 }
 
 

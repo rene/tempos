@@ -303,12 +303,12 @@ int sprintf(char *str, const char *format, ...)
 
 
 /**
- * This is a temporary implementation
- * \todo final implementation
+ * Write formated messages (like printf).
+ * \todo Implement "TYPE" of messages.
  */
 int kprintf(const char *format, ...)
 {
-	char str[4096];
+	char str[MAX_KPRINTF_SIZE];
 	va_list args;
 	int res, offset;
 
@@ -321,6 +321,7 @@ int kprintf(const char *format, ...)
 	res = vsprintf(str, &format[offset], args);
 	va_end(args);
 
+	/* Write string according to the type of message */
 	kprint(str);
 
 	return(res);

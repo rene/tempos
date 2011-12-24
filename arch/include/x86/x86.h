@@ -72,6 +72,9 @@
 
 	typedef struct _pt_regs pt_regs;
 
+	/* Prototypes */
+	void dump_cpu(void);
+
 #endif
 
 	#define KERNEL_DPL 0x00

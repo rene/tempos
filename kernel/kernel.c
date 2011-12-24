@@ -134,7 +134,6 @@ void kernel_main_thread(void *arg)
 	for (i = 0; i < 512; i++) {
 		kprintf("%c ", buff->data[i]);
 	}*/
-	/*panic("Testing panic function!");*/
 	/*getblk(3, 0, 24);
 	getblk(3, 0, 4);
 	getblk(3, 0, 8);
@@ -143,9 +142,9 @@ void kernel_main_thread(void *arg)
 	 kprintf(KERN_INFO "Hello, I'm the main kernel process!\n"); */
 	/*new_alarm(jiffies + (3 * HZ), test, 2);*/
 	/* Call a system call */
-	/*char *hello = "Ola Mundo!\n";
+	/*char *hello = "Hello World!\n";
 	asm("movl $4,  %%eax  \n" // syscall number
-		 "movl $11, %%ebx  \n" // count
+		 "movl $13, %%ebx  \n" // count
 		 "movl %0,  %%ecx  \n" // hello
 		 "movl $0,  %%edx  \n" // fd
 		 "pushl %%eax\n"
@@ -176,16 +175,23 @@ void idle_thread(void *arg)
 }
 
 /**
- * Show error message and dump CPU information.
+ * Show error message and dump halt CPU.
  * This function should be used when something goes really wrong.
  * System will hang out without any chance of recovery.
  *
- * \param str Error message.
+ * \param format Error message (formated).
  */
-void panic(const char *str)
+void panic(const char *format, ...)
 {
-	kprintf(KERN_CRIT "\nPANIC: %s\n\nDEBUG INFORMATION:\n", str);
-	dump_cpu();
+	char str[MAX_KPRINTF_SIZE];
+	va_list args;
+
+	va_start(args, format);
+	vsprintf(str, format, args);
+	va_end(args);
+
+	kprintf(KERN_CRIT "\nPANIC: %s\n", str);
+
 	halt_cpu();
 	for(;;);
 }
