@@ -27,6 +27,7 @@
 #include <fs/vfs.h>
 #include <fs/device.h>
 #include <fs/ext2/ext2.h>
+#include <arch/io.h>
 
 /** I-nodes hash queue */
 vfs_inode **inode_hash_table;
@@ -51,6 +52,12 @@ static int vfs_reg_types = 0;
 /* Prototypes */
 static vfs_inode *search_inode(dev_t device, uint32_t number);
 
+static void inode_remove_from_freelist(vfs_inode *inode);
+
+static void add_inode_htable(vfs_inode *inode);
+
+static vfs_inode *get_free_inode(vfs_superblock *sb, uint32_t number);
+
 
 /**
  * This function initializes all File System types recognized
@@ -66,7 +73,7 @@ void register_all_fs_types(void)
 
 	kprintf(KERN_INFO "Initializing VFS...\n");
 
-	free_inodes = (vfs_inode*)kmalloc(sizeof(vfs_inode) * VFS_MAX_OPEN_FILES, GFP_NORMAL_Z);
+	free_inodes = (vfs_inode*)kmalloc(sizeof(vfs_inode) * (VFS_MAX_OPEN_FILES+1), GFP_NORMAL_Z);
 	inode_hash_table = (vfs_inode**)kmalloc(sizeof(vfs_inode*) * ht_entries, GFP_NORMAL_Z);
 	if (free_inodes == NULL || inode_hash_table == NULL) {
 		panic("Could not allocate memory for i-node system queue.");
@@ -90,6 +97,7 @@ void register_all_fs_types(void)
 		prev = inode;
 	}
 	
+	head->flags = IFLAG_LIST_HEAD;
 	free_inodes_head = head;
 
 	/* Initialize system's file table */
@@ -151,8 +159,7 @@ static vfs_inode *search_inode(dev_t device, uint32_t number)
 	/* Search for the i-node */
 	tmp = head;
 	while (tmp != NULL) {
-		if (tmp->device.major == device.major &&
-				tmp->device.minor == device.minor) {
+		if ( DEV_CMP(tmp->device, device) ) {
 			break;
 		}
 		tmp = tmp->next;
@@ -161,9 +168,164 @@ static vfs_inode *search_inode(dev_t device, uint32_t number)
 	return tmp;
 }
 
+/**
+ * Remove i-node from free list.
+ * \param inode i-node.
+ */
+static void inode_remove_from_freelist(vfs_inode *inode)
+{
+	vfs_inode *head, *tmp, *prev, *next;
+
+	head = free_inodes_head;
+	tmp = head->free_next;
+	while (tmp != head) {
+		if ( DEV_CMP(tmp->device, inode->device) ) {
+			break;
+		}
+		tmp = tmp->free_next;
+	}
+
+	if (tmp == head) {
+		/* i-node it's not on free list */
+		return;
+	}
+
+	/* Remove i-node */
+	cli();
+	prev = tmp->free_prev;
+	next = tmp->free_next;
+
+	next->prev = prev;
+	prev->next = next;
+	sti();
+	return;
+}
 
 /**
- * iget
+ * Get new i-node from free list and initialize it.
+ *
+ * \param sb Super block associated with i-node.
+ * \param number i-node number.
+ * \return The new i-node.
+ */
+static vfs_inode *get_free_inode(vfs_superblock *sb, uint32_t number)
+{
+	vfs_inode *head, *tmp, *prev, *next;
+
+	head = free_inodes_head;
+	tmp = head->free_next;
+	
+	/* Sanity check */
+	if (tmp == head) {
+		panic("VFS: no i-node object available!");
+	}
+
+	/* try to find the i-node on the free list */
+	while (tmp != head) {
+		if ( DEV_CMP(tmp->device, sb->device) ) {
+			break;
+		}
+		tmp = tmp->free_next;
+	}
+
+	if (tmp == head) {
+		/* i-node it's not on free list, pick up any i-node */
+		tmp = head->free_next;
+	}
+
+	/* remove i-node from free list */
+	cli();
+	prev = tmp->free_prev;
+	next = tmp->free_next;
+	prev->free_next = next;
+	next->free_prev = prev;
+	sti();
+
+	/* Initialize i-node */
+	tmp->device.major = sb->device.major;
+	tmp->device.minor = sb->device.minor;
+	tmp->sb = sb;
+	tmp->number = number;
+	tmp->reference = 1;
+	/* Read i-node from device */
+	sb->sb_op->get_inode(tmp);
+
+	return tmp;
+}
+
+/**
+ * Remove i-node from old hash queue and inser onto new hash queue.
+ *
+ * \param inode i-node.
+ */
+static void add_inode_htable(vfs_inode *inode)
+{
+	vfs_inode *head, *tmp, *prev, *next;
+	uint32_t pos;
+
+	/* Find position based on i-node number */
+	pos = inode->number % INODE_HASH_TABLE_SIZE;
+	head = inode_hash_table[pos];
+
+	if (head != NULL) {
+		/* Search and remove from hash queue */
+		tmp = head;
+		if (tmp->next == NULL) {
+			inode_hash_table[pos] = NULL;
+		} else {
+			while (tmp->next != NULL) {
+				if ( DEV_CMP(tmp->device, inode->device) ) {
+					cli();
+					prev = tmp->prev;
+					if (tmp->next == NULL) {
+						next = NULL;
+					} else {
+						next = tmp->next;
+						next->prev = prev;
+					}
+					prev->next = next;
+					sti();
+				}
+				tmp = tmp->next;
+			}
+		}
+	}
+
+	/* Add to new hash queue */
+	pos = inode->number % INODE_HASH_TABLE_SIZE;
+	head = inode_hash_table[pos];
+
+	if (head == NULL) {
+		inode->next = NULL;
+		inode->prev = NULL;
+		inode_hash_table[pos] = inode;
+		return;
+	} else if (head->next == NULL) {
+		cli();
+		head->next = inode;
+		head->prev = NULL;
+		inode->next = NULL;
+		inode->prev = head;
+		sti();
+		return;
+	}
+
+	tmp = head;
+	while(tmp->next != NULL)
+		tmp = tmp->next;
+
+	cli();
+	inode->prev = tmp;
+	inode->next = NULL;
+	tmp->next   = inode;
+	sti();
+}
+
+/**
+ * Get i-node from hash table. Read from disk if i-node it's not at memory.
+ *
+ * \param sb Super block of associated file system.
+ * \param number i-node number.
  */
 vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number)
 {
@@ -185,17 +347,18 @@ vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number)
 				/* TODO: mount point processing */
 			}
 
-			//inode_remove_from_freelist(inode);
+			inode_remove_from_freelist(inode);
 			return inode;
 
 		} else {
 			/* i-node is not on hash table */
 			
-			/*if ((inode = get_free_inode(device, number)) == NULL) {
+			/* get new free i-node and initialize it */
+			if ((inode = get_free_inode(i_sb, number)) == NULL) {
 				panic("VFS: free i-nodes list empty!");
-			}*/
+			}
 
-			//add_inode_htable(inode);
+			add_inode_htable(inode);
 
 			return inode;
 		}

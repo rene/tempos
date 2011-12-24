@@ -260,7 +260,7 @@ static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, int devi
 		buff->prev = buff;
 		queue->hashtable[pos] = buff; 
 		return;
-	} else if(head->next == NULL) {
+	} else if (head->next == NULL) {
 		cli(); 
 		head->next = buff;
 		head->prev = NULL;
@@ -271,15 +271,14 @@ static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, int devi
 	}
 
 	tmp = head;
-	while(tmp->next != NULL) tmp = tmp->next;
+	while(tmp->next != NULL)
+		tmp = tmp->next;
 
 	cli();
 	buff->prev = tmp;
 	buff->next = NULL;
 	tmp->next  = buff;
 	sti();
-
-	return;
 }
 
 
@@ -399,6 +398,10 @@ buff_header_t *bread(int major, int device, uint64_t blocknum)
 	if ((buff = getblk(major, device, blocknum)) == NULL) {
 		kprintf(KERN_ERROR "bread(): Error on get cached block.\n");
 		return NULL;
+	}
+
+	if (buff->status == BUFF_ST_BUSY) {
+		buff->status = BUFF_ST_VALID;
 	}
 
 	if (buff->status != BUFF_ST_VALID) {

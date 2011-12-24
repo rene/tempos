@@ -38,6 +38,8 @@ int vfs_mount_root(dev_t device)
 	int i;
 	char found;
 	vfs_fs_type *fs;
+	vfs_mount_table *mnt;
+	vfs_inode *root;
 
 	/* Try to find which file system device is formated */
 	found = 0;
@@ -54,6 +56,15 @@ int vfs_mount_root(dev_t device)
 	if (!found) {
 		panic("VFS: Cannot mount root. Unknown file system type.");
 	}
+
+	/* Mount table entry: first position */
+	mnt = &mount_table[0];
+
+	/* Read file system super block */
+	fs->get_sb(device, &mnt->sb);
+
+	/* Get root i-node */
+	root = vfs_iget(&mnt->sb, 0);
 
 	return -1;
 }

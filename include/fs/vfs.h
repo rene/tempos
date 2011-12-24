@@ -34,6 +34,9 @@
 	#include <fs/device.h>
 	#include <semaphore.h>
 
+	/** Compare to devices */
+	#define DEV_CMP(d1, d2)	((d1.major == d2.major && d1.minor == d2.minor) ? 1 : 0)
+
 	/** Maximum file name length */
 	#define VFS_NAME_LEN 512
 	
@@ -49,22 +52,13 @@
 	/** Number of file systems supported by TempOS */
 	#define VFS_SUPPORTED_FS 1
 
-	/* i-node flags */
-
 	/** i-node is a mount point */
 	#define IFLAG_MOUNT_POINT  0x01
+	/** Head of linked list */
+	#define IFLAG_LIST_HEAD    0x02
 
 
-	/**
-	 * File system type
-	 */
-	struct _vfs_fs_type_st {
-		/** File System name */
-		char *name;
-		/** Check if such device is this file system valid */
-		int (*check_fs_type) (dev_t);
-	};
-
+	/** i-node is a head */
 
 	/**
 	 * Super Block structure
@@ -87,7 +81,7 @@
 		/** The number of times the file system has been mounted */
 		uint16_t s_mnt_count;
 		/** File System type */
-		struct _vfs_fs_type_st type;
+		struct _vfs_fs_type_st *type;
 		/** Flags indicating the current state of the file system */
 		uint16_t s_state;
 		/** Flags indicating the procedures for error reporting */
@@ -109,6 +103,8 @@
 		uint16_t flags;
 		/** Super block operations for this kind of file system */
 		struct _vfs_sb_operations *sb_op;
+		/** For the use of file system driver */
+		void *fs_driver;
 	};
 
 	/**
@@ -158,6 +154,8 @@
 		struct _vfs_inode_st *free_prev;
 		/** Associated super block */
 		struct _vfs_superblock_st *sb;
+		/** For the use of file system driver */
+		void *fs_driver;
 	};
 
 	/**
@@ -179,19 +177,31 @@
 	};
 
 	/**
+	 * File system type
+	 */
+	struct _vfs_fs_type_st {
+		/** File System name */
+		char *name;
+		/** Check if such device is this file system valid */
+		int (*check_fs_type) (dev_t);
+		/** Get super block from file system */
+		int (*get_sb) (dev_t, struct _vfs_superblock_st *);
+	};
+
+	/**
 	 * Mount table entry
 	 */
 	struct _vfs_mount_table_entry {
 		/** Mounted device */
 		dev_t device;
 		/** Super block of mounted device */
-		struct _vfs_superblock_st *sb;
+		struct _vfs_superblock_st sb;
 		/** Root i-node of mounted device */
 		struct _vfs_inode_st *root_inode;
 		/** Directory i-node where device is mounted on */
 		struct _vfs_inode_st *mnt_on_inode;
 		/** File system type */
-		char *fs_type;
+		struct _vfs_fs_type *fs;
 	};
 
 	/**
@@ -227,6 +237,8 @@
 	typedef struct _vfs_mount_table_entry 	vfs_mount_table;
 	typedef struct _vfs_fs_type_st			vfs_fs_type;
 	typedef struct _vfs_file_st				vfs_file;
+	typedef struct _vfs_sb_operations		vfs_sb_ops;
+
 
 	/** Global free i-nodes queue */
 	extern vfs_inode *free_inodes_head;
@@ -248,6 +260,8 @@
 	void register_fs_type(vfs_fs_type *type);
 
 	int vfs_mount_root(dev_t device);
+
+	vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number);
 
 #endif /* VFS_H */
 

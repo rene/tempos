@@ -84,7 +84,7 @@
 		uint16_t s_mnt_count;  		
 		/** The number of times the file system can be mounted */
 		int16_t  s_max_mnt_count; 	
-		/** Magic number indicating ex2fs */
+		/** Magic number indicating ext2 fs */
 		uint16_t s_magic;  			
 		/** Flags indicating the current state of the filesystem */
 		uint16_t s_state; 			

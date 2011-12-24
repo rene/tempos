@@ -130,7 +130,6 @@ void kernel_main_thread(void *arg)
 	/* tests */
 	/*buff_header_t *buff;
 	buff = bread(3, 1, 368);
-	int i;
 	for (i = 0; i < 512; i++) {
 		kprintf("%c ", buff->data[i]);
 	}*/

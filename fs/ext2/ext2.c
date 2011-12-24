@@ -25,11 +25,22 @@
 #include <fs/vfs.h>
 #include <fs/ext2/ext2.h>
 #include <fs/bhash.h>
+#include <string.h>
 
+
+/** ext2 fs type */
 vfs_fs_type ext2_fs_type;
+
+/** ext2 super block operations */
+vfs_sb_ops ext2_sb_ops;
+
 
 /* Prototypes */
 int check_is_ext2(dev_t device);
+
+int ext2_get_sb(dev_t device, vfs_superblock *sb);
+
+int ext2_get_inode(vfs_inode *inode);
 
 
 /**
@@ -39,6 +50,10 @@ void register_ext2(void)
 {
 	ext2_fs_type.name = "ext2";
 	ext2_fs_type.check_fs_type = check_is_ext2;
+	ext2_fs_type.get_sb = ext2_get_sb;
+
+	ext2_sb_ops.get_inode = ext2_get_inode;
+
 	register_fs_type(&ext2_fs_type);
 }
 
@@ -62,6 +77,73 @@ int check_is_ext2(dev_t device)
 	} else {
 		return 0;
 	}
+}
+
+/**
+ * Read EXT2 super block.
+ *
+ * \param device Device.
+ * \param sb Super block.
+ * \return 1 on success. 0 otherwise.
+ */
+int ext2_get_sb(dev_t device, vfs_superblock *sb)
+{
+	buff_header_t *sb_blks[2];
+	ext2_superblock_t *ext2_sb;
+	char tmp[1024];
+
+	ext2_sb = (ext2_superblock_t*)kmalloc(sizeof(ext2_superblock_t), GFP_NORMAL_Z);
+	if (ext2_sb == NULL) {
+		return 0;
+	}
+
+	sb_blks[0] = bread(device.major, device.minor, EXT2_SUPERBLOCK_SECTOR);
+	sb_blks[1] = bread(device.major, device.minor, EXT2_SUPERBLOCK_SECTOR+1);
+
+	/* Keep EXT2 super block in memory */
+	memcpy(tmp, sb_blks[0]->data, 512);
+	memcpy(&tmp[512], sb_blks[1]->data, 512);
+	memcpy(ext2_sb, tmp, 1024);
+	sb->fs_driver = ext2_sb;
+	
+	brelse(device.major, device.minor, sb_blks[0]);
+	brelse(device.major, device.minor, sb_blks[1]);
+
+	/* Now, fill VFS super block */
+	sb->s_inodes_count      = ext2_sb->s_inodes_count;
+	sb->s_blocks_count      = ext2_sb->s_r_blocks_count;  
+	sb->s_free_blocks_count = ext2_sb->s_free_blocks_count;  
+	sb->s_free_inodes_count = ext2_sb->s_free_inodes_count; 
+	sb->s_log_block_size    = ext2_sb->s_log_block_size;  
+	sb->s_mtime             = ext2_sb->s_mtime; 			
+	sb->s_wtime             = ext2_sb->s_wtime; 			
+	sb->s_mnt_count         = ext2_sb->s_mnt_count;  		
+	sb->s_state             = ext2_sb->s_state; 			
+	sb->s_errors            = ext2_sb->s_errors;  		
+	sb->s_lastcheck         = ext2_sb->s_lastcheck;		
+	sb->s_checkinterval     = ext2_sb->s_checkinterval;	
+	
+	strcpy((char*)sb->s_uuid, (char*)ext2_sb->s_uuid);
+	strcpy((char*)sb->s_volume_name, (char*)ext2_sb->s_volume_name);
+
+	sb->type = &ext2_fs_type;
+	sb->device = device;
+	sb->sb_op = &ext2_sb_ops;
+
+	return 1;
+}
+
+/**
+ * Get an i-node from disk
+ *
+ * \param inode i-node structure, where information will be store.
+ * \return 1 on success. 0 otherwise.
+ */
+int ext2_get_inode(vfs_inode *inode)
+{
+	kprintf("\next2: get inode: %ld\n", inode->number);
+
+	return 0;
 }
 
 /**
