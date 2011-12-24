@@ -47,7 +47,7 @@
 	#define INODE_HASH_TABLE_SIZE VFS_MAX_OPEN_FILES
 
 	/** Number of file systems supported by TempOS */
-	#define SUPPORTED_FS 1
+	#define VFS_SUPPORTED_FS 1
 
 	/* i-node flags */
 
@@ -236,6 +236,9 @@
 
 	/** Global system's file table */
 	extern vfs_file *file_table;
+
+	/** Supported file systems */
+	extern vfs_fs_type *vfs_filesystems[VFS_SUPPORTED_FS];
 
 
 	/* Prototypes */

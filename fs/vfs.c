@@ -43,7 +43,7 @@ vfs_file *file_table;
 vfs_mount_table mount_table[VFS_MAX_MOUNTED_FS];
 
 /** Registered file system types */
-vfs_fs_type *vfs_filesystems[SUPPORTED_FS];
+vfs_fs_type *vfs_filesystems[VFS_SUPPORTED_FS];
 
 /** Number of file system type already registered */
 static int vfs_reg_types = 0;
@@ -101,7 +101,7 @@ void register_all_fs_types(void)
 	/* Initialize device drivers interface */
 	init_drivers_interface();
 
-	for (i = 0; i < SUPPORTED_FS; i++) {
+	for (i = 0; i < VFS_SUPPORTED_FS; i++) {
 		vfs_filesystems[i] = NULL;
 	}
 
@@ -118,7 +118,7 @@ void register_all_fs_types(void)
  */
 void register_fs_type(vfs_fs_type *type)
 {
-	if (vfs_reg_types >= SUPPORTED_FS) {
+	if (vfs_reg_types >= VFS_SUPPORTED_FS) {
 		kprintf(KERN_ERROR "File systems table is full!\n");
 		return;
 	}
@@ -185,10 +185,20 @@ vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number)
 				/* TODO: mount point processing */
 			}
 
-			/* */
+			//inode_remove_from_freelist(inode);
+			return inode;
 
+		} else {
+			/* i-node is not on hash table */
+			
+			/*if ((inode = get_free_inode(device, number)) == NULL) {
+				panic("VFS: free i-nodes list empty!");
+			}*/
+
+			//add_inode_htable(inode);
+
+			return inode;
 		}
-	
 	}
 }
 

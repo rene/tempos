@@ -35,6 +35,26 @@
  */
 int vfs_mount_root(dev_t device)
 {
+	int i;
+	char found;
+	vfs_fs_type *fs;
+
+	/* Try to find which file system device is formated */
+	found = 0;
+	for (i = 0; i < VFS_SUPPORTED_FS; i++) {
+		fs = vfs_filesystems[i];
+		if (fs != NULL) {
+			if ( fs->check_fs_type(device) ) {
+				kprintf("VFS: Found %s file system.", fs->name);
+				found = 1;
+				break;
+			}
+		}
+	}
+	if (!found) {
+		panic("VFS: Cannot mount root. Unknown file system type.");
+	}
+
 	return -1;
 }
 

@@ -29,7 +29,7 @@
 
 /* Prototypes */
 static buff_header_t *search_blk(buff_hashq_t *queue, int device, uint64_t blocknum);
-static void remove_from_freelist(buff_hashq_t *queue, int device, uint64_t blocknum);
+static void blk_remove_from_freelist(buff_hashq_t *queue, int device, uint64_t blocknum);
 static buff_header_t *get_free_blk(buff_hashq_t *queue, int device, uint64_t blocknum);
 static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, int device, uint64_t blocknum);
 static buff_header_t *getblk(int major, int device, uint64_t blocknum);
@@ -134,7 +134,7 @@ static buff_header_t *search_blk(buff_hashq_t *queue, int device, uint64_t block
  * \param device Device number.
  * \return buff_header_t The block (if was found), NULL otherwise.
  */
-static void remove_from_freelist(buff_hashq_t *queue, int device, uint64_t blocknum)
+static void blk_remove_from_freelist(buff_hashq_t *queue, int device, uint64_t blocknum)
 {
 	struct _buffer_header_t *head, *tmp, *prev, *next;
 
@@ -315,7 +315,7 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 			cli();
 			buff->status = BUFF_ST_BUSY;
 			sti();
-			remove_from_freelist(driver->buffer_queue, device, blocknum);
+			blk_remove_from_freelist(driver->buffer_queue, device, blocknum);
 			return buff;
 		} else {
 			/* Block is not on hash queue */

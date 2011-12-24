@@ -33,17 +33,17 @@
 
 	#include <unistd.h>
 
-	#define EXT2_MAGIC		0xEF53
+	#define EXT2_MAGIC	0xEF53
 
-	#define SUPERBLOCK_OFFSET 1024
-	#define SUPERBLOCK_SECTOR (SUPERBLOCK_OFFSET/512)
+	#define EXT2_SUPERBLOCK_OFFSET 1024
+	#define EXT2_SUPERBLOCK_SECTOR (EXT2_SUPERBLOCK_OFFSET/512)
 
-	#define BLOCK_SIZE_1k	0
-	#define BLOCK_SIZE_2k	1
-	#define BLOCK_SIZE_4k	2
+	#define EXT2_BLOCK_SIZE_1k	0
+	#define EXT2_BLOCK_SIZE_2k	1
+	#define EXT2_BLOCK_SIZE_4k	2
 
-	#define BLOCK_ST_FREE	   0x00
-	#define BLOCK_ST_ALLOCATED 0x01
+	#define EXT2_BLOCK_ST_FREE	   0x00
+	#define EXT2_BLOCK_ST_ALLOCATED 0x01
 
 	#define EXT2_NDIR_BLOCKS 12
 	#define EXT2_IND_BLOCKS   2
@@ -53,7 +53,7 @@
 	/**
 	 * EXT2 Super Block structure
 	 */
-	struct _superblock_st {
+	struct _ext2_superblock_st {
 		/** Count of inodes in the filesystem */
 		uint32_t s_inodes_count;  	
 		/** Count of blocks in the filesystem */
@@ -135,7 +135,7 @@
 	/**
 	 * EXT2 Group Descriptor structure
 	 */
-	struct _group_descriptor_st {
+	struct _ext2_group_descriptor_st {
 		/** Block number of the block bitmap */
 		uint32_t bg_block_bitmap;      
 		/** Block number of the inode bitmap */
@@ -157,7 +157,7 @@
 	/**
 	 * EXT2 i-node structure
 	 */
-	struct _inode_st {
+	struct _ext2_inode_st {
 		/** File mode */
 		uint16_t i_mode;               
 		/** Owner uid */
@@ -205,7 +205,7 @@
 	/**
 	 * EXT2 Directory structure
 	 */
-	struct _directory_st {
+	struct _ext2_directory_st {
 		/** Inode number */
 		uint32_t inode;			
 		/** Directory entry length */
@@ -219,10 +219,10 @@
 	};
 
 
-	typedef struct _superblock_st superblock_st;
-	typedef struct _group_descriptor_st group_st;
-	typedef struct _inode_st inode_st;
-	typedef struct _directory_st directory_st;
+	typedef struct _ext2_superblock_st ext2_superblock_t;
+	typedef struct _ext2_group_descriptor_st ext2_group_t;
+	typedef struct _ext2_inode_st ext2_inode_t;
+	typedef struct _ext2_directory_st ext2_directory_t;
 
 
 	/* Prototypes */
@@ -230,7 +230,7 @@
 
 	uint32_t div_rup(uint32_t a, uint32_t b);
 
-	uint32_t get_block_size(superblock_st sb);
+	uint32_t get_block_size(ext2_superblock_t sb);
 
 #endif /* VFS_FS_EXT2 */
 

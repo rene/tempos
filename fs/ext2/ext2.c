@@ -24,6 +24,7 @@
 
 #include <fs/vfs.h>
 #include <fs/ext2/ext2.h>
+#include <fs/bhash.h>
 
 vfs_fs_type ext2_fs_type;
 
@@ -43,10 +44,24 @@ void register_ext2(void)
 
 /**
  * Check if some device is formated as EXT2
+ *
+ * \param device Device
+ * \return 1 if device is formated as EXT2, 0 otherwise.
  */
 int check_is_ext2(dev_t device)
 {
-	return -1;
+	buff_header_t *blk;
+	ext2_superblock_t sb;
+
+	blk = bread(device.major, device.minor, EXT2_SUPERBLOCK_SECTOR);
+
+	memcpy(&sb, blk->data, sizeof(ext2_superblock_t));
+
+	if (sb.s_magic == EXT2_MAGIC) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 /**
@@ -70,16 +85,16 @@ uint32_t div_rup(uint32_t a, uint32_t b)
  * \param sb Super block.
  * \return Block size in bytes.
  */
-uint32_t get_block_size(superblock_st sb)
+uint32_t get_block_size(ext2_superblock_t sb)
 {
 	uint32_t size = 1024; /* default */
 
 	switch(sb.s_log_block_size) {
-		case BLOCK_SIZE_2k:
+		case EXT2_BLOCK_SIZE_2k:
 			size = 2048;
 			break;
 
-		case BLOCK_SIZE_4k:
+		case EXT2_BLOCK_SIZE_4k:
 			size = 4096;
 			break;
 	}
