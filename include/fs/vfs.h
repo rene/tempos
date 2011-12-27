@@ -201,7 +201,7 @@
 		/** Directory i-node where device is mounted on */
 		struct _vfs_inode_st *mnt_on_inode;
 		/** File system type */
-		struct _vfs_fs_type *fs;
+		struct _vfs_fs_type_st *fs;
 	};
 
 	/**

@@ -45,10 +45,21 @@
 	#define EXT2_BLOCK_ST_FREE	   0x00
 	#define EXT2_BLOCK_ST_ALLOCATED 0x01
 
-	#define EXT2_NDIR_BLOCKS 12
-	#define EXT2_IND_BLOCKS   2
+	#define EXT2_NDIR_BLOCKS 11
+	#define EXT2_IND_BLOCKS  12
+	#define EXT2_DIND_BLOCKS 13
+	#define EXT2_TIND_BLOCKS 14
 
 	#define EXT2_NAME_LEN 255
+
+	#define EXT2_BAD_INO          1
+	#define EXT2_ROOT_INO         2
+	#define EXT2_ACL_IDX_INO      3
+	#define EXT2_ACL_DATA_INO     4
+	#define EXT2_BOOT_LOADER_INO  5
+	#define EXT2_UNDEL_DIR_INO    6
+	#define EXT2_FIRST_INO       11 
+
 
 	/**
 	 * EXT2 Super Block structure

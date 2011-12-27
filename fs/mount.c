@@ -31,7 +31,7 @@
  * Mount root file system
  *
  * \param device Root device.
- * \return 0 on success, -1 otherwise.
+ * \return 1 on success, 0 otherwise.
  */
 int vfs_mount_root(dev_t device)
 {
@@ -47,7 +47,7 @@ int vfs_mount_root(dev_t device)
 		fs = vfs_filesystems[i];
 		if (fs != NULL) {
 			if ( fs->check_fs_type(device) ) {
-				kprintf("VFS: Found %s file system.", fs->name);
+				kprintf("VFS: Found %s file system.\n", fs->name);
 				found = 1;
 				break;
 			}
@@ -66,6 +66,19 @@ int vfs_mount_root(dev_t device)
 	/* Get root i-node */
 	root = vfs_iget(&mnt->sb, 0);
 
-	return -1;
+	/* Check if is a directory */
+	if ( !(root->i_mode & S_IFDIR) ) {
+		return 0;
+	}
+
+	/* Fill mount table entry */
+	mnt->device       = device;
+	mnt->root_inode   = root;
+	mnt->mnt_on_inode = root;
+	mnt->fs           = fs;
+
+	kprintf("VFS: device (%d,%d) mounted as root.\n", device.major, device.minor);
+
+	return 1;
 }
 

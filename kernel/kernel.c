@@ -123,7 +123,7 @@ void kernel_main_thread(void *arg)
 	if (i == rdev_len) {
 		panic("Kernel command line root argument bad formated.");
 	}
-	if (vfs_mount_root(rootdev) < 0) {
+	if ( !vfs_mount_root(rootdev) ) {
 		panic("VFS ERROR: Could not mount root file system.");
 	}
 
