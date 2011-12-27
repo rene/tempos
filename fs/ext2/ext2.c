@@ -156,7 +156,7 @@ int ext2_get_sb(dev_t device, vfs_superblock *sb)
 	sb->s_blocks_count      = ext2_sb->s_r_blocks_count;  
 	sb->s_free_blocks_count = ext2_sb->s_free_blocks_count;  
 	sb->s_free_inodes_count = ext2_sb->s_free_inodes_count; 
-	sb->s_log_block_size    = ext2_sb->s_log_block_size;  
+	sb->s_log_block_size    = get_block_size(*ext2_sb);
 	sb->s_mtime             = ext2_sb->s_mtime; 			
 	sb->s_wtime             = ext2_sb->s_wtime; 			
 	sb->s_mnt_count         = ext2_sb->s_mnt_count;  		
