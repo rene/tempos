@@ -202,6 +202,10 @@
 		struct _vfs_inode_st *mnt_on_inode;
 		/** File system type */
 		struct _vfs_fs_type_st *fs;
+		/** Device root name */
+		char *root_name;
+		/** Directory name */
+		char *mnt_on_name;
 	};
 
 	/**

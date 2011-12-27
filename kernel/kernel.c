@@ -89,7 +89,7 @@ void tempos_main(karch_t kinf)
  */
 void kernel_main_thread(void *arg)
 {
-	char rdev_str[10];
+	char rdev_str[10], *rstr;
 	dev_t rootdev;
 	size_t i, rdev_len;
 	task_t *idle_th;
@@ -110,8 +110,10 @@ void kernel_main_thread(void *arg)
 	parse_cmdline((char*)kinfo.cmdline);
 
 	/* Mount root file system */
-	strcpy(rdev_str, cmdline_get_value("root"));
-	rdev_len = strlen(rdev_str);
+	rstr = cmdline_get_value("root");
+	strcpy(rdev_str, rstr);
+	rdev_len = strlen(rstr);
+	rdev_str[rdev_len] = '\0';
 	for (i = 0; i < rdev_len; i++) {
 		if (rdev_str[i] == ':') {
 			rdev_str[i] = '\0';

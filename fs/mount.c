@@ -71,11 +71,16 @@ int vfs_mount_root(dev_t device)
 		return 0;
 	}
 
+	/* Mark as a mount point */
+	root->flags |= IFLAG_MOUNT_POINT;
+
 	/* Fill mount table entry */
 	mnt->device       = device;
 	mnt->root_inode   = root;
 	mnt->mnt_on_inode = root;
 	mnt->fs           = fs;
+	mnt->root_name    = "rootfs";
+	mnt->mnt_on_name  = "/";
 
 	kprintf("VFS: device (%d,%d) mounted as root.\n", device.major, device.minor);
 

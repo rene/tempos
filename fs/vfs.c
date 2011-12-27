@@ -337,13 +337,13 @@ vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number)
 		if ( (inode = search_inode(i_sb->device, number)) != NULL ) {
 			
 			/* Block is in hash table, check if is locked */
-			if (mutex_is_locked(inode->lock)) {
+			if ( mutex_is_locked(inode->lock) ) {
 				sleep_on(WAIT_INODE_BECOMES_UNLOCKED);
 				continue;
 			}
 
 			/* Special processing for mount points */
-			if ((inode->flags & IFLAG_MOUNT_POINT) != 0) {
+			if ( (inode->flags & IFLAG_MOUNT_POINT) ) {
 				/* TODO: mount point processing */
 			}
 
@@ -364,4 +364,8 @@ vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number)
 		}
 	}
 }
+
+/**
+ *
+ */
 

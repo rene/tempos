@@ -62,7 +62,7 @@ int parse_cmdline(char *cmdline)
 		key++;
 	}
 
-	while(cmdline_str[i++] != '\0') {
+	while(i < len) {
 		/* check for key */
 		if (cmdline_str[i] == '=') {
 			cmdline_str[i] = '\0';
@@ -70,6 +70,7 @@ int parse_cmdline(char *cmdline)
 			i++;
 			value = &cmdline_str[i];
 			cmdline_args[p].value = value;
+			continue;
 		}
 
 		if (cmdline_str[i] == ' ') {
@@ -82,7 +83,10 @@ int parse_cmdline(char *cmdline)
 				i++;
 				key++;
 			}
+			value = key;
 		}
+
+		i++;
 	}
 
 	cmdline_argc = p;
