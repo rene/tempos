@@ -92,7 +92,7 @@ int check_is_ext2(dev_t device)
 
 	blk = bread(device.major, device.minor, EXT2_SUPERBLOCK_SECTOR);
 
-	memcpy(&sb, blk->data, SECTOR_SIZE);
+	memcpy(&sb.s_magic, &blk->data[56], sizeof(uint16_t));
 
 	if (sb.s_magic == EXT2_MAGIC) {
 		return 1;
