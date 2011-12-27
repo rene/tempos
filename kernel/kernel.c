@@ -89,7 +89,7 @@ void tempos_main(karch_t kinf)
  */
 void kernel_main_thread(void *arg)
 {
-	char rdev_str[10], *rstr;
+	char rdev_str[10], *rstr, *init;
 	dev_t rootdev;
 	size_t i, rdev_len;
 	task_t *idle_th;
@@ -129,6 +129,25 @@ void kernel_main_thread(void *arg)
 		panic("VFS ERROR: Could not mount root file system.");
 	}
 
+	/* Load init */
+	init = cmdline_get_value("init");
+	if (init == NULL) {
+		init = DEFAULT_INIT_PROCCESS;
+	}
+	kprintf("Loading %s...\n", init);
+
+	/* fork thread */
+	/* call execve_init */
+
+	/**
+	 * We are done. User proccess "init" is running, now
+	 * idle_thread can go away...
+	 */
+	/* thread_done = 1; */
+	for(;;) {
+		/* measure system load */
+	}
+
 	/* tests */
 	/*buff_header_t *buff;
 	buff = bread(3, 1, 368);
@@ -157,8 +176,6 @@ void kernel_main_thread(void *arg)
 	kprintf(KERN_INFO "2 ");
 	mdelay(1000);
 	kprintf(KERN_INFO "3 ");*/
-
-	for(;;);
 }
 
 /**

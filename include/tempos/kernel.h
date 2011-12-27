@@ -37,6 +37,8 @@
 	#define CHECK_BIT(a, b)		((a >> b) & 0x01)
 	#define SET_BIT(a, b)		a |= (0x01 << b)
 
+	/** Default init proccess */
+	#define DEFAULT_INIT_PROCCESS "/sbin/init"
 
 	/* kprintf messages */
 	#define KERN_CRIT			"!0!"

@@ -103,8 +103,10 @@ char *cmdline_get_value(char *key)
 	int i;
 
 	for (i = 0; i <= cmdline_argc; i++) {
-		if (strcmp(cmdline_args[i].key, key) == 0) {
-			return cmdline_args[i].value;
+		if (cmdline_args[i].key != NULL) {
+			if (strcmp(cmdline_args[i].key, key) == 0) {
+				return cmdline_args[i].value;
+			}
 		}
 	}
 
