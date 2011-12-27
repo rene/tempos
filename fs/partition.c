@@ -48,7 +48,7 @@ part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device)
 
 	/* Read MBR */
 	sec.addr = 0;
-	blk_drv.dev_ops->read_block(blk_drv.major, device, &sec);
+	blk_drv.dev_ops->read_sync_block(blk_drv.major, device, &sec);
 	memcpy(&mbr, sec.data, sizeof(mbr));
 
 	/* Check for boot signature */
@@ -79,7 +79,7 @@ part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device)
 
 					/* Read the first EBR from extended partition */
 					sec.addr = fsector;
-					blk_drv.dev_ops->read_block(blk_drv.major, device, &sec);
+					blk_drv.dev_ops->read_sync_block(blk_drv.major, device, &sec);
 					memcpy(&ebr, sec.data, sizeof(ebr));
 				
 					if (ebr.boot_signature[0] == 0x55 && ebr.boot_signature[1] == 0xaa) {
@@ -124,7 +124,7 @@ part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device)
 
 					/* Read the first EBR from extended partition */
 					sec.addr = fsector;
-					blk_drv.dev_ops->read_block(blk_drv.major, device, &sec);
+					blk_drv.dev_ops->read_sync_block(blk_drv.major, device, &sec);
 					memcpy(&ebr, sec.data, sizeof(ebr));
 				
 					if (ebr.boot_signature[0] == 0x55 && ebr.boot_signature[1] == 0xaa) {

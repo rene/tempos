@@ -57,8 +57,18 @@
 	/** Head of linked list */
 	#define IFLAG_LIST_HEAD    0x02
 
+	/** 
+	 * As EXT2, TempOS VFS i-nodes has 15 addressing blocks.
+	 * 12 - Direct blocks
+	 * 1  - Single indirect block 
+	 * 1  - Double 
+	 * 1  - Triple indirect block
+	 */
+	#define VFS_NDIR_BLOCKS     12
+	#define	VFS_IND_BLOCK       VFS_NDIR_BLOCKS
+	#define	VFS_DIND_BLOCK      (VFS_IND_BLOCK + 1)
+	#define	VFS_TIND_BLOCK      (VFS_DIND_BLOCK + 1)
 
-	/** i-node is a head */
 
 	/**
 	 * Super Block structure

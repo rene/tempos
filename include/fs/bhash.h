@@ -48,6 +48,13 @@
 	/** Buffer size */
 	#define BUFF_SIZE 		512
 
+	/** Buffer write syncronously */
+	#define BWRITE_SYNC		0x01
+	/** Buffer write asyncronously */
+	#define BWRITE_ASYNC	0x02
+	/** Buffer write mark to delayed write */
+	#define BWRITE_DELAYED  0x03
+
 	/** How many blocks has each buffer queue? */
 	#ifdef CONFIG_BUFFER_QUEUE_SIZE
 		/** Buffer queue size defined at kernel configuration file */
@@ -101,7 +108,9 @@
 
 	void brelse(int major, int device, buff_header_t *buff);
 
-	buff_header_t *bread(int major, int device, uint64_t blocknum);
+	buff_header_t *breada(int major, int device, uint64_t blocknum1, uint64_t blocknum2);
+
+	int bwrite(int major, int device, buff_header_t *buff, char type);
 
 #endif /* BHASH_H */
 

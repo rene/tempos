@@ -291,7 +291,7 @@ static void add_to_buff_queue(buff_hashq_t *queue, buff_header_t *buff, int devi
  * \param blocknum Block number (address)
  * \return buff_header_t* Pointer to the block
  */
-buff_header_t *getblk(int major, int device, uint64_t blocknum)
+static buff_header_t *getblk(int major, int device, uint64_t blocknum)
 {
 	buff_header_t *buff;
 	dev_blk_driver_t *driver;
@@ -325,7 +325,7 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 
 				/* Buffer should be flushed to disk */
 				if (buff->status == BUFF_ST_FLUSH) {
-					/* asynchronous wirte buffer to disk */
+					/* asynchronous write buffer to disk */
 					driver->dev_ops->write_async_block(major, device, buff);
 					continue;
 				}
@@ -343,6 +343,7 @@ buff_header_t *getblk(int major, int device, uint64_t blocknum)
 
 /**
  * Release a locked buffer.
+ *
  * \param major Major number of the device
  * \param device Minor number (device number)
  * \param buff The buffer to be released.
@@ -384,9 +385,12 @@ void brelse(int major, int device, buff_header_t *buff)
 
 
 /**
- * bread
- *
  * Read a specific block from device (handling the cache).
+ *
+ * \param major Major number of the device
+ * \param device Minor number (device number)
+ * \param blocknum Block number (address)
+ * \return buff_header_t* Buffer on read success, NULL otherwise.
  */
 buff_header_t *bread(int major, int device, uint64_t blocknum)
 {
@@ -406,11 +410,105 @@ buff_header_t *bread(int major, int device, uint64_t blocknum)
 
 	if (buff->status != BUFF_ST_VALID) {
 		/* Read from device (synchronous) */
-		if (driver->dev_ops->read_block(major, device, buff) < 0) {
+		if (driver->dev_ops->read_sync_block(major, device, buff) < 0) {
 			kprintf(KERN_ERROR "Error on reading block from device: MAJOR = %d | MINOR = %d", major, device);
 		}
 	}
 
 	return buff;
+}
+
+
+/**
+ * Read a specific block from device (handling the cache), and put
+ * the second block to be read to improve sequential reads.
+ *
+ * \param major Major number of the device
+ * \param device Minor number (device number)
+ * \param blocknum1 Block number (address) of immediate read.
+ * \param blocknum2 Block number (address) of second block.
+ * \return buff_header_t* Buffer on read success, NULL otherwise.
+
+ */
+buff_header_t *breada(int major, int device, uint64_t blocknum1, uint64_t blocknum2)
+{
+	buff_header_t *buff1, *buff2;
+	dev_blk_driver_t *driver;
+
+	driver = block_dev_drivers[major]; 
+
+	/**
+	 * First, we read block 1 
+	 */
+	buff1 = bread(major, device, blocknum1);
+
+	/**
+	 * Now, we check for second block and if not in cache,
+	 * start a asynchronous read.
+	 */
+	if ((buff2 = getblk(major, device, blocknum2)) == NULL) {
+		kprintf(KERN_ERROR "breada(): Error on get cached block.\n");
+		return NULL;
+	}
+
+	if (buff2->status == BUFF_ST_BUSY) {
+		buff2->status = BUFF_ST_VALID;
+	}
+
+	if (buff2->status != BUFF_ST_VALID) {
+		/* Read from device (synchronous) */
+		if (driver->dev_ops->read_async_block(major, device, buff2) < 0) {
+			kprintf(KERN_ERROR "Error on reading block from device: MAJOR = %d | MINOR = %d", major, device);
+		}
+	} else {
+		brelse(major, device, buff2);
+	}
+
+	return NULL;
+}
+
+/**
+ * Write block back to device.
+ *
+ * \param major Major number of the device
+ * \param device Minor number (device number)
+ * \param buff The buffer to be write.
+ * \param type Type of write operation: BWRITE_SYNC (synchronously),
+ * BWRITE_ASYNC (asynchrounously) or BWRITE_DELAYED (for delayed write).
+ * \return 1 on success, 0 otherwise.
+ */
+int bwrite(int major, int device, buff_header_t *buff, char type)
+{
+	buff_header_t *head, *tmp;
+	dev_blk_driver_t *driver = block_dev_drivers[major]; 
+
+	if (buff == NULL) {
+		return 0;
+	}
+	
+	switch(type) {
+		case BWRITE_DELAYED:
+			cli();
+			/* mark for delayed write */
+			buff->status = BUFF_ST_FLUSH;
+			/* put at the head of free list */
+			head = driver->buffer_queue->freelist_head;
+			tmp = head->free_next;
+			buff->free_next = tmp;
+			buff->free_prev = head;
+			head->free_next = buff;
+			tmp->free_prev  = buff;
+			sti();
+			return 1;
+	
+		case BWRITE_SYNC:
+			return driver->dev_ops->write_sync_block(major, device, buff);
+
+		case BWRITE_ASYNC:
+			return driver->dev_ops->write_async_block(major, device, buff);
+
+		default:
+			return 0;
+	}
 }
 

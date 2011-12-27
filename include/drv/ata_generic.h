@@ -79,7 +79,9 @@
 
 	void init_ata_generic(void);
 
-	int read_ata_sector(int major, int device, buff_header_t *buf);
+	int read_sync_ata_sector(int major, int device, buff_header_t *buf);
+
+	int read_async_ata_sector(int major, int device, buff_header_t *buf);
 
 	int write_async_ata_sector(int major, int device, buff_header_t *buf);
 

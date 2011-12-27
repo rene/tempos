@@ -50,8 +50,10 @@
 
 	/** Block device operations */
 	struct _blk_dev_op {
-		/** read(): Read a block */
-		int (*read_block) (int, int, buff_header_t *);
+		/** read(): Read a block synchronously */
+		int (*read_sync_block) (int, int, buff_header_t *);
+		/** read(): Read a block asynchronously */
+		int (*read_async_block) (int, int, buff_header_t *);
 		/** write_async(): Write asynchronously */
 		int (*write_async_block) (int, int, buff_header_t *);
 		/** write_sync(): Write synchronously */

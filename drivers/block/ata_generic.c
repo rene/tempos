@@ -146,7 +146,8 @@ static int write_hd_sector(int major, int device, uint64_t addr, char *sector);
 
 /** ATA block device operations (Read/Write) */
 struct _blk_dev_op ata_ops = {
-	.read_block        = read_ata_sector,
+	.read_sync_block   = read_sync_ata_sector,
+	.read_async_block  = read_async_ata_sector,
 	.write_async_block = write_async_ata_sector,
 	.write_sync_block  = write_sync_ata_sector,
 };
@@ -843,9 +844,8 @@ static void ata_handler2(int id, pt_regs *regs)
  * \param device Device number.
  * \param buf Buffer structure that should contains block address, 
  *            and space for block data.
- * \note This function will sleep until the block becomes available.
  */
-int read_ata_sector(int major, int device, buff_header_t *buf)
+int read_async_ata_sector(int major, int device, buff_header_t *buf)
 {
 	uchar8_t dev;
 	struct _block_op *bop;
@@ -899,7 +899,24 @@ int read_ata_sector(int major, int device, buff_header_t *buf)
 		llist_add(&blk_queue[dev], bop);
 	}
 	sti();
+
+	return 0;
+}
+
+/**
+ * Read a sector from hard disk.
+ *
+ * \param major Bus - Primary or Secondary IDE.
+ * \param device Device number.
+ * \param buf Buffer structure that should contains block address, 
+ *            and space for block data.
+ * \note This function will sleep until the block becomes available.
+ */
+int read_sync_ata_sector(int major, int device, buff_header_t *buf)
+{
+	int res;
 	
+	res = read_async_ata_sector(major, device, buf);
 
 	/** Wait block to become available */
 	if (major == DEVMAJOR_ATA_PRI) {

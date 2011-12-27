@@ -93,6 +93,7 @@ int check_is_ext2(dev_t device)
 	blk = bread(device.major, device.minor, EXT2_SUPERBLOCK_SECTOR);
 
 	memcpy(&sb.s_magic, &blk->data[56], sizeof(uint16_t));
+	brelse(device.major, device.minor, blk);
 
 	if (sb.s_magic == EXT2_MAGIC) {
 		return 1;
@@ -132,12 +133,16 @@ int ext2_get_sb(dev_t device, vfs_superblock *sb)
 	memcpy(&tmp[SECTOR_SIZE], blks[1]->data, SECTOR_SIZE);
 	memcpy(ext2_sb, tmp, (2*SECTOR_SIZE));
 	
+	brelse(device.major, device.minor, blks[0]);
+	brelse(device.major, device.minor, blks[1]);
+
 	/* Read EXT2 Group Descriptor and calculate FS information */
 	fsdriver->block_size = get_block_size(*ext2_sb) / SECTOR_SIZE;
 
 	grp_offset = ext2_sb->s_first_data_block * fsdriver->block_size;
 	blks[0] = bread(device.major, device.minor, grp_offset + EXT2_SUPERBLOCK_SECTOR);
 	memcpy(ext2_gd, blks[0]->data, sizeof(ext2_group_t));
+	brelse(device.major, device.minor, blks[0]);
 
 	fsdriver->n_groups          = div_rup(ext2_sb->s_blocks_count, ext2_sb->s_blocks_per_group);
 	fsdriver->blks_bmap_size    = div_rup(div_rup(ext2_sb->s_blocks_per_group, 8), get_block_size(*ext2_sb));
@@ -148,9 +153,6 @@ int ext2_get_sb(dev_t device, vfs_superblock *sb)
 	fsdriver->gdesc = ext2_gd;
 	sb->fs_driver   = fsdriver;
 	
-	brelse(device.major, device.minor, blks[0]);
-	brelse(device.major, device.minor, blks[1]);
-
 	/* Now, fill VFS super block */
 	sb->s_inodes_count      = ext2_sb->s_inodes_count;
 	sb->s_blocks_count      = ext2_sb->s_r_blocks_count;  
@@ -231,6 +233,7 @@ int ext2_get_inode(vfs_inode *inode)
 		return 0;
 	} else {
 		memcpy(&inode_ext2, &blk->data[iblk_addr], sizeof(ext2_inode_t));
+		brelse(inode->device.major, inode->device.minor, blk);
 	}
 
 	/* Now, fill VFS i-node with information */
