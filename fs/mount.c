@@ -87,7 +87,7 @@ int vfs_mount_root(dev_t device)
 	/* Ajust kernel thread i-nodes */
 	current_task = GET_TASK(cur_task);
 	current_task->i_root = root;
-	current_task->cdir = root;
+	current_task->i_cdir = root;
 
 	kprintf("VFS: device (%d,%d) mounted as root.\n", device.major, device.minor);
 

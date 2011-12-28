@@ -89,7 +89,7 @@
 		/** Root i-node */
 		vfs_inode *i_root;
 		/** Current directory i-node */
-		vfs_inode *cdir;
+		vfs_inode *i_cdir;
 	};
 	typedef struct _task_struct task_t;
 

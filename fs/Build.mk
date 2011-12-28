@@ -5,5 +5,5 @@
 # TBS - Build configuration file
 #
 
-obj-y += binfmt_elf32.o bhash.o vfs.o mount.o devices.o partition.o
+obj-y += binfmt_elf32.o bhash.o vfs.o namei.o mount.o devices.o partition.o
 

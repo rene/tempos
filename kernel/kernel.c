@@ -139,7 +139,9 @@ void kernel_main_thread(void *arg)
 
 	/* TEST: Read root directory */
 	kprintf("DEBUG:\n");
-	vfs_inode *root = mount_table[0].root_inode;
+	vfs_inode *root = vfs_iget(mount_table[0].root_inode->sb, 1153);
+		//vfs_namei("/");
+	//mount_table[0].root_inode;
 	char *block = root->sb->sb_op->get_fs_block(root->sb, root->i_block[0]);
 	vfs_directory dir;
 	
@@ -173,7 +175,9 @@ void kernel_main_thread(void *arg)
 
 	kfree(block);
 
-	vfs_inode *arq = vfs_iget(root->sb, 12);
+	vfs_inode *arq = vfs_namei("/test.txt");
+	//vfs_inode *arq = vfs_namei("/test2.txt");
+	//vfs_inode *arq = vfs_iget(root->sb, 12);
 	//vfs_inode *arq = vfs_iget(root->sb, 14);
 	vfs_bmap_t bk = vfs_bmap(arq, 12298);
 	//vfs_bmap_t bk = vfs_bmap(arq, 274442);
@@ -185,6 +189,7 @@ void kernel_main_thread(void *arg)
 	block = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
 	kprintf("%s\n", &block[bk.blk_offset]);
 	kfree(block);
+
 
 	/* fork thread */
 	/* call execve_init */

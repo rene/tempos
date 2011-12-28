@@ -26,8 +26,12 @@
 #include <tempos/wait.h>
 #include <fs/vfs.h>
 #include <fs/device.h>
-#include <fs/ext2/ext2.h>
 #include <arch/io.h>
+
+#ifdef CONFIG_FS_EXT2
+	#include <fs/ext2/ext2.h>
+#endif
+
 
 /** I-nodes hash queue */
 vfs_inode **inode_hash_table;
@@ -454,16 +458,5 @@ vfs_bmap_t vfs_bmap(vfs_inode *inode, uint32_t offset)
 	bmap.blk_number = b_ind_number;
 
 	return bmap;
-}
-
-/**
- * Convert path name to i-node.
- *
- * \param pathname Path name.
- * \return NULL if path name is invalid, or the i-node otherwise.
- */
-vfs_inode *vfs_namei(const char *pathname)
-{
-	return NULL;
 }
 
