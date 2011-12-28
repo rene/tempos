@@ -173,7 +173,10 @@ void kernel_main_thread(void *arg)
 	kfree(block);
 
 	vfs_inode *arq = vfs_iget(root->sb, 12);
+	//vfs_inode *arq = vfs_iget(root->sb, 14);
 	vfs_bmap_t bk = vfs_bmap(arq, 12298);
+	//vfs_bmap_t bk = vfs_bmap(arq, 274442);
+	//vfs_bmap_t bk = vfs_bmap(arq, 67384320);
 
 	kprintf("bk.blk_number = %ld\n", bk.blk_number);
 	kprintf("bk.blk_offset = %ld\n", bk.blk_offset);

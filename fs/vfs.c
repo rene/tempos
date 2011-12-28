@@ -73,6 +73,10 @@ static uint32_t _ipow(uint32_t x, uint32_t y)
 	uint32_t i;
 	uint32_t res = x;
 
+	if (y == 0) {
+		return 1;
+	}
+
 	for (i = 1; i < y; i++) {
 		res *= x;
 	}
@@ -387,7 +391,6 @@ vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number)
 }
 
 /**
- *
  * Translate file byte offset into file system block number, block offset, etc.
  *
  * \param inode File i-node.
@@ -396,76 +399,59 @@ vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number)
  */
 vfs_bmap_t vfs_bmap(vfs_inode *inode, uint32_t offset)
 {
-	uint32_t blk_size;
-	uint32_t blk_ind_size;
-	uint32_t div, quo, ind;
 	vfs_bmap_t bmap;
-	char *block;
-	uint32_t *ind_block, baddr, b_dind_size;
+	uint32_t blk_size, n_entries;
+	uint32_t b_ind, b_ind_number, b_ind_index;
+	char *raw_blk;
+	uint32_t *ind_blk;
+	int i, ilevel;
 
 	/* Block size (in bytes) */
 	blk_size = inode->sb->s_log_block_size;
 
-	/* Check if block is in direct blocks */
-	div = offset;
-	quo = (div / blk_size);
-	if (quo < VFS_NDIR_BLOCKS) {
-		ind = quo;
-		bmap.blk_number = inode->i_block[ind];
-		bmap.blk_offset = div - (quo * blk_size);
-		bmap.blk_breada = 0;
+	/* Calculate block offset */
+	b_ind = (offset / blk_size);
+	bmap.blk_offset = offset - (b_ind * blk_size);
+	bmap.blk_breada = 0;
+
+	/* Check indirection level */
+	if (b_ind < VFS_NDIR_BLOCKS) {
+		bmap.blk_number = inode->i_block[b_ind];
 		return bmap;
-	}
-	
-	/* Calculate how many entries indirect blocks have */
-	blk_ind_size = blk_size / sizeof(inode->i_block[0]);
-
-	/* Check if block is single indirect block */
-	div -= (quo * blk_size);
-	quo  = (div / blk_size);
-	if (quo < (blk_ind_size * blk_size)) {
-		ind = quo / blk_ind_size;
-
-		/* Read indirect block */
-		block = inode->sb->sb_op->get_fs_block(inode->sb, inode->i_block[VFS_IND_BLOCK]);
-
-		/* Read indirect block entry */
-		ind_block = (uint32_t*)block;
-		baddr = ind_block[ind];
-		kfree(block);
-
-		bmap.blk_number = baddr;
-		bmap.blk_offset = div - (quo * blk_size);
-		bmap.blk_breada = 0;
-		return bmap;
-	}
-
-	/* Check if block is double indirect block */
-	/* TODO: finish implement double indirect search block */
-	b_dind_size = _ipow(blk_ind_size, 2);
-	div -= (quo * b_dind_size * blk_size);
-	quo  = (div / blk_size);
-	if (quo < b_dind_size) {
-		ind = quo / b_dind_size;
-
-		/* Read double indirect block */
-		block = inode->sb->sb_op->get_fs_block(inode->sb, inode->i_block[VFS_DIND_BLOCK]);
-		/* Read double first indirect block entry */
-		ind_block = (uint32_t*)block;
-		baddr = ind_block[ind];
-		kfree(block);
-
-		/* Calculate and read second index */
+	} else {
+		/* Calculate how many entries indirect blocks have */
+		n_entries = blk_size / sizeof(inode->i_block[0]);
 		
-
-		bmap.blk_number = baddr;
-		bmap.blk_offset = div - (quo * blk_size);
-		bmap.blk_breada = 0;
-		return bmap;
+		if (b_ind < (VFS_NDIR_BLOCKS + n_entries)) {
+			/* Single indirection */
+			ilevel = 1;
+			b_ind  = VFS_IND_BLOCK; 
+		} else if (b_ind < (VFS_NDIR_BLOCKS + n_entries + _ipow(n_entries, 2))) {
+			/* Double indirection */
+			ilevel = 2;
+			b_ind  = VFS_DIND_BLOCK;
+		} else {
+			/* Triple indirection */
+			ilevel = 3;
+			b_ind  = VFS_TIND_BLOCK;
+		}
 	}
 
-	/* Block is in triple indirect block */
-	/* TODO: implement triple indirect search block. */
+	/* Walk into indirect blocks */
+	b_ind_number = inode->i_block[b_ind];
+	for (i = 0; i < ilevel; i++) {
+		raw_blk = inode->sb->sb_op->get_fs_block(inode->sb, b_ind_number);
+		ind_blk = (uint32_t*)raw_blk;
+
+		b_ind_index = (offset - 
+				((VFS_NDIR_BLOCKS + _ipow(n_entries, (ilevel-1)) * blk_size)))
+					/ (n_entries * blk_size);
+
+		b_ind_number = ind_blk[b_ind_index];
+
+		kfree(raw_blk);
+	}
+	bmap.blk_number = b_ind_number;
 
 	return bmap;
 }
