@@ -105,7 +105,7 @@ void karch(unsigned long magic, unsigned long addr)
 
 	/* Still here we use the GDT trick to translate the virtual
 	   into physical address, now the first thing to do it's
-	   enable the paging system and reload de GDT with
+	   enable the paging system and reload the GDT with
 	   base 0, after that, we can continue to load the kernel */
 	init_pg(&kinf);
  	

@@ -186,7 +186,7 @@ void kernel_main_thread(void *arg)
 	/* call execve_init */
 
 	/**
-	 * We are done. User proccess "init" is running, now
+	 * We are done. User process "init" is running, now
 	 * idle_thread can go away...
 	 */
 	/* thread_done = 1; */
