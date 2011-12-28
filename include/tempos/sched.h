@@ -27,6 +27,7 @@
 
 	#include <sys/types.h>
 	#include <unistd.h>
+	#include <fs/vfs.h>
 	#include <arch/task.h>
 	#include <linkedl.h>
 
@@ -64,6 +65,15 @@
 	 * process, PID, state, and also its context.
 	 */
 	struct _task_struct {
+		/** 
+		 * Architecture dependent: Keep first on
+		 * structure to avoid alignment issues
+		 * at assembly code.
+		 */
+		arch_tss_t arch_tss;
+
+		/* Architecture independent fields */
+		
 		/** Process state */
 		int state;
 		/** Process priority */
@@ -76,8 +86,10 @@
 		int return_code;
 		/** Wait queue */
 		int wait_queue;
-		/** Architecture dependent */
-		arch_tss_t arch_tss;
+		/** Root i-node */
+		vfs_inode *i_root;
+		/** Current directory i-node */
+		vfs_inode *cdir;
 	};
 	typedef struct _task_struct task_t;
 

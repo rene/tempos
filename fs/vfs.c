@@ -456,3 +456,14 @@ vfs_bmap_t vfs_bmap(vfs_inode *inode, uint32_t offset)
 	return bmap;
 }
 
+/**
+ * Convert path name to i-node.
+ *
+ * \param pathname Path name.
+ * \return NULL if path name is invalid, or the i-node otherwise.
+ */
+vfs_inode *vfs_namei(const char *pathname)
+{
+	return NULL;
+}
+

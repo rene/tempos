@@ -24,6 +24,7 @@
 
 #include <tempos/kernel.h>
 #include <tempos/wait.h>
+#include <tempos/sched.h>
 #include <fs/vfs.h>
 #include <fs/device.h>
 
@@ -40,6 +41,7 @@ int vfs_mount_root(dev_t device)
 	vfs_fs_type *fs;
 	vfs_mount_table *mnt;
 	vfs_inode *root;
+	task_t *current_task;
 
 	/* Try to find which file system device is formated */
 	found = 0;
@@ -81,6 +83,11 @@ int vfs_mount_root(dev_t device)
 	mnt->fs           = fs;
 	mnt->root_name    = "rootfs";
 	mnt->mnt_on_name  = "/";
+
+	/* Ajust kernel thread i-nodes */
+	current_task = GET_TASK(cur_task);
+	current_task->i_root = root;
+	current_task->cdir = root;
 
 	kprintf("VFS: device (%d,%d) mounted as root.\n", device.major, device.minor);
 

@@ -37,11 +37,14 @@ initial_task:
 	 * initialization, thus at the kernel mode, we doesn't
 	 * need to make level switch because we are already in kernel mode,
 	 * so here all we need it's adjust stack and jmp to main thread function
+	 *
+	 * \note keep offset values sync with struct _task_struct
+	 * \see include/tempos/sched.h
 	 */
-	movl 34(%eax), %ebx /* arch_tss.regs.esp    */
-	movl 72(%eax), %ecx /* arch_tss.regs.eflags */
-	movl 66(%eax), %edx /* arch_tss.regs.eip    */
-		
+	movl 10(%eax), %ebx /* arch_tss.regs.esp    */
+	movl 48(%eax), %ecx /* arch_tss.regs.eflags */
+	movl 42(%eax), %edx /* arch_tss.regs.eip    */
+
 	/* Ajust stack */
 	movl  %ebx, %esp
 	
@@ -122,8 +125,6 @@ task_switch_to:
 
 	/**
 	 * Make stack switch
-	 * keep offset values sync with struct _task_struct
-	 * \see include/tempos/sched.h
 	 */
 	movl 56(%esp), %eax
 	movl 10(%eax), %esp

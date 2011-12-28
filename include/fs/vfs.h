@@ -294,5 +294,7 @@
 
 	vfs_bmap_t vfs_bmap(vfs_inode *inode, uint32_t offset);
 
+	vfs_inode *vfs_namei(const char *pathname);
+
 #endif /* VFS_H */
 

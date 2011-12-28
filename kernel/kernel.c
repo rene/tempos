@@ -145,6 +145,7 @@ void kernel_main_thread(void *arg)
 	
 	int pos = 0;
 	int newpos = 0;
+	kprintf("/: %ld\n", root->i_size);
 	while(1) {
 		memcpy(&dir.inode, &block[pos], sizeof(uint32_t));
 		if (dir.inode == 0) {
