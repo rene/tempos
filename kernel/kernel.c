@@ -136,6 +136,52 @@ void kernel_main_thread(void *arg)
 	}
 	kprintf("Loading %s...\n", init);
 
+
+	/* TEST: Read root directory */
+	kprintf("DEBUG:\n");
+	vfs_inode *root = mount_table[0].root_inode;
+	char *block = root->sb->sb_op->get_fs_block(root->sb, root->i_block[0]);
+	vfs_directory dir;
+	
+	int pos = 0;
+	int newpos = 0;
+	while(1) {
+		memcpy(&dir.inode, &block[pos], sizeof(uint32_t));
+		if (dir.inode == 0) {
+			break;
+		} else {
+			pos += sizeof(uint32_t);
+		}
+
+		memcpy(&dir.rec_len, &block[pos], sizeof(uint16_t));
+		pos += sizeof(uint16_t);
+
+		memcpy(&dir.name_len, &block[pos], sizeof(uchar8_t));
+		pos += 2 * sizeof(uchar8_t);
+
+		memcpy(&dir.name[0], &block[pos], dir.name_len);
+		dir.name[dir.name_len] = '\0';
+		newpos += dir.rec_len;
+		pos = newpos;
+
+		kprintf("%.8ld|", dir.inode);
+		/*kprintf("|%ld\n", dir.rec_len);
+		kprintf("|%ld\n", dir.name_len);*/
+		kprintf("%s\n",  dir.name);
+	}
+
+	kfree(block);
+
+	vfs_inode *arq = vfs_iget(root->sb, 12);
+	vfs_bmap_t bk = vfs_bmap(arq, 12298);
+
+	kprintf("bk.blk_number = %ld\n", bk.blk_number);
+	kprintf("bk.blk_offset = %ld\n", bk.blk_offset);
+	kprintf("bk.blk_breada = %ld\n", bk.blk_breada);
+	block = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
+	kprintf("%s\n", &block[bk.blk_offset]);
+	kfree(block);
+
 	/* fork thread */
 	/* call execve_init */
 

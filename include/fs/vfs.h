@@ -227,6 +227,18 @@
 	};
 
 	/**
+	 * File offset to file system block number map structure
+	 */
+	struct _vfs_bmap_st {
+		/* File system block number */
+		uint32_t blk_number;
+		/* Byte offset into block */
+		uint32_t blk_offset;
+		/* Read ahead block number */
+		uint32_t blk_breada;
+	};
+
+	/**
 	 * Super block operations
 	 */
 	struct _vfs_sb_operations {
@@ -242,6 +254,8 @@
 		int (*free_inode) (struct _vfs_superblock_st *, struct _vfs_inode_st *);
 		/** Update super block disk with current information */
 		int (*write_super) (struct _vfs_superblock_st*);
+		/** Retrieve a file system logic block */
+		char *(*get_fs_block) (struct _vfs_superblock_st*, uint32_t blocknum);
 	};
 
 
@@ -252,6 +266,7 @@
 	typedef struct _vfs_fs_type_st			vfs_fs_type;
 	typedef struct _vfs_file_st				vfs_file;
 	typedef struct _vfs_sb_operations		vfs_sb_ops;
+	typedef struct _vfs_bmap_st             vfs_bmap_t;
 
 
 	/** Global free i-nodes queue */
@@ -276,6 +291,8 @@
 	int vfs_mount_root(dev_t device);
 
 	vfs_inode *vfs_iget(vfs_superblock *sb, uint32_t number);
+
+	vfs_bmap_t vfs_bmap(vfs_inode *inode, uint32_t offset);
 
 #endif /* VFS_H */
 

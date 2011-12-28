@@ -64,17 +64,20 @@ int ext2_get_sb(dev_t device, vfs_superblock *sb);
 
 int ext2_get_inode(vfs_inode *inode);
 
+char *ext2_get_fs_block(vfs_superblock *sb, uint32_t blocknum);
+
 
 /**
  * This function registers EXT2 file system in VFS.
  */
 void register_ext2(void)
 {
-	ext2_fs_type.name = "ext2";
+	ext2_fs_type.name          = "ext2";
 	ext2_fs_type.check_fs_type = check_is_ext2;
-	ext2_fs_type.get_sb = ext2_get_sb;
+	ext2_fs_type.get_sb        = ext2_get_sb;
 
-	ext2_sb_ops.get_inode = ext2_get_inode;
+	ext2_sb_ops.get_inode      = ext2_get_inode;
+	ext2_sb_ops.get_fs_block   = ext2_get_fs_block;
 
 	register_fs_type(&ext2_fs_type);
 }
@@ -225,7 +228,7 @@ int ext2_get_inode(vfs_inode *inode)
 	itab_addr  = (grp_block * fs->block_size);
 	iblk       = ((number - 1) * sizeof(ext2_inode_t));
 	itab_addr += (iblk / SECTOR_SIZE);
-	iblk_addr  = iblk - (iblk / SECTOR_SIZE);
+	iblk_addr  = iblk - ((iblk / SECTOR_SIZE) * SECTOR_SIZE);
 
 	/* Read the i-node */
 	blk = bread(inode->device.major, inode->device.minor, itab_addr);
@@ -252,6 +255,40 @@ int ext2_get_inode(vfs_inode *inode)
 	}
 
 	return 1;
+}
+
+/**
+ * Retrieve a file system block (logic) from device.
+ *
+ * \param sb Super block.
+ * \param blocknum Block number.
+ * \return char* NULL on error, block data (allocated with kmalloc) otherwise.
+ */
+char *ext2_get_fs_block(vfs_superblock *sb, uint32_t blocknum)
+{
+	/* Maximum blocks = (for 4KB)*/
+	buff_header_t *blks[4096/SECTOR_SIZE];
+	ext2_fsdriver_t *fs;
+	int i, nb;
+	uint64_t baddr;
+	char *block;
+
+	fs = (ext2_fsdriver_t*)sb->fs_driver;
+	baddr = blocknum * fs->block_size;
+
+	block = (char*)kmalloc(get_block_size(*fs->sb), GFP_NORMAL_Z);
+	if (block == NULL) {
+		return NULL;
+	}
+
+	nb = get_block_size(*fs->sb) / SECTOR_SIZE;
+	for (i = 0; i < nb; i++, baddr++) {
+		blks[i] = bread(sb->device.major, sb->device.minor, baddr);
+		memcpy(&block[(i * SECTOR_SIZE)], blks[i]->data, SECTOR_SIZE);
+		brelse(sb->device.major, sb->device.minor, blks[i]);
+	}
+
+	return block;
 }
 
 /**
