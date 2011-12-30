@@ -123,14 +123,14 @@ static vfs_inode *_vfs_find_component(vfs_inode *inode, char *component)
 		oldpos = bpos;
 		while(bpos < blk_size) {
 			/* Read information */
-			memcpy(&dir.inode,    &block[bpos], sizeof(uint32_t));
+			memcpy(&dir.inode, &block[bpos], sizeof(uint32_t));
 			bpos += sizeof(uint32_t);
 			
 			if (dir.inode == 0) {
 				break;
 			}
 
-			memcpy(&dir.rec_len,  &block[bpos], sizeof(uint16_t));
+			memcpy(&dir.rec_len, &block[bpos], sizeof(uint16_t));
 			bpos += sizeof(uint16_t);
 			
 			memcpy(&dir.name_len, &block[bpos], sizeof(uchar8_t));

@@ -207,27 +207,39 @@ int ext2_get_inode(vfs_inode *inode)
 		number = inode->number;
 	}
 
-	/* Calculate which group i-node belongs */
-	grp_number = div_rup((number - 1), sb->s_inodes_per_group);
-	grp_block  = (sb->s_blocks_per_group * (grp_number-1));
-	grp_block += fs->gdesc->bg_inode_table;
+	/* Calculate which group i-node belongs to */
+	grp_number = (number - 1) / sb->s_inodes_per_group;
 
+	/**
+	 * Revision 0 of EXT2 file system stores a copy of super block and group
+	 * descriptor at the beginning of each block group.
+	 * Revision 1 and later reduce the number of these backups by keeping a copy
+	 * of super block and group descritor only in block groups 0, 1 and powers
+	 * of 3, 5 and 7.
+	 */
 	if (sb->s_rev_level > 0) {
-		/**
-		 * Revision 1 and later reduce the number of backups of super block 
-		 * by keeping a copy of super block only in groups 0, 1 and powers
-		 * of 3, 5 and 7.
-		 */
-		if (grp_number != 1 && (grp_number % 3) != 0 &&
-				(grp_number % 5) != 0 && (grp_number % 7) != 0) {
-			grp_block--;
+		grp_block = fs->gdesc->bg_inode_table;
+		for (i = 1; i <= grp_number; i++) {
+			grp_block += sb->s_blocks_per_group;
+
+			if (i == 1 || (i % 3) == 0 || (i % 5) == 0 || (i % 7) == 0) {
+				//grp_block--;
+			} else {
+				grp_block -= 2;
+			}
 		}
+	} else {
+		grp_block = (sb->s_blocks_per_group * grp_number) + fs->gdesc->bg_inode_table;
 	}
 
 	/* Find i-node table block addr */
-	itab_addr  = (grp_block * fs->block_size);
+	if (grp_number > 0) {
+		number = number - (grp_number * sb->s_inodes_per_group);
+	}
+	itab_addr  = (grp_block * get_block_size(*sb));
 	iblk       = ((number - 1) * sizeof(ext2_inode_t));
-	itab_addr += (iblk / SECTOR_SIZE);
+	itab_addr += iblk;
+	itab_addr  = itab_addr / SECTOR_SIZE;
 	iblk_addr  = iblk - ((iblk / SECTOR_SIZE) * SECTOR_SIZE);
 
 	/* Read the i-node */
@@ -287,7 +299,7 @@ char *ext2_get_fs_block(vfs_superblock *sb, uint32_t blocknum)
 		memcpy(&block[(i * SECTOR_SIZE)], blks[i]->data, SECTOR_SIZE);
 		brelse(sb->device.major, sb->device.minor, blks[i]);
 	}
-
+	
 	return block;
 }
 
