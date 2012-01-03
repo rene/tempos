@@ -1,0 +1,10 @@
+*** Welcome to TempOS ***
+
+Website: http://tempos-project.org
+
+Sources: git clone git://tempos-project.git.sourceforge.net/gitroot/tempos-project
+
+This folder contains the root directories and files structure of a common system
+running TempOS, as the scripts and tools to generate a new environment.
+
+
