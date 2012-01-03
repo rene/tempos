@@ -80,7 +80,7 @@ install:
 # test
 #
 test:
-	@[ -f hdtest.img.gz ] || @qemu -M pc -fda $(fimage) -boot a &&  ( TEMPOSHD=`mktemp`; gunzip hdtest.img.gz -c > $$TEMPOSHD; qemu -M pc -fda $(fimage) -hda $$TEMPOSHD -boot a; rm $$TEMPOSHD )
+	@[ -f hdisk.img.gz ] || @qemu -M pc -fda $(fimage) -boot a &&  ( TEMPOSHD=`mktemp`; gunzip hdisk.img.gz -c > $$TEMPOSHD; qemu -M pc -fda $(fimage) -hda $$TEMPOSHD -boot a; rm $$TEMPOSHD )
 
 
 ##

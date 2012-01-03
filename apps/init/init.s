@@ -8,7 +8,7 @@
 
 .global _start
 
-/* Note: Program starts at 10MB (linker will handle this)*/
+/* Note: Program starts at 12MB (linker will handle this)*/
 
 .text
 _start:
