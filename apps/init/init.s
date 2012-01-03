@@ -16,7 +16,7 @@ _start:
 	movl $0x01, %ebx   /* fd              */
 	movl $msg,  %ecx   /* buffer          */
 	movl $0x1D, %edx   /* size            */
-	int  $0x80         /* make a syscall  */
+	int  $0x85         /* make a syscall  */
 
 /* Never exit from init.... */
 loop:
