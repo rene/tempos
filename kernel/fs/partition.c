@@ -82,10 +82,7 @@ part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device)
 					blk_drv.dev_ops->read_sync_block(blk_drv.major, device, &sec);
 					memcpy(&ebr, sec.data, sizeof(ebr));
 				
-					if (ebr.boot_signature[0] == 0x55 && ebr.boot_signature[1] == 0xaa) {
-						epart = &ebr.partition;
-						count++;
-					}
+					count++;
 				
 					epart = &ebr.next_ebr;
 					fsector += epart->LBA_first_sector;
@@ -127,15 +124,13 @@ part_table_st *parse_mbr(dev_blk_driver_t blk_drv, int device)
 					blk_drv.dev_ops->read_sync_block(blk_drv.major, device, &sec);
 					memcpy(&ebr, sec.data, sizeof(ebr));
 				
-					if (ebr.boot_signature[0] == 0x55 && ebr.boot_signature[1] == 0xaa) {
-						epart = &ebr.partition;
-						partitions[pos].init   = fsector;
-						partitions[pos].length = (uint64_t)epart->total_sectors;
-						partitions[pos].id     = epart->sysid;
-						partitions[pos].type   = PART_TYPE_LOGIC;
-						partitions[pos].number = exnum++;
-						pos++;
-					}
+					epart = &ebr.partition;
+					partitions[pos].init   = fsector;
+					partitions[pos].length = (uint64_t)epart->total_sectors;
+					partitions[pos].id     = epart->sysid;
+					partitions[pos].type   = PART_TYPE_LOGIC;
+					partitions[pos].number = exnum++;
+					pos++;
 				
 					epart = &ebr.next_ebr;
 					fsector += epart->LBA_first_sector;
@@ -192,7 +187,7 @@ int translate_part_address(uint64_t *diskaddr, part_table_st *ptable, uint32_t p
 
 	for (i = 0; i < ptable->size; i++) {
 		part = &ptable->partitions[i];
-		if (part->number == pnumber) { 
+		if (part->number == pnumber) {
 			/* Check limits */
 			if (paddress > part->length) {
 				return -1;
