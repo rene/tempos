@@ -7,4 +7,7 @@ Sources: git clone git://tempos-project.git.sourceforge.net/gitroot/tempos-proje
 This folder contains the root directories and files structure of a common system
 running TempOS, as the scripts and tools to generate a new environment.
 
+You can use gen_hddisk_img.sh script to generate a Hard Disk image with the same
+structure and files of rtree folder. This image should be used with QEMU to
+emulate a system running TempOS.
 
