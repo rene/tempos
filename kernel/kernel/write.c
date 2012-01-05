@@ -28,19 +28,22 @@
 _pushargs ssize_t sys_write(int fd, const void *buf, size_t count)
 {
 	char buffer[256];
-	char *tmp = (char *)buf;
+	char *tmp = (char*)buf;
 	size_t i;
 
+	//kprintf(KERN_DEBUG "SYSWRITE_IN: %d %ld %ld\n", fd, buf, count);
+
 	if(count < 256) {
-		for(i=0;i<=count;i++)
+		for(i=0;i<=count;i++) {
 			buffer[i] = tmp[i];
+		}
 	}
 
-	if(fd == 0) {
-		kprintf(KERN_DEBUG "SYSCALL WRITE: %s\n", buffer);
+	if(fd == 1) {
+		kprintf(KERN_DEBUG "%s\n", buffer);
 	}
 
-	return(10);
+	return(count);
 }
 
 

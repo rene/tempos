@@ -44,6 +44,7 @@
 	#define GFP_NORMAL_Z	0x02
 	#define GFP_ZEROP		0x04
 
+	#define GFP_USER		0x08
 
 	/** Map of a directory */
 	struct _mem_map {

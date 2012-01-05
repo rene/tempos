@@ -55,9 +55,9 @@ _sys_enter:
 	jae  exit_syscall
 
 	/* Push syscall arguments */
-	pushl %ebx
-	pushl %ecx
 	pushl %edx
+	pushl %ecx
+	pushl %ebx
 
 	/* Now the proccess is ready to make the syscall, so
 	   we can enable interrupts again. */

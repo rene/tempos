@@ -143,12 +143,21 @@ void setup_GDT(void)
 	tssentry->high.busy        = 0;
 	tssentry->high.type_res1   = 2; /* do NOT change! */
 	tssentry->high.reserved1   = 0;
-	tssentry->high.DPL         = KERNEL_DPL;
+	tssentry->high.DPL         = USER_DPL;
 	tssentry->high.present     = 1;
 	tssentry->high.avaliable   = 0;
 	tssentry->high.reserved2   = 0;
 	tssentry->high.reserved3   = 0;
 	tssentry->high.granularity = GDT_GR_4KB;
+
+	/* Initialize TSS */
+	task_tss.ss0 = 0x10;
+	task_tss.cs = 0x0b;
+	task_tss.ss = 0x13;
+	task_tss.ds = 0x13;
+	task_tss.es = 0x13;
+	task_tss.fs = 0x13;
+	task_tss.gs = 0x13;
 
 	/* Finally, load GDT */
 	GDTR.table_limit = (GDT_TABLE_SIZE * sizeof(gdt_t)) - 1;
@@ -174,8 +183,8 @@ inline void load_gdt(void)
 		"ljmp %2, $reloadCS \n"
 		"reloadCS:            "
 		/* Now, we also load the Task Register */
-		"	movw %3, %%ax      \n"
+		"	movw $0x2b, %%ax      \n"
 		"	ltrw %%ax          \n"
-			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS), "i" (TSS_SEG) : "eax");
+			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS) : "eax");
 }
 

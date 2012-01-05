@@ -52,6 +52,10 @@
 	/** Process's stack size */
 	#define PROCESS_STACK_SIZE STACK_SIZE
 
+	/** Maximum number of process */
+	#define MAX_NUM_PROCESS 32000
+
+
 	/** Return cur_task circular linked list element (or NULL) */
 	#define GET_TASK(a) (a == NULL ? NULL : (task_t*)a->element)
 
@@ -80,6 +84,8 @@
 		int priority;
 		/** Process ID */
 		pid_t pid;
+		/** Process's stack base */
+		char *stack_base;
 		/** Process kernel stack */
 		char *kstack;
 		/** Return code */
@@ -113,6 +119,16 @@
 	void kernel_thread_exit(int return_code);
 	
 	int kernel_thread_wait(task_t *th);
+
+	pid_t get_new_pid(void);
+	
+	void release_pid(pid_t pid);
+
+	void init_pids(void);
+
+	pid_t _fork(task_t *thread);
+
+	void _exec_init(char *init_data);
 
 	/* These are Architecture specific */
 	void arch_init_scheduler(void (*start_routine)(void*));

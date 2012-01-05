@@ -64,6 +64,7 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	uchar8_t bit, istart;
 	volatile pagedir_t *pgdir;
 	uint32_t i, j;
+	char user_page;
 
 	/* Check flags */
 	if( (flags & GFP_DMA_Z) ) {
@@ -71,7 +72,12 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	} else {
 		mzone = NORMAL_ZONE;
 	}
-
+	if ( (flags & GFP_USER) ) {
+		user_page = PAGE_USER;
+	} else {
+		user_page = 0x00;
+	}
+	
 	/* Calculate number of pages needed */
 	size_region = sizeof(mregion) + size;
 	npages      = PAGE_ALIGN(size_region) >> PAGE_SHIFT;
@@ -130,7 +136,7 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 		} else {
 			bmap_on(memm, (pstart + apages));
 			apages++;
-			table[i] = MAKE_ENTRY(newpage, (PAGE_WRITABLE | PAGE_PRESENT));
+			table[i] = MAKE_ENTRY(newpage, (PAGE_WRITABLE | PAGE_PRESENT | user_page));
 		}
 
 		if(i < TABLE_SIZE) {

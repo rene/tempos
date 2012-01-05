@@ -59,6 +59,7 @@ task_t *kernel_thread_create(int priority, void (*start_routine)(void *), void *
 	newth->pid = KERNEL_PID;
 	newth->return_code = 0;
 	newth->wait_queue = 0;
+	newth->stack_base = new_kstack;
 	newth->kstack = (char*)((void*)new_kstack + PROCESS_STACK_SIZE);
 
 	/* "push" start_routine argument */
@@ -108,7 +109,7 @@ int kernel_thread_wait(task_t *th)
 	cli();
 	ret = th->return_code;
 	c_llist_remove(&tasks, th);
-	kfree(th->kstack);
+	kfree(th->stack_base);
 	kfree(th);
 	sti();
 

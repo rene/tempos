@@ -80,6 +80,14 @@ void tempos_main(karch_t kinf)
 	panic("Error on initialize scheduler!");
 }
 
+void thread1(void *arg)
+{
+	int *t = (int*)arg;
+	kprintf("Ola Mundo! %x\n", t);
+	mdelay(1000);
+	kernel_thread_exit(0);
+}
+
 /**
  * This is the main kernel thread. When TempOS initializes his scheduler
  * the kernel process becomes a kernel thread (running this function). So
@@ -101,6 +109,9 @@ void kernel_main_thread(void *arg)
 
 	/* Initialize Virtual File System layer */
 	register_all_fs_types();
+
+	/* Initialize PID numbers */
+	init_pids();
 
 	/* ATA controller */
 	init_ata_generic();
@@ -138,7 +149,7 @@ void kernel_main_thread(void *arg)
 
 
 	/* TEST: Read root directory */
-	kprintf("DEBUG:\n");
+	/*kprintf("DEBUG:\n");
 	vfs_inode *root = vfs_namei("/");
 	if ( !(root->i_mode & S_IFDIR) ) {
 		panic("Not dir.");
@@ -169,8 +180,8 @@ void kernel_main_thread(void *arg)
 		pos = newpos;
 
 		kprintf("%.8ld|", dir.inode);
-		/*kprintf("|%ld\n", dir.rec_len);
-		kprintf("|%ld\n", dir.name_len);*/
+		//kprintf("|%ld\n", dir.rec_len);
+		//kprintf("|%ld\n", dir.name_len);
 		kprintf("%s\n",  dir.name);
 	}
 
@@ -183,17 +194,42 @@ void kernel_main_thread(void *arg)
 	//vfs_bmap_t bk = vfs_bmap(arq, 12298);
 	vfs_bmap_t bk = vfs_bmap(arq, 274442);
 	//vfs_bmap_t bk = vfs_bmap(arq, 67384320);
+	*/
+	
+	/* Load init */
+	vfs_inode *arq = vfs_namei(init);
+	vfs_bmap_t bk = vfs_bmap(arq, 0);
+	//kprintf("bk.blk_number = %ld\n", bk.blk_number);
+	//kprintf("bk.blk_offset = %ld\n", bk.blk_offset);
+	//kprintf("bk.blk_breada = %ld\n", bk.blk_breada);
+	char *block = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
+	
+	//kfree(block);
 
-	//vfs_inode *arq = vfs_namei("/bin/init.c");
-	//vfs_bmap_t bk = vfs_bmap(arq, 0);
+	_exec_init(block);
 
-	kprintf("bk.blk_number = %ld\n", bk.blk_number);
-	kprintf("bk.blk_offset = %ld\n", bk.blk_offset);
-	kprintf("bk.blk_breada = %ld\n", bk.blk_breada);
-	block = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
-	kprintf("%s\n", &block[bk.blk_offset]);
-	kfree(block);
 
+	/*pid_t pid = _fork(GET_TASK(cur_task));
+
+	if (pid != 0) {
+		kprintf("Eu sou o PAI!\n");
+		while(1) {
+			kprintf("PAI: %d\n", pid);
+			mdelay(500);
+		}
+	} else {
+		kprintf("Eu sou o Filho!\n");
+		while(1) {
+			kprintf("Filho: %d\n", GET_TASK(cur_task)->pid);
+			mdelay(500);
+		}
+	}*/
+
+/*	task_t *th1 = kernel_thread_create(DEFAULT_PRIORITY, thread1, (void*)0x24);
+
+	kernel_thread_wait(th1);
+
+	kprintf("Acordei!\n");*/
 
 	/* fork thread */
 	/* call execve_init */

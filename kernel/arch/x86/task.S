@@ -23,7 +23,7 @@
  */
 
 .global initial_task, task_switch_to
-.extern arch_tss_cur_task
+.extern task_tss, arch_tss_cur_task
 
 /**
  * This is function should be used only once to
@@ -78,6 +78,10 @@ initial_task:
  *  ----------------
  * |     EFLAGS     |
  *  ----------------
+ * |      ESP       |
+ *  ----------------
+ * |      SS        |
+ *  ----------------
  * | task_t *task   |
  *  ----------------
  * |      ...       |
@@ -91,20 +95,37 @@ initial_task:
  */
 task_switch_to:
 	cli
-	pushw %cs		/* push CS */
+	pushw %ss
+	pushl %esp
+
+	pushw %cs		/* push CS  */
 	pushl %eax 		/* save EAX in the stack */
 	
+	/* Move return address to top of stack */
+	subl $0x04, %esp
+	movl 16(%esp), %eax
+	movl %eax, (%esp)
+	
+	/* Move SS down */
+	movw 14(%esp), %ax
+	movw %ax, 18(%esp)
+
+	/* Move ESP down */
+	movl 10(%esp), %eax
+	movl %eax, 14(%esp)
+
 	/* put eflags in EAX */
 	pushf
 	popl  %eax
 
-	/* exchange eflags with return address */
-	xchgl %eax,6(%esp)
-	
-	/* exchange return address with EAX value */
+	/* Move eflags above ESP */
+	movl %eax, 10(%esp)
+
+	/* exchange return value with EAX onto the stack */
+	popl %eax /* return value */
 	xchgl %eax,(%esp)
 
-	/* Save registers */
+	/* Save general registers */
 	pushal
 	pushw %ds
 	pushw %es
@@ -120,13 +141,31 @@ task_switch_to:
 	/**
 	 * Save stack
 	 */
-	movl arch_tss_cur_task,%eax
+	movl arch_tss_cur_task, %eax
 	movl %esp, 10(%eax)
+	movl %ebx, -4(%esp)
+	movl task_tss, %ebx
+	movl %esp, 4(%ebx)
+	movl -4(%esp), %ebx
+
+	/**
+	 * Check if iret will pop SS and ESP (intra-privilege)
+	 */
+	pushl %ebx
+	pushl %ecx
+	pushl %eax
+	movl 74(%esp), %eax
+	movw  8(%eax), %bx
+	popl %eax
+	movw  8(%eax), %cx
+	cmpw %bx, %cx
+	popl %ecx
+	popl %ebx
 
 	/**
 	 * Make stack switch
 	 */
-	movl 56(%esp), %eax
+	movl 62(%esp), %eax
 	movl 10(%eax), %esp
 	movl %eax, arch_tss_cur_task
 
@@ -142,7 +181,18 @@ task_switch_to:
 	popw %ds
 	popal
 
+	/* Check for intra-privilege */
+	jne intra
+	pushl %eax
+	movl 10(%esp), %eax  /* EFLAGS */
+	xchgl %eax, 16(%esp)
+	movw  8(%esp), %ax   /* CS */
+	xchgw %ax, 14(%esp)
+	movl 4(%esp), %eax   /* Ret addr */
+	xchgl %eax, 10(%esp)
+	popl %eax
+	addl $0x06, %esp
+intra:
 	/* Call iret and go to new thread */
-	sti
 	iret
 
