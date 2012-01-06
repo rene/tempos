@@ -32,22 +32,22 @@ void dump_cpu(void)
 {
 	pt_regs regs;
 
-	asm("movl %%eax, %0  \n"  
-		"movl %%ebx, %1  \n"
-		"movl %%ecx, %2  \n"
-		"movl %%edx, %3": 
+	asm("movl %%eax, %0  \n" \
+		"movl %%ebx, %1  \n" \
+		"movl %%ecx, %2  \n" \
+		"movl %%edx, %3":  \
 		"=r" (regs.eax), "=r" (regs.ebx), "=r" (regs.ecx), "=r" (regs.edx) ::);
 
-	asm("movw %%cs, %0  \n"
-		"movw %%ds, %1  \n"
-		"movw %%es, %2  \n"
+	asm("movw %%cs, %0  \n" \
+		"movw %%ds, %1  \n" \
+		"movw %%es, %2  \n" \
 		"movw %%fs, %3":
 		"=r" (regs.cs), "=r" (regs.ds), "=r" (regs.es), "=r" (regs.fs) ::);
 
-	asm("movw %%gs,  %0  \n"
-		"movw %%ss,  %1  \n"
-		"movl %%esi, %2  \n"
-		"movl %%edi, %3  \n":
+	asm("movw %%gs,  %0  \n" \
+		"movw %%ss,  %1  \n" \
+		"movl %%esi, %2  \n" \
+		"movl %%edi, %3  \n": \
 		"=r" (regs.gs), "=r" (regs.ss), "=r" (regs.esi), "=r" (regs.edi) ::);
 
 	dump_cpu_regs(&regs);
