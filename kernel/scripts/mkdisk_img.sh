@@ -144,9 +144,8 @@ GRUB1TARBALL=scripts/grub1.tar.bz2
 # Check grub's version
 GRUBI=$(which grub-install)
 if [ -z "$GRUBI" ]; then
-	echo "ERROR: GRUB not found."
-	false
-	check_result
+	echo "ERROR: GRUB not found. Trying to use GRUB2..."
+	use_grub2
 else
 	GVERSION=$($GRUBI -v | sed "s/.*\([0-9]\.[0-9][0-9]\).*/\1/")
 fi
