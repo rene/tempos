@@ -77,7 +77,7 @@
 
 	void wait_write_8042(void);
 
-	uchar8_t read_key(void);
+	uchar8_t read_scancode(void);
 
 #endif /* CHAR_I8042_H */
 

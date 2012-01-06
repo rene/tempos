@@ -38,11 +38,9 @@
 #include <linkedl.h>
 #include <semaphore.h>
 
+
 /** information passed from first stage */
 karch_t kinfo;
-
-/** kernel stack */
-extern uint32_t stack;
 
 /** kernel main thread */
 void kernel_main_thread(void *arg);

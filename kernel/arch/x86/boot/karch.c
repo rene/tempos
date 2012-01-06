@@ -37,7 +37,6 @@
 #include "video.h" /* TODO: console */
 
 
-
 /**
  * First Stage: Called from Boot Stage.
  */

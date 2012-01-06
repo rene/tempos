@@ -26,7 +26,6 @@
 #include <x86/gdt.h>
 #include <x86/tss.h>
 
-
 /** GDT table */
 gdt_t gdt_table[GDT_TABLE_SIZE];
 
@@ -151,13 +150,15 @@ void setup_GDT(void)
 	tssentry->high.granularity = GDT_GR_4KB;
 
 	/* Initialize TSS */
-	task_tss.ss0 = 0x10;
-	task_tss.cs = 0x0b;
-	task_tss.ss = 0x13;
-	task_tss.ds = 0x13;
-	task_tss.es = 0x13;
-	task_tss.fs = 0x13;
-	task_tss.gs = 0x13;
+	task_tss.ss0  = KERNEL_DS;
+	task_tss.esp0 = 0x00;
+
+	task_tss.cs   = 0x0B;
+	task_tss.ss   = 0x13;
+	task_tss.ds   = 0x13;
+	task_tss.es   = 0x13;
+	task_tss.fs   = 0x13;
+	task_tss.gs   = 0x13;
 
 	/* Finally, load GDT */
 	GDTR.table_limit = (GDT_TABLE_SIZE * sizeof(gdt_t)) - 1;
@@ -183,8 +184,8 @@ inline void load_gdt(void)
 		"ljmp %2, $reloadCS \n"
 		"reloadCS:            "
 		/* Now, we also load the Task Register */
-		"	movw $0x2b, %%ax      \n"
+		"	movw %3, %%ax      \n"
 		"	ltrw %%ax          \n"
-			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS) : "eax");
+			: : "m" (GDTR), "I" (KERNEL_DS), "I" (KERNEL_CS), "i" (TSS_SEG_RPL) : "eax");
 }
 

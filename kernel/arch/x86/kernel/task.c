@@ -108,7 +108,7 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.eflags = 0x2020000;
 	
 	/* Setup thread context into stack */
-	task->arch_tss.regs.esp = (uint32_t)task->kstack - sizeof(arch_tss_t) - sizeof(task->arch_tss.regs.ss) - sizeof(task->arch_tss.regs.esp);
+	task->arch_tss.regs.esp = (uint32_t)task->kstack - (12 * sizeof(task->arch_tss.regs.eax)) - (3 * sizeof(task->arch_tss.regs.ds));
 	
 	/* Configure thread's stack */
 	push_into_stack(task->kstack, task->arch_tss.regs.ss);
@@ -125,10 +125,6 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	push_into_stack(task->kstack, task->arch_tss.regs.esi);
 	push_into_stack(task->kstack, task->arch_tss.regs.edi);
 	push_into_stack(task->kstack, task->arch_tss.regs.ds);
-	push_into_stack(task->kstack, task->arch_tss.regs.es);
-	push_into_stack(task->kstack, task->arch_tss.regs.fs);
-	push_into_stack(task->kstack, task->arch_tss.regs.gs);
-	push_into_stack(task->kstack, task->arch_tss.regs.ss);
 	push_into_stack(task->kstack, task->arch_tss.cr3);
 
 	return;

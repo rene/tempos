@@ -101,25 +101,24 @@ void _exec_init(char *init_data)
 	newth->arch_tss.regs.gs  = KERNEL_DS;
 	newth->arch_tss.regs.ss  = KERNEL_DS;
 	newth->arch_tss.regs.es  = KERNEL_DS;
-	newth->arch_tss.regs.cs  = KERNEL_CS;
-
-	/*
-	newth->arch_tss.regs.ds  = USER_DS | USER_DPL;
-	newth->arch_tss.regs.fs  = USER_DS | USER_DPL;
-	newth->arch_tss.regs.gs  = USER_DS | USER_DPL;
-	newth->arch_tss.regs.ss  = USER_DS | USER_DPL;
-	newth->arch_tss.regs.es  = USER_DS | USER_DPL;
-	newth->arch_tss.regs.cs  = USER_CS | USER_DPL;
+	newth->arch_tss.regs.cs  = KERNEL_CS; 
+/*
+	newth->arch_tss.regs.ds  = USER_DS_RPL;
+	newth->arch_tss.regs.fs  = USER_DS_RPL;
+	newth->arch_tss.regs.gs  = USER_DS_RPL;
+	newth->arch_tss.regs.ss  = USER_DS_RPL;
+	newth->arch_tss.regs.es  = USER_DS_RPL;
+	newth->arch_tss.regs.cs  = USER_CS_RPL;
 */
 	newth->arch_tss.regs.eflags = 0x2020000;
 	
 	/* Setup thread context into stack */
-	newth->arch_tss.regs.esp = (uint32_t)newth->kstack - sizeof(arch_tss_t) - sizeof(newth->arch_tss.regs.ss) - sizeof(newth->arch_tss.regs.esp);
-	
+	newth->arch_tss.regs.esp = (uint32_t)newth->kstack - (12 * sizeof(newth->arch_tss.regs.eax)) - (3 * sizeof(newth->arch_tss.regs.ds));
+
 	ptable_addr = alloc_page(GFP_NORMAL_Z);
 	dtable_addr = alloc_page(GFP_NORMAL_Z);
 
-	/* Map dtable at 0x1000000 just for fill data */
+	/* Map dtable at 0x1000000 */
 	kerneldir->tables[4][0] = MAKE_ENTRY(dtable_addr, (PAGE_WRITABLE | PAGE_PRESENT | PAGE_USER));
 	dtable = (uint32_t*)0x1000000;
 	for (i = 0; i < 1024; i++) {
@@ -133,7 +132,7 @@ void _exec_init(char *init_data)
 	ptable = (uint32_t*)0xC00000;
 	ptable[0] = MAKE_ENTRY(get_phy_addr(init_data), (PAGE_WRITABLE | PAGE_PRESENT | PAGE_USER));
 
-	pg_pdir->tables_phy_addr = (uint32_t*)dtable_addr;
+	pg_pdir->tables_phy_addr = dtable; //(uint32_t*)dtable_addr;
 	pg_pdir->dir_phy_addr = dtable_addr;
 
 	/* 12MB+12bytes : start point */
@@ -157,10 +156,6 @@ void _exec_init(char *init_data)
 	push_into_stack(newth->kstack, newth->arch_tss.regs.esi);
 	push_into_stack(newth->kstack, newth->arch_tss.regs.edi);
 	push_into_stack(newth->kstack, newth->arch_tss.regs.ds);
-	push_into_stack(newth->kstack, newth->arch_tss.regs.es);
-	push_into_stack(newth->kstack, newth->arch_tss.regs.fs);
-	push_into_stack(newth->kstack, newth->arch_tss.regs.gs);
-	push_into_stack(newth->kstack, newth->arch_tss.regs.ss);
 	push_into_stack(newth->kstack, newth->arch_tss.cr3);
 
 	/* Add to task queue */

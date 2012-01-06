@@ -174,8 +174,11 @@ void setup_IDT(void)
 	/* TempOS syscall interrupt : 0x85 */
 	idtentry = (idt_tpintdesc_t *)&idt_table[133];
 	IDT_SET_OFFSET(idtentry, _sys_enter);
-	idtentry->high.present = 1;
-
+	idtentry->seg_selector   = KERNEL_CS;
+	idtentry->high.DPL       = USER_DPL;
+	idtentry->high.type      = IDT_INT_GATE;
+	idtentry->high.gate_size = IDT_INTGATE_S32;
+	idtentry->high.present   = 1;
 
 	IDTR.table_limit = (IDT_TABLE_SIZE * sizeof(idt_t)) - 1;
 	IDTR.idt_ptr     = (void*)idt_table;

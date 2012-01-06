@@ -140,6 +140,12 @@ void kprint(char *str)
 			case '\r':
 						if(px > 0) px--;
 						break;
+			
+			case '\b':
+						if(px > 0) px--;
+						writechar(' ', c_attr);
+						px--;
+						break;
 
 			default:
 						writechar(str[i], c_attr);

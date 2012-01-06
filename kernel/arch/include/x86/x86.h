@@ -93,6 +93,15 @@
 	/** Position 5 on GDT */
 	#define TSS_SEG     0x28
 
+	/** USER data segment RPL (USER_DS | USER_DPL) */
+	#define USER_DS_RPL 0x23
+	
+	/** USER code segment RPL (USER_CS | USER_DPL) */
+	#define USER_CS_RPL 0x1B
+
+	/** TSS segment RPL (TSS_SEG | USER_DPL) */
+	#define TSS_SEG_RPL 0x2B
+
 	/** Interrupt flags in EFLAGS */
 	#define EFLAGS_IF   0x2020000
 

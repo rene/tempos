@@ -22,6 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <x86/x86.h>
+
 .global initial_task, task_switch_to
 .extern task_tss, arch_tss_cur_task
 
@@ -46,8 +48,12 @@ initial_task:
 	movl 42(%eax), %edx /* arch_tss.regs.eip    */
 
 	/* Ajust stack */
-	movl  %ebx, %esp
+	movl %ebx, %esp
 	
+	/* Update TSS */
+	movl task_tss, %eax
+	movl %ebx, 4(%eax)
+
 	/* Push arguments for iret and call it */
 	pushl %ecx
 	pushw %cs
@@ -95,10 +101,31 @@ initial_task:
  */
 task_switch_to:
 	cli
-	pushw %ss
-	pushl %esp
 
-	pushw %cs		/* push CS  */
+	pushl %eax
+	movl arch_tss_cur_task, %eax
+	movl 10(%eax), %eax
+
+	pushl %ebx
+	movl 12(%esp), %eax
+
+	/* Check if task it's kernel or user process */
+	movw (%eax), %bx
+	cmpw  $USER_DS_RPL, %bx
+	popl %ebx
+	popl %eax
+
+	jne kernel_proc
+	pushw $USER_DS_RPL /* SS  */
+	pushl %esp         /* ESP */
+	pushw $USER_CS_RPL /* CS  */
+	jmp cs_cont
+kernel_proc:
+	pushw $KERNEL_DS   /* SS  */
+	pushl %esp         /* ESP */
+	pushw $KERNEL_CS   /* CS  */
+cs_cont:
+
 	pushl %eax 		/* save EAX in the stack */
 	
 	/* Move return address to top of stack */
@@ -123,15 +150,14 @@ task_switch_to:
 
 	/* exchange return value with EAX onto the stack */
 	popl %eax /* return value */
-	xchgl %eax,(%esp)
+	xchgl %eax, (%esp)
 
 	/* Save general registers */
 	pushal
-	pushw %ds
-	pushw %es
-	pushw %fs
-	pushw %gs
-	pushw %ss
+	/* Get correct data segment RPL */
+	movw 46(%esp), %ax
+	/* Push data segment "registers" */
+	pushw %ax /* SS, ES, FS, GS, SS */
 
 	/* Save CR3 */
 	pushl %eax
@@ -143,42 +169,37 @@ task_switch_to:
 	 */
 	movl arch_tss_cur_task, %eax
 	movl %esp, 10(%eax)
-	movl %ebx, -4(%esp)
+	movl %esp, 48(%esp)
+
 	movl task_tss, %ebx
 	movl %esp, 4(%ebx)
-	movl -4(%esp), %ebx
 
 	/**
 	 * Check if iret will pop SS and ESP (intra-privilege)
 	 */
-	pushl %ebx
-	pushl %ecx
-	pushl %eax
-	movl 74(%esp), %eax
-	movw  8(%eax), %bx
-	popl %eax
-	movw  8(%eax), %cx
+	movw  8(%eax), %bx   /* SS of current task */
+	movl 54(%esp), %eax
+	movw  8(%eax), %cx   /* SS of this task */
 	cmpw %bx, %cx
-	popl %ecx
-	popl %ebx
-
+	
 	/**
 	 * Make stack switch
 	 */
-	movl 62(%esp), %eax
+	movl 54(%esp), %eax
 	movl 10(%eax), %esp
+	
 	movl %eax, arch_tss_cur_task
-
+	
 	/* Invalidate TLB cache and load page table directory */
 	popl %eax
 	movl %eax, %cr3
 
 	/* Restore register values for new task */
-	popw %ss
-	popw %gs
-	popw %fs
-	popw %es
-	popw %ds
+	popw %ax
+	movw %ax, %ds
+	movw %ax, %es
+	movw %ax, %fs
+	movw %ax, %gs
 	popal
 
 	/* Check for intra-privilege */
@@ -192,6 +213,7 @@ task_switch_to:
 	xchgl %eax, 10(%esp)
 	popl %eax
 	addl $0x06, %esp
+	iret
 intra:
 	/* Call iret and go to new thread */
 	iret
