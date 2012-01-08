@@ -31,7 +31,7 @@
 
 #define load_eflags(x) __asm__ __volatile__("pushfl ; popl %0" : "=r"(x) :: "eax")
 
-
+extern tss_t task_tss;
 extern pagedir_t *kerneldir;
 
 /**
@@ -51,11 +51,21 @@ void arch_init_scheduler(void (*start_routine)(void*))
 {
 	uint32_t eflags;
 	task_t *newth = NULL;
+	char *kstack;
 
 	/* Alloc memory for task structure */
 	newth = (task_t*)kmalloc(sizeof(task_t), GFP_NORMAL_Z);
 	if (newth == NULL) {
 		return;
+	}
+
+	/* Alloc memory for kernel TSS stack */
+	kstack = (char*)kmalloc(PROCESS_STACK_SIZE, GFP_NORMAL_Z | PAGE_USER);
+	if (kstack == NULL) {
+		kfree(newth);
+		return;
+	} else {
+		task_tss.esp0 = (uint32_t)kstack + PROCESS_STACK_SIZE;
 	}
 
 	load_eflags(eflags);

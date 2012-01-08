@@ -25,6 +25,8 @@
 #include <string.h>
 #include <x86/gdt.h>
 #include <x86/tss.h>
+#include <x86/karch.h>
+
 
 /** GDT table */
 gdt_t gdt_table[GDT_TABLE_SIZE];

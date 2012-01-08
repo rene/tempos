@@ -78,7 +78,7 @@ void ex_device()
 
 void ex_dfault(int code)
 {
-	kprintf("EXCEP: DEFAULT\n");
+	panic("EXCEP: DEFAULT\n");
 }
 
 
@@ -90,19 +90,19 @@ void ex_coproc(int code)
 
 void ex_inv_tss(int code)
 {
-	kprintf("EXCEP: INVALID TSS\n");
+	panic("EXCEP: INVALID TSS\n");
 }
 
 
 void ex_segnp(int code)
 {
-	kprintf("EXCEP: SEGNP\n");
+	panic("EXCEP: SEGNP\n");
 }
 
 
 void ex_stack(int code)
 {
-	kprintf("EXCEP: STACK\n");
+	panic("EXCEP: STACK\n");
 }
 
 
@@ -131,7 +131,7 @@ void ex_floatp()
 
 void ex_align(int code)
 {
-	kprintf("EXCEP: ALIGN\n");
+	panic("EXCEP: ALIGN\n");
 }
 
 

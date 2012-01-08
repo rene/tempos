@@ -25,7 +25,7 @@
 #include <x86/x86.h>
 
 .global initial_task2, initial_task, task_switch_to
-.extern task_tss, arch_tss_cur_task
+.extern arch_tss_cur_task
 
 /**
  * This is function should be used only once to
@@ -49,58 +49,10 @@ initial_task:
 
 	/* Ajust stack */
 	movl %ebx, %esp
-	
-	/* Update TSS */
-	movl task_tss, %eax
-	movl %ebx, 4(%eax)
 
 	/* Push arguments for iret and call it */
 	pushl %ecx
 	pushl %cs
-	pushl %edx
-	iret
-
-initial_task2:
-	cli
-	movl 4(%esp), %eax
-	/**
-	 * Since this function should be called just once at kernel
-	 * initialization, thus at the kernel mode, we doesn't
-	 * need to make level switch because we are already in kernel mode,
-	 * so here all we need it's adjust stack and jmp to main thread function
-	 *
-	 * \note keep offset values sync with struct _task_struct
-	 * \see include/tempos/sched.h
-	 */
-	movl 10(%eax), %ebx /* arch_tss.regs.esp    */
-	movl 48(%eax), %ecx /* arch_tss.regs.eflags */
-	movl 42(%eax), %edx /* arch_tss.regs.eip    */
-
-	/* Ajust stack */
-	movl %ebx, %esp
-
-	movl 52(%eax), %ebx
-	movl %ebx, %cr3
-
-	/* Update TSS */
-	movl task_tss, %eax
-	movl %esp, 4(%eax)
-
-	movw $0x23, %ax
-	movw %ax, %ds
-	movw %ax, %es
-	movw %ax, %fs
-	movw %ax, %gs
-
-	movl $0x00, %ebp
-	movl $0x00, %esi
-	movl $0x00, %edi
-
-	/* Push arguments for iret and call it */
-	pushl $0x23
-	pushl %esp
-	pushl %ecx
-	pushl $0x1b
 	pushl %edx
 	iret
 
@@ -212,10 +164,7 @@ cs_cont:
 	 */
 	movl arch_tss_cur_task, %eax
 	movl %esp, 10(%eax)
-	movl %esp, 50(%esp)
-
-	movl task_tss, %ebx
-	movl %esp, 4(%ebx)
+#	movl %esp, 50(%esp)
 
 	/**
 	 * Check if iret will pop SS and ESP (intra-privilege)

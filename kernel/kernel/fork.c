@@ -100,21 +100,21 @@ void _exec_init(char *init_data)
 	newth->kstack = (char*)((void*)new_stack + PROCESS_STACK_SIZE);
 
 	newth->arch_tss.regs.eip = (uint32_t)0xC0000C; /* Start point */
-	newth->arch_tss.regs.ds  = KERNEL_DS;
+/*	newth->arch_tss.regs.ds  = KERNEL_DS;
 	newth->arch_tss.regs.fs  = KERNEL_DS;
 	newth->arch_tss.regs.gs  = KERNEL_DS;
 	newth->arch_tss.regs.ss  = KERNEL_DS;
 	newth->arch_tss.regs.es  = KERNEL_DS;
-	newth->arch_tss.regs.cs  = KERNEL_CS; 
-/*
+	newth->arch_tss.regs.cs  = KERNEL_CS;
+*/
 	newth->arch_tss.regs.ds  = USER_DS_RPL;
 	newth->arch_tss.regs.fs  = USER_DS_RPL;
 	newth->arch_tss.regs.gs  = USER_DS_RPL;
 	newth->arch_tss.regs.ss  = USER_DS_RPL;
 	newth->arch_tss.regs.es  = USER_DS_RPL;
 	newth->arch_tss.regs.cs  = USER_CS_RPL;
-*/
-	newth->arch_tss.regs.eflags = EFLAGS_IF;// | IOPL_USER;
+
+	newth->arch_tss.regs.eflags = EFLAGS_IF | IOPL_USER;
 
 	/* Setup thread context into stack */
 	newth->arch_tss.regs.esp = (uint32_t)newth->kstack - (14 * sizeof(newth->arch_tss.regs.eax)) - sizeof(newth->arch_tss.regs.ds);
@@ -127,7 +127,7 @@ void _exec_init(char *init_data)
 	dtable = (uint32_t*)0x1000000;
 	for (i = 0; i < 1024; i++) {
 		pg_pdir->tables[i] = kerneldir->tables[i];
-		dtable[i] = kerneldir->tables_phy_addr[i];
+		dtable[i] = kerneldir->tables_phy_addr[i] | PAGE_USER;
 	}
 	dtable[3] = MAKE_ENTRY(ptable_addr, (PAGE_WRITABLE | PAGE_PRESENT | PAGE_USER));
 
@@ -139,12 +139,11 @@ void _exec_init(char *init_data)
 	pg_pdir->tables_phy_addr = dtable; //(uint32_t*)dtable_addr;
 	pg_pdir->dir_phy_addr = dtable_addr;
 
-	/* 12MB+12bytes : start point */
+	/* 12MB : start point */
 	//kerneldir->tables[3][0] = MAKE_ENTRY(get_phy_addr(init_data), (PAGE_PRESENT));
 	//pg_pdir->dir_phy_addr = kerneldir->dir_phy_addr;
 	
 	newth->arch_tss.cr3 = pg_pdir->dir_phy_addr;
-	//initial_task2(newth);
 
 	/* Configure thread's stack */
 	cs = newth->arch_tss.regs.cs;

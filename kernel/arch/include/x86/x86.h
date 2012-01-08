@@ -103,7 +103,7 @@
 	#define TSS_SEG_RPL 0x2B
 
 	/** Interrupt flags in EFLAGS */
-	#define EFLAGS_IF   0x200
+	#define EFLAGS_IF   0x202
 
 	/** IOPL User EFLAGS */
 	#define IOPL_USER  0x3000
