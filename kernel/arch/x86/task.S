@@ -24,7 +24,7 @@
 
 #include <x86/x86.h>
 
-.global initial_task, task_switch_to
+.global initial_task2, initial_task, task_switch_to
 .extern task_tss, arch_tss_cur_task
 
 /**
@@ -56,9 +56,52 @@ initial_task:
 
 	/* Push arguments for iret and call it */
 	pushl %ecx
-	pushw %cs
+	pushl %cs
 	pushl %edx
-	sti
+	iret
+
+initial_task2:
+	cli
+	movl 4(%esp), %eax
+	/**
+	 * Since this function should be called just once at kernel
+	 * initialization, thus at the kernel mode, we doesn't
+	 * need to make level switch because we are already in kernel mode,
+	 * so here all we need it's adjust stack and jmp to main thread function
+	 *
+	 * \note keep offset values sync with struct _task_struct
+	 * \see include/tempos/sched.h
+	 */
+	movl 10(%eax), %ebx /* arch_tss.regs.esp    */
+	movl 48(%eax), %ecx /* arch_tss.regs.eflags */
+	movl 42(%eax), %edx /* arch_tss.regs.eip    */
+
+	/* Ajust stack */
+	movl %ebx, %esp
+
+	movl 52(%eax), %ebx
+	movl %ebx, %cr3
+
+	/* Update TSS */
+	movl task_tss, %eax
+	movl %esp, 4(%eax)
+
+	movw $0x23, %ax
+	movw %ax, %ds
+	movw %ax, %es
+	movw %ax, %fs
+	movw %ax, %gs
+
+	movl $0x00, %ebp
+	movl $0x00, %esi
+	movl $0x00, %edi
+
+	/* Push arguments for iret and call it */
+	pushl $0x23
+	pushl %esp
+	pushl %ecx
+	pushl $0x1b
+	pushl %edx
 	iret
 
 
@@ -116,37 +159,37 @@ task_switch_to:
 	popl %eax
 
 	jne kernel_proc
-	pushw $USER_DS_RPL /* SS  */
+	pushl $USER_DS_RPL /* SS  */
 	pushl %esp         /* ESP */
-	pushw $USER_CS_RPL /* CS  */
+	pushl $USER_CS_RPL /* CS  */
 	jmp cs_cont
 kernel_proc:
-	pushw $KERNEL_DS   /* SS  */
+	pushl $KERNEL_DS   /* SS  */
 	pushl %esp         /* ESP */
-	pushw $KERNEL_CS   /* CS  */
+	pushl $KERNEL_CS   /* CS  */
 cs_cont:
 
 	pushl %eax 		/* save EAX in the stack */
 	
 	/* Move return address to top of stack */
 	subl $0x04, %esp
-	movl 16(%esp), %eax
+	movl 20(%esp), %eax
 	movl %eax, (%esp)
 	
 	/* Move SS down */
-	movw 14(%esp), %ax
-	movw %ax, 18(%esp)
+	movw 16(%esp), %ax
+	movw %ax, 20(%esp)
 
 	/* Move ESP down */
-	movl 10(%esp), %eax
-	movl %eax, 14(%esp)
+	movl 12(%esp), %eax
+	movl %eax, 16(%esp)
 
 	/* put eflags in EAX */
 	pushf
 	popl  %eax
 
 	/* Move eflags above ESP */
-	movl %eax, 10(%esp)
+	movl %eax, 12(%esp)
 
 	/* exchange return value with EAX onto the stack */
 	popl %eax /* return value */
@@ -155,9 +198,9 @@ cs_cont:
 	/* Save general registers */
 	pushal
 	/* Get correct data segment RPL */
-	movw 46(%esp), %ax
+	movl 52(%esp), %eax
 	/* Push data segment "registers" */
-	pushw %ax /* SS, ES, FS, GS, SS */
+	pushw (%eax) /* SS, ES, FS, GS, SS */
 
 	/* Save CR3 */
 	pushl %eax
@@ -169,7 +212,7 @@ cs_cont:
 	 */
 	movl arch_tss_cur_task, %eax
 	movl %esp, 10(%eax)
-	movl %esp, 48(%esp)
+	movl %esp, 50(%esp)
 
 	movl task_tss, %ebx
 	movl %esp, 4(%ebx)
@@ -178,14 +221,14 @@ cs_cont:
 	 * Check if iret will pop SS and ESP (intra-privilege)
 	 */
 	movw  8(%eax), %bx   /* SS of current task */
-	movl 54(%esp), %eax
+	movl 58(%esp), %eax
 	movw  8(%eax), %cx   /* SS of this task */
 	cmpw %bx, %cx
 	
 	/**
 	 * Make stack switch
 	 */
-	movl 54(%esp), %eax
+	movl 58(%esp), %eax
 	movl 10(%eax), %esp
 	
 	movl %eax, arch_tss_cur_task
@@ -205,15 +248,14 @@ cs_cont:
 	/* Check for intra-privilege */
 	jne intra
 	pushl %eax
-	movl 10(%esp), %eax  /* EFLAGS */
+	movl 12(%esp), %eax  /* EFLAGS */
+	xchgl %eax, 20(%esp)
+	movl  8(%esp), %eax  /* CS */
 	xchgl %eax, 16(%esp)
-	movw  8(%esp), %ax   /* CS */
-	xchgw %ax, 14(%esp)
 	movl 4(%esp), %eax   /* Ret addr */
-	xchgl %eax, 10(%esp)
+	xchgl %eax, 12(%esp)
 	popl %eax
-	addl $0x06, %esp
-	iret
+	addl $0x08, %esp
 intra:
 	/* Call iret and go to new thread */
 	iret

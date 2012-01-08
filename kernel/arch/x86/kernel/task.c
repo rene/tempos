@@ -38,8 +38,8 @@ extern pagedir_t *kerneldir;
  * This is the low level routine to make context switch
  * \see arch/x86/task.S
  */
-void task_switch_to(arch_tss_t *task);
-void initial_task(task_t *task);
+extern void task_switch_to(arch_tss_t *task);
+extern void initial_task(task_t *task);
 
 arch_tss_t *arch_tss_cur_task;
 
@@ -92,6 +92,8 @@ void arch_init_scheduler(void (*start_routine)(void*))
  */
 void setup_task(task_t *task, void (*start_routine)(void*))
 {
+	uint32_t ss, cs;
+
 	if (task == NULL) {
 		return;
 	}
@@ -105,16 +107,18 @@ void setup_task(task_t *task, void (*start_routine)(void*))
 	task->arch_tss.regs.cs  = KERNEL_CS;
 	task->arch_tss.cr3 = (uint32_t)kerneldir->dir_phy_addr; /* physical address */
 
-	task->arch_tss.regs.eflags = 0x2020000;
+	task->arch_tss.regs.eflags = EFLAGS_IF;
 	
 	/* Setup thread context into stack */
-	task->arch_tss.regs.esp = (uint32_t)task->kstack - (12 * sizeof(task->arch_tss.regs.eax)) - (3 * sizeof(task->arch_tss.regs.ds));
+	task->arch_tss.regs.esp = (uint32_t)task->kstack - (14 * sizeof(task->arch_tss.regs.eax)) - sizeof(task->arch_tss.regs.ds);
 	
 	/* Configure thread's stack */
-	push_into_stack(task->kstack, task->arch_tss.regs.ss);
+	cs = task->arch_tss.regs.cs;
+	ss = task->arch_tss.regs.ss;
+	push_into_stack(task->kstack, ss);
 	push_into_stack(task->kstack, task->arch_tss.regs.esp);
 	push_into_stack(task->kstack, task->arch_tss.regs.eflags);
-	push_into_stack(task->kstack, task->arch_tss.regs.cs);
+	push_into_stack(task->kstack, cs);
 	push_into_stack(task->kstack, task->arch_tss.regs.eip);
 	push_into_stack(task->kstack, task->arch_tss.regs.eax);
 	push_into_stack(task->kstack, task->arch_tss.regs.ecx);

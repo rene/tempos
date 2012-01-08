@@ -35,7 +35,7 @@ tss_t task_tss;
 /**
 \verbatim
   TempOS use a Protected Flat Model with paging for memory organization
-  and protection. The GDT has seven entries:
+  and protection. The GDT has six entries:
   		
   		KERNEL_CS (Code Segment, Ring 0) <-- For kernel code
   		KERNEL_DS (Data Segment, Ring 0) <-- For kernel data and stack
@@ -136,7 +136,7 @@ void setup_GDT(void)
 	/* TSS_SEG */
 	memset(&task_tss, 0, sizeof(tss_t));
 	tssentry = (gdt_tsseg_t *)&gdt_table[5];
-	GDT_SET_BASE(tssentry,  (size_t)&task_tss);
+	GDT_SET_BASE(tssentry,  (uint32_t)&task_tss);
 	GDT_SET_LIMIT(tssentry, sizeof(tss_t)-1);
 	tssentry->high.type_res0   = 1; /* do NOT change! */
 	tssentry->high.busy        = 0;

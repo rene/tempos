@@ -28,12 +28,15 @@
 #include <arch/io.h>
 #include <x86/x86.h>
 
+
 /** Stack of PIDs numbers */
 static pid_t pid_stack[MAX_NUM_PROCESS];
 
 /** PID's stack top */
 static uint32_t pid_st_top;
 
+
+void initial_task2(task_t *task);
 
 /**
  * Fork system call.
@@ -64,6 +67,7 @@ void _exec_init(char *init_data)
 	pagedir_t *pg_pdir;
 	uint32_t *ptable, *dtable, ptable_addr, dtable_addr;
 	uint32_t i;
+	uint32_t cs, ss;
 
 	/* Alloc memory for task structure */
 	newth = (task_t*)kmalloc(sizeof(task_t), GFP_NORMAL_Z | GFP_USER);
@@ -110,10 +114,10 @@ void _exec_init(char *init_data)
 	newth->arch_tss.regs.es  = USER_DS_RPL;
 	newth->arch_tss.regs.cs  = USER_CS_RPL;
 */
-	newth->arch_tss.regs.eflags = 0x2020000;
-	
+	newth->arch_tss.regs.eflags = EFLAGS_IF;// | IOPL_USER;
+
 	/* Setup thread context into stack */
-	newth->arch_tss.regs.esp = (uint32_t)newth->kstack - (12 * sizeof(newth->arch_tss.regs.eax)) - (3 * sizeof(newth->arch_tss.regs.ds));
+	newth->arch_tss.regs.esp = (uint32_t)newth->kstack - (14 * sizeof(newth->arch_tss.regs.eax)) - sizeof(newth->arch_tss.regs.ds);
 
 	ptable_addr = alloc_page(GFP_NORMAL_Z);
 	dtable_addr = alloc_page(GFP_NORMAL_Z);
@@ -138,14 +142,17 @@ void _exec_init(char *init_data)
 	/* 12MB+12bytes : start point */
 	//kerneldir->tables[3][0] = MAKE_ENTRY(get_phy_addr(init_data), (PAGE_PRESENT));
 	//pg_pdir->dir_phy_addr = kerneldir->dir_phy_addr;
-
+	
 	newth->arch_tss.cr3 = pg_pdir->dir_phy_addr;
+	//initial_task2(newth);
 
 	/* Configure thread's stack */
-	push_into_stack(newth->kstack, newth->arch_tss.regs.ss);
+	cs = newth->arch_tss.regs.cs;
+	ss = newth->arch_tss.regs.ss;
+	push_into_stack(newth->kstack, ss);
 	push_into_stack(newth->kstack, newth->arch_tss.regs.esp);
 	push_into_stack(newth->kstack, newth->arch_tss.regs.eflags);
-	push_into_stack(newth->kstack, newth->arch_tss.regs.cs);
+	push_into_stack(newth->kstack, cs);
 	push_into_stack(newth->kstack, newth->arch_tss.regs.eip);
 	push_into_stack(newth->kstack, newth->arch_tss.regs.eax);
 	push_into_stack(newth->kstack, newth->arch_tss.regs.ecx);

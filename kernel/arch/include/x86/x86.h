@@ -103,7 +103,10 @@
 	#define TSS_SEG_RPL 0x2B
 
 	/** Interrupt flags in EFLAGS */
-	#define EFLAGS_IF   0x2020000
+	#define EFLAGS_IF   0x200
+
+	/** IOPL User EFLAGS */
+	#define IOPL_USER  0x3000
 
 #endif /* ARCH_X86_H */
 
