@@ -72,7 +72,7 @@ $(MAKEGEN): \
 # install
 #
 install:
-	@scripts/do_mkdisk.sh $(PWD)/$(kimage) $(PWD)/$(bimage)
+	@scripts/mkdisk_img.sh $(PWD)/$(kimage) $(PWD)/$(bimage)
 	@$(ECHO) "Installation done."
 
 

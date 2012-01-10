@@ -101,12 +101,12 @@ use_grub2() {
 	check_result
 
 	echo -n " + Creating GRUB configuration file..."
-	cat > $TMPDIR/boot/grub/menu.lst << EOF
+	cat > $TMPDIR/boot/grub/grub.cfg << EOF
 ##
 # TempOS
 #
 menuentry "TempOS" {
-	multiboot /$(basename $TEMPOSFILE) root=3:1 init=/sbin/init
+	multiboot /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init
 }
 
 COLOR_NORMAL="white/blue"
