@@ -72,7 +72,7 @@ $(MAKEGEN): \
 # install
 #
 install:
-	@scripts/do_mkdisk.sh $(PWD)/$(kimage) $(PWD)/$(fimage)
+	@scripts/do_mkdisk.sh $(PWD)/$(kimage) $(PWD)/$(bimage)
 	@$(ECHO) "Installation done."
 
 
@@ -80,7 +80,7 @@ install:
 # test
 #
 test:
-	@[ -f hdisk.img.gz ] || @qemu -M pc -fda $(fimage) -boot a &&  ( TEMPOSHD=`mktemp`; gunzip hdisk.img.gz -c > $$TEMPOSHD; qemu -M pc -fda $(fimage) -hda $$TEMPOSHD -boot a; rm $$TEMPOSHD )
+	@[ -f hdisk.img.gz ] || @qemu -M pc -cdrom $(bimage) -boot d &&  ( TEMPOSHD=`mktemp`; gunzip hdisk.img.gz -c > $$TEMPOSHD; qemu -M pc -cdrom $(bimage) -hda $$TEMPOSHD -boot d; rm $$TEMPOSHD )
 
 
 ##
@@ -92,5 +92,5 @@ clean: $(MAKEGEN)
 	done
 	@[ -f $(MAKEGEN) ] && (rm -f $(MAKEGEN) && echo " - REMOVING $(MAKEGEN)") || echo " ! $(MAKEGEN) not found."
 	@[ -f $(kimage) ] && (rm -f $(kimage) && echo " - REMOVING $(kimage)") || echo " ! $(kimage) not found."
-	@[ -f $(fimage) ] && (rm -f $(fimage) && echo " - REMOVING $(fimage)") || echo " ! $(fimage) not found."
+	@[ -f $(bimage) ] && (rm -f $(bimage) && echo " - REMOVING $(bimage)") || echo " ! $(bimage) not found."
 

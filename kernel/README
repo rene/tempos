@@ -27,6 +27,9 @@ ABOUT:
 		- System calls support
 		- Generic ATA driver
 		- Kernel Multithreading
+		- Virtual File System layer
+		- EXT2 parcial support
+		- User multitasking
 
 HISTORY:
 	TempOS was born as an undergraduate project designed by

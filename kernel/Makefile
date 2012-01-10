@@ -10,7 +10,7 @@ PWD := $(shell pwd)
 
 # Default files and dirs
 kimage     := tempos.elf
-fimage     := floppy.img
+bimage     := boot.iso
 
 conffile   := .config
 config_def := scripts/config.default
@@ -121,7 +121,7 @@ help:
 #
 test: showtitle $(kimage)
 	@$(ECHO) -n " * Checking architecture..."
-	@[ -f "$(fimage)" ] && ($(checkarch) $(conffile) test) \
+	@[ -f "$(bimage)" ] && ($(checkarch) $(conffile) test) \
 		|| ($(ECHO) -e "!\n * Running make..."; $(MAKE) --quiet install && $(MAKE) --quiet test)
 
 
