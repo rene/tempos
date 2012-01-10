@@ -81,28 +81,25 @@ void do_schedule(pt_regs *regs)
  */
 void schedule(void)
 {
-	task_t *current_task;
-	c_llist *next;
+	task_t *c_task;
+	c_llist *tmp, *head;
 
 	if (cur_task == NULL) {
 		return;
 	}
 
 	/* do schedule */
+	tmp = head = cur_task;
 	do {
-		next = cur_task->next;
-		if (next != NULL) {
-			if (next != cur_task) {
-				current_task = GET_TASK(next);
-				if (current_task->state == TASK_RUNNING || 
-						current_task->state == TASK_READY_TO_RUN) {
-					switch_to(next);
-					break;
-				} else {
-					continue;
-				}
-			}
+		tmp = tmp->next;
+		c_task = GET_TASK(tmp);
+		if (c_task->state == TASK_RUNNING || 
+				c_task->state == TASK_READY_TO_RUN) {
+			switch_to(tmp);
+			break;
+		} else {
+			continue;
 		}
-	} while(next == NULL);
+	} while(tmp == head);
 }
 

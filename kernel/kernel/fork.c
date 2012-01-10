@@ -206,7 +206,8 @@ pid_t _fork(task_t *thread)
 	/* Copy process's stack */
 	memcpy(new_stack, thread->stack_base, PROCESS_STACK_SIZE);
 	newth->stack_base = new_stack;
-	/* FIXME: */
+	newth->kstack = newth->stack_base + (((uint32_t)thread->stack_base + PROCESS_STACK_SIZE) - thread->arch_tss.regs.esp);
+	newth->arch_tss.regs.esp = (uint32_t)newth->kstack;
 	if (GET_TASK(cur_task)->pid == child) {
 		return 0;
 	}
