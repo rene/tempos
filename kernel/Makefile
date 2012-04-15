@@ -92,7 +92,7 @@ $(conffile):
 #
 doc: showtitle
 	@$(ECHO) "Generating source code documentation..."
-	@[ -z "$(shell which doxygen)" ] && ( $(ECHO) "Doxygen not found. Please, install doxygen (http://doxygen.org)" ) || doxygen $(doxycfg)
+	@[ -z "$(shell which doxygen)" ] && ( $(ECHO) "Doxygen not found. Please, install doxygen (http://doxygen.org)" ) || doxygen $(doxycfg) && $(MAKE) -C doc/doxygen/latex
 
 ##
 # help
