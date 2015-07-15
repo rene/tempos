@@ -1,0 +1,16 @@
+January, 10, 2012:
+	- TempOS 0.01 release!
+	- Simple user init program running in user space.
+	- Virtual File System Layer almost done.
+	- EXT2 parcial support.
+
+July, 12, 2011:
+	- ATA generic driver is working (can read and write sector from a disk)
+	  using PIO mode.
+	- Start to develop the Virtual File System layer (VFS).
+
+April, 13, 2010:
+	- Eliminate the dependecy of root user to execute command 'make install'.
+	  However, the genext2fs tool is necessary. If not present, the old method
+	  should be used: 'sudo make install'.
+
