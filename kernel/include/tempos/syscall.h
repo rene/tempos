@@ -32,11 +32,11 @@
 
 	#define _pushargs __attribute__((regparm(0)))
 
-	int      sys_exit(int status);
-	void     sys_fork(void);
-	int      sys_execve(const char *filename, char *const argv[], char *const envp[]);
-	ssize_t  sys_read(int fd, void *buf, size_t count);
-	ssize_t  sys_write(int fd, const void *buf, size_t count);
+	_pushargs int      sys_exit(int status);
+	_pushargs void     sys_fork(void);
+	_pushargs int      sys_execve(const char *filename, char *const argv[], char *const envp[]);
+	_pushargs ssize_t  sys_read(int fd, void *buf, size_t count);
+	_pushargs ssize_t  sys_write(int fd, const void *buf, size_t count);
 #endif
 
 #endif /* SYSCALL_H */

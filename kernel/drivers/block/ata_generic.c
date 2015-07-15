@@ -165,7 +165,6 @@ void init_ata_generic(void)
 	uint64_t size;
 	uchar8_t dev, bus;
 	uchar8_t sc, saddr1, saddr2, saddr3;
-	buff_header_t mbr;	
 	
 	kprintf(KERN_INFO "Initializing generic ATA controller...\n");
 
@@ -204,10 +203,10 @@ void init_ata_generic(void)
 		saddr2 = inb(pio_ports[bus][REG_SADDR2]);
 		saddr3 = inb(pio_ports[bus][REG_SADDR3]);
 
-		/*if(sc != 0x01 && saddr1 != 0x01) {
+		if(sc != 0x01 && saddr1 != 0x01) {
 			kprintf(" hd%c: Device not found.\n", drvl);
 			continue;
-		}*/
+		}
 
 		if(saddr2 == 0x14 && saddr3 == 0xEB) {
 			kprintf(KERN_INFO " hd%c: CD/DVD-ROM detected.\n", drvl);
@@ -293,7 +292,6 @@ void init_ata_generic(void)
 	/** FIXME: TempOS supports only one device per bus.
 	 *  To support more devices we need to check PCI bus to
 	 *  know which device generates the interrupt */
-	mbr.addr = 0;
 	if ((ata_devices[0].flags & PRESENT) != 0) {
 
 		/* Register primary bus driver */
@@ -927,7 +925,7 @@ int read_sync_ata_sector(int major, int device, buff_header_t *buf)
 			sleep_on(WAIT_INT_IDE_SEC);
 	}
 
-	return 0;
+	return res;
 }
 
 /** 

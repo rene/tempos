@@ -98,12 +98,13 @@ void kernel_main_thread(void *arg)
 	char rdev_str[10], *rstr, *init;
 	dev_t rootdev;
 	size_t i, rdev_len;
-	task_t *idle_th;
+	//task_t *idle_th;
 	
 	/* NOTE: keep calling order for the functions below */
 
 	/* Create idle thread */
-	idle_th = kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
+	//idle_th = kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
+	kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
 
 	/* Initialize Virtual File System layer */
 	register_all_fs_types();

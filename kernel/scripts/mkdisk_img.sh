@@ -52,7 +52,7 @@ use_grub1() {
 	cp $TEMPOSFILE $TMPDIR/boot 2>>$errorlog
 	check_result
 	echo -n " + Copying GRUB boot image..."
-	cp /boot/grub/stage2_eltorito $TMPDIR/boot/grub 2>>$errorlog
+	cp scripts/stage2_eltorito $TMPDIR/boot/grub 2>>$errorlog
 	check_result
 
 	echo -n " + Creating GRUB configuration file..."
@@ -135,8 +135,8 @@ fi
 
 
 # Check grub's version
-GRUBI=$(which grub-install 2> /dev/null)
-GRUBMKR=$(which grub-mkrescue 2> /dev/null)
+GRUBI=$(which grub-install 2> /dev/null || which grub2-install 2> /dev/null)
+GRUBMKR=$(which grub-mkrescue 2> /dev/null || which grub2-mkrescue 2> /dev/null)
 if [ -z "$GRUBI" -a -z "$GRUBMKR" ]; then
 	echo "ERROR: GRUB not found."
 	exit 1
@@ -146,7 +146,7 @@ if [ -z "$GRUBMKR" ]; then
 	# GRUB1
 	use_grub1
 else
-	# GRUB2
-	use_grub2
+	# TODO: fix GRUB2
+	use_grub1
 fi
 

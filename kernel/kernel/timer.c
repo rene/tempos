@@ -35,7 +35,7 @@
 llist *alarm_queue;
 
 
-_pushargs void timer_handler(int i, pt_regs *regs);
+void timer_handler(int i, pt_regs *regs);
 
 
 /**
@@ -66,7 +66,7 @@ void init_timer(void)
 /**
  * Interrupt handler
  */
-_pushargs void timer_handler(int i, pt_regs *regs)
+void timer_handler(int i, pt_regs *regs)
 {
 	llist *tmp;
 	alarm_t *alarm;

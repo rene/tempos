@@ -432,7 +432,7 @@ buff_header_t *bread(int major, int device, uint64_t blocknum)
  */
 buff_header_t *breada(int major, int device, uint64_t blocknum1, uint64_t blocknum2)
 {
-	buff_header_t *buff1, *buff2;
+	buff_header_t *buff2;
 	dev_blk_driver_t *driver;
 
 	driver = block_dev_drivers[major]; 
@@ -440,7 +440,7 @@ buff_header_t *breada(int major, int device, uint64_t blocknum1, uint64_t blockn
 	/**
 	 * First, we read block 1 
 	 */
-	buff1 = bread(major, device, blocknum1);
+	bread(major, device, blocknum1);
 
 	/**
 	 * Now, we check for second block and if not in cache,

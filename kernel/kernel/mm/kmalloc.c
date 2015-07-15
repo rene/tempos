@@ -53,8 +53,8 @@ void *kmalloc(uint32_t size, uint16_t flags)
  */
 void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 {
-	uint32_t npages, pstart, ffpage;
-	uint32_t apages, index, oldindex;
+	uint32_t npages, pstart;
+	uint32_t apages, index;
 	uint32_t size_region;
 	uint32_t newpage;
 	uint32_t *mem_block;
@@ -123,9 +123,6 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	index = GET_DINDEX(pstart);
 	table = pgdir->tables[index];
 	i     = pstart - (TABLE_SIZE * index);
-
-	oldindex = index;
-	ffpage   = i;
 
 	/* Now, we need to alloc pages */
 	apages = 0;
