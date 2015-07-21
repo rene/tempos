@@ -37,6 +37,9 @@
 #include <stdlib.h>
 #include <linkedl.h>
 #include <semaphore.h>
+#ifdef TKGDB
+#include <drv/serial.h>
+#endif
 
 
 /** information passed from first stage */
@@ -96,6 +99,9 @@ void thread1(void *arg)
 void kernel_main_thread(void *arg)
 {
 	char rdev_str[10], *rstr, *init;
+#ifdef TKGDB
+	char *tkgdb_str;
+#endif
 	dev_t rootdev;
 	size_t i, rdev_len;
 	//task_t *idle_th;
@@ -118,6 +124,19 @@ void kernel_main_thread(void *arg)
 	/* Show and parse command line */
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 	parse_cmdline((char*)kinfo.cmdline);
+
+#ifdef TKGDB
+	struct serial_interface serial;
+
+	kprintf(KERN_INFO "Using serial.\n");
+	tkgdb_str = cmdline_get_value("kgdbwait");
+	if (tkgdb_str != NULL) {
+		serial_init(&serial, 115200);
+		/* Initialize debugger. */
+	}
+
+        while(1);
+#endif
 
 	/* Mount root file system */
 	rstr = cmdline_get_value("root");

@@ -21,7 +21,7 @@ MAKEGEN  := $(CWD)/MakefileX86.gen
 ##
 # Specific CFLAGS for each target described in .mk files
 #
-obj-y-CFLAGS      := $(CFLAGS)
+obj-y-CFLAGS      := -DTKGDB $(CFLAGS)
 obj-x86asm-CFLAGS := -DASM $(CFLAGS)
 
 export obj-y-CFLAGS obj-x86asm-CFLAGS
@@ -53,6 +53,7 @@ $(MAKEGEN): \
 		lib/Build.mk				\
 		drivers/char/Build.mk		\
 		drivers/block/Build.mk		\
+		drivers/tty/serial/Build.mk	\
 		fs/Build.mk					\
 		fs/ext2/Build.mk			\
 		kernel/Build.mk				\
