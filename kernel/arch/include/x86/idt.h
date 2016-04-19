@@ -104,7 +104,7 @@
 
 	void setup_IDT(void);
 
-	inline void load_idt(void);
+	extern void load_idt(void);
 
 #endif /* ARCH_X86_IDT_H */
 

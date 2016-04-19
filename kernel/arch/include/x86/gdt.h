@@ -145,7 +145,7 @@
 
 
 	void setup_GDT(void);
-	inline void load_gdt(void);
+	extern void load_gdt(void);
 
 #endif /* ARCH_X86_GDT_H */
 

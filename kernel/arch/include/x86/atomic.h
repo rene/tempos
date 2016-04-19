@@ -27,9 +27,9 @@
 
 	#include <unistd.h>
 
-	inline void atomic_incl(int32_t *i);
+	extern void atomic_incl(int32_t *i);
 	
-	inline void atomic_decl(int32_t *i);
+	extern void atomic_decl(int32_t *i);
 	
 	void atomic_spin_down(uint32_t *i);
 

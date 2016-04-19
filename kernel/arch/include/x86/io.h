@@ -30,27 +30,27 @@
 	#define CR0_PG_MASK		0x80000000
 
 
-	inline uchar8_t inb(uint16_t port);
+	extern uchar8_t inb(uint16_t port);
 
-	inline void outb(uchar8_t value, uint16_t port);
+	extern void outb(uchar8_t value, uint16_t port);
 
-	inline uint16_t inw(uint16_t port);
+	extern uint16_t inw(uint16_t port);
 
-	inline void outw(uint16_t value, uint16_t port);
+	extern void outw(uint16_t value, uint16_t port);
 
-	inline uint32_t inl(uint16_t port);
+	extern uint32_t inl(uint16_t port);
 
-	inline void outl(uint32_t value, uint16_t port);
+	extern void outl(uint32_t value, uint16_t port);
 
-	inline void cli(void);
+	extern void cli(void);
 
-	inline void sti(void);
+	extern void sti(void);
 
-	inline uint32_t read_cr0();
+	extern uint32_t read_cr0();
 
-	inline void write_cr0(uint32_t value);
+	extern void write_cr0(uint32_t value);
 
-	inline void write_cr3(uint32_t value);
+	extern void write_cr3(uint32_t value);
 
 #endif /* ARCH_X86_IO_H */
 

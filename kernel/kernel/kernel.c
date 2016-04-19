@@ -81,7 +81,7 @@ void tempos_main(karch_t kinf)
 void thread1(void *arg)
 {
 	int *t = (int*)arg;
-	kprintf("Ola Mundo! %x\n", t);
+	kprintf("Hello World! %x\n", t);
 	mdelay(1000);
 	kernel_thread_exit(0);
 }
@@ -98,12 +98,10 @@ void kernel_main_thread(void *arg)
 	char rdev_str[10], *rstr, *init;
 	dev_t rootdev;
 	size_t i, rdev_len;
-	//task_t *idle_th;
 	
 	/* NOTE: keep calling order for the functions below */
 
 	/* Create idle thread */
-	//idle_th = kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
 	kernel_thread_create(DEFAULT_PRIORITY, idle_thread, NULL);
 
 	/* Initialize Virtual File System layer */
@@ -135,6 +133,8 @@ void kernel_main_thread(void *arg)
 	if (i == rdev_len) {
 		panic("Kernel command line root argument bad formated.");
 	}
+
+	for(;;);
 	if ( !vfs_mount_root(rootdev) ) {
 		panic("VFS ERROR: Could not mount root file system.");
 	}
@@ -144,7 +144,7 @@ void kernel_main_thread(void *arg)
 	if (init == NULL) {
 		init = DEFAULT_INIT_PROCCESS;
 	}
-	kprintf("Loading %s...\n", init);
+	kprintf("Loading %s...\n", init); for(;;);
 
 
 	/* TEST: Read root directory */
@@ -179,33 +179,33 @@ void kernel_main_thread(void *arg)
 		pos = newpos;
 
 		kprintf("%.8ld|", dir.inode);
-		//kprintf("|%ld\n", dir.rec_len);
-		//kprintf("|%ld\n", dir.name_len);
+		kprintf("|%ld\n", dir.rec_len);
+		kprintf("|%ld\n", dir.name_len);
 		kprintf("%s\n",  dir.name);
 	}
 
 	kfree(block);
 
-	//vfs_inode *arq = vfs_namei("/test.txt");
+	vfs_inode *arq = vfs_namei("/test.txt");
 	vfs_inode *arq = vfs_namei("/test2.txt");
-	//vfs_inode *arq = vfs_iget(root->sb, 12);
-	//vfs_inode *arq = vfs_iget(root->sb, 14);
-	//vfs_bmap_t bk = vfs_bmap(arq, 12298);
+	vfs_inode *arq = vfs_iget(root->sb, 12);
+	vfs_inode *arq = vfs_iget(root->sb, 14);
+	vfs_bmap_t bk = vfs_bmap(arq, 12298);
 	vfs_bmap_t bk = vfs_bmap(arq, 274442);
-	//vfs_bmap_t bk = vfs_bmap(arq, 67384320);
+	vfs_bmap_t bk = vfs_bmap(arq, 67384320);
 	*/
 	
 	/* Load init */
-	vfs_inode *arq = vfs_namei(init);
+	/*vfs_inode *arq = vfs_namei(init);
 	vfs_bmap_t bk = vfs_bmap(arq, 0);
-	//kprintf("bk.blk_number = %ld\n", bk.blk_number);
-	//kprintf("bk.blk_offset = %ld\n", bk.blk_offset);
-	//kprintf("bk.blk_breada = %ld\n", bk.blk_breada);
+	kprintf("bk.blk_number = %ld\n", bk.blk_number);
+	kprintf("bk.blk_offset = %ld\n", bk.blk_offset);
+	kprintf("bk.blk_breada = %ld\n", bk.blk_breada);
 	char *block = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
 	
-	//kfree(block);
+	kfree(block);
 
-	_exec_init(block);
+	_exec_init(block);*/
 
 
 	/*pid_t pid = _fork(GET_TASK(cur_task));
@@ -224,11 +224,11 @@ void kernel_main_thread(void *arg)
 		}
 	}*/
 
-/*	task_t *th1 = kernel_thread_create(DEFAULT_PRIORITY, thread1, (void*)0x24);
+	//task_t *th1 = kernel_thread_create(DEFAULT_PRIORITY, thread1, (void*)0x24);
 
-	kernel_thread_wait(th1);
+	//kernel_thread_wait(th1);
 
-	kprintf("Acordei!\n");*/
+	kprintf("Acordei!\n");
 
 	/* fork thread */
 	/* call execve_init */
