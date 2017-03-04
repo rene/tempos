@@ -80,7 +80,7 @@ install:
 # test
 #
 test:
-	@[ -f hdisk.img.gz ] || @qemu-system-i386 -M pc -cdrom $(bimage) -boot d &&  ( TEMPOSHD=`mktemp`; gunzip hdisk.img.gz -c > $$TEMPOSHD; qemu-system-i386 -M pc -cdrom $(bimage) -hda $$TEMPOSHD -boot d; rm $$TEMPOSHD )
+	@[ -f hdisk.img.gz ] || @qemu-system-i386 -M pc -cdrom $(bimage) -boot d &&  ( TEMPOSHD=`mktemp`; gunzip hdisk.img.gz -c > $$TEMPOSHD; qemu-system-i386 -M pc -cdrom $(bimage) -hda $$TEMPOSHD -boot d --no-reboot; rm $$TEMPOSHD )
 
 
 ##

@@ -134,7 +134,6 @@ void kernel_main_thread(void *arg)
 		panic("Kernel command line root argument bad formated.");
 	}
 
-	for(;;);
 	if ( !vfs_mount_root(rootdev) ) {
 		panic("VFS ERROR: Could not mount root file system.");
 	}
@@ -144,7 +143,7 @@ void kernel_main_thread(void *arg)
 	if (init == NULL) {
 		init = DEFAULT_INIT_PROCCESS;
 	}
-	kprintf("Loading %s...\n", init); for(;;);
+	kprintf("Loading %s...\n", init);
 
 
 	/* TEST: Read root directory */

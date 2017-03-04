@@ -298,6 +298,10 @@ static buff_header_t *getblk(int major, int device, uint64_t blocknum)
 
 	driver = block_dev_drivers[major]; 
 
+        if (driver == NULL) {
+                return NULL;
+        }
+
 	while(1) {
 	
 		if ( (buff = search_blk(driver->buffer_queue, device, blocknum)) != NULL ) {
@@ -353,11 +357,16 @@ void brelse(int major, int device, buff_header_t *buff)
 	dev_blk_driver_t *driver;
 	buff_header_t *head, *tmp;
 
-	driver = block_dev_drivers[major]; 
+	driver = block_dev_drivers[major];
 
 	wakeup(WAIT_BLOCK_BUFFER_GET_FREE);
 	wakeup(WAIT_THIS_BLOCK_BUFFER_GET_FREE);
-	
+
+        /* Checking driver pointer after wakeup function. */
+	if (driver == NULL) {
+                return;
+        }
+
 	cli();
 
 	head = driver->buffer_queue->freelist_head;
@@ -397,7 +406,11 @@ buff_header_t *bread(int major, int device, uint64_t blocknum)
 	buff_header_t *buff;
 	dev_blk_driver_t *driver;
 
-	driver = block_dev_drivers[major]; 
+	driver = block_dev_drivers[major];
+
+        if (driver == NULL) {
+                return NULL;
+        }
 
 	if ((buff = getblk(major, device, blocknum)) == NULL) {
 		kprintf(KERN_ERROR "bread(): Error on get cached block.\n");
