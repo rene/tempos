@@ -64,7 +64,7 @@ use_grub1() {
 color white/blue light-green/black
 
 title   TempOS
-kernel  /boot/tempos.elf root=3:1 init=/sbin/init
+kernel  /boot/tempos.elf root=3:1 init=/sbin/init kgdbwait=1
 EOF
 	check_result
 
@@ -109,7 +109,7 @@ set menu_color_highlight="light-green/black"
 # TempOS
 #
 menuentry "TempOS" {
-	multiboot /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init
+	multiboot /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init kgdbwait=1
 }
 EOF
 	check_result
