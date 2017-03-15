@@ -164,7 +164,7 @@ void init_ata_generic(void)
 	char drvl = 'a';
 	uint64_t size;
 	uchar8_t dev, bus;
-	uchar8_t sc, saddr1, saddr2, saddr3;
+	uchar8_t sc, saddr1, saddr2, saddr3, status;
 	
 	kprintf(KERN_INFO "Initializing generic ATA controller...\n");
 
@@ -202,8 +202,10 @@ void init_ata_generic(void)
 		saddr1 = inb(pio_ports[bus][REG_SADDR1]);
 		saddr2 = inb(pio_ports[bus][REG_SADDR2]);
 		saddr3 = inb(pio_ports[bus][REG_SADDR3]);
+		status = inb(pio_ports[bus][REG_ASTATUS]);
 
-		if(sc != 0x01 && saddr1 != 0x01) {
+                /* TODO: Maybe we need to support other kind of ATAs. */
+		if(sc != 0x01 && saddr1 != 0x01 && status == 0) {
 			kprintf(" hd%c: Device not found.\n", drvl);
 			continue;
 		}
