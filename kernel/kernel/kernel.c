@@ -145,6 +145,12 @@ void kernel_main_thread(void *arg)
 	}
 	kprintf("Loading %s...\n", init);
 
+	/* Load init */
+	vfs_inode *arq = vfs_namei(init);
+	vfs_bmap_t bk = vfs_bmap(arq, 0);
+	char *block = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
+
+	_exec_init(block);
 
 	/* TEST: Read root directory */
 	/*kprintf("DEBUG:\n");
@@ -193,19 +199,6 @@ void kernel_main_thread(void *arg)
 	vfs_bmap_t bk = vfs_bmap(arq, 274442);
 	vfs_bmap_t bk = vfs_bmap(arq, 67384320);
 	*/
-	
-	/* Load init */
-	/*vfs_inode *arq = vfs_namei(init);
-	vfs_bmap_t bk = vfs_bmap(arq, 0);
-	kprintf("bk.blk_number = %ld\n", bk.blk_number);
-	kprintf("bk.blk_offset = %ld\n", bk.blk_offset);
-	kprintf("bk.blk_breada = %ld\n", bk.blk_breada);
-	char *block = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
-	
-	kfree(block);
-
-	_exec_init(block);*/
-
 
 	/*pid_t pid = _fork(GET_TASK(cur_task));
 
@@ -223,11 +216,11 @@ void kernel_main_thread(void *arg)
 		}
 	}*/
 
-	//task_t *th1 = kernel_thread_create(DEFAULT_PRIORITY, thread1, (void*)0x24);
+	/*task_t *th1 = kernel_thread_create(DEFAULT_PRIORITY, thread1, (void*)0x24);
 
-	//kernel_thread_wait(th1);
+	kernel_thread_wait(th1);
 
-	kprintf("Acordei!\n");
+	kprintf("Acordei!\n");*/
 
 	/* fork thread */
 	/* call execve_init */
