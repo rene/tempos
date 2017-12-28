@@ -27,30 +27,38 @@
 #include <tempos/syscall.h>
 #include <tempos/error.h>
 
-.globl _sys_enter;
+.globl _sys_enter, check_kernel_stack;
 .extern syscall_table;
 
 _sys_enter:
-	pushl %esp
+	/*
+	 * Save machine state
+	 */
+	call check_kernel_stack
+
+	pushl %ecx
+	pushl %edx
+	pushl %ebx
 	pushl %ebp
+	pushl %esi
+	pushl %edi
+	pushl %esp
 	pushw %ds
 	pushw %es
 	pushw %fs
 	pushw %gs
-	pushl %edx /* Save EDX argument */
+	pushw %ss
 
 	/* Move to kernel mode */
+	pushw %dx
 	movw $KERNEL_DS, %dx
 	movw %dx, %ds
 	movw %dx, %fs
 	movw %dx, %gs
-	movw %dx, %ss
 	movw %dx, %es
-	
-	popl %edx
+	popw %dx
 
-	pushl $exit_syscall
-
+	/* Execute systemcall */
 	cmpl $SYSCALL_COUNT, %eax
 	jae  exit_syscall
 
@@ -59,22 +67,26 @@ _sys_enter:
 	pushl %ecx
 	pushl %ebx
 
-	/* Now the proccess is ready to make the syscall, so
-	   we can enable interrupts again. */
-	sti
+	/* Now the proccess is ready to make the syscall */
 	call *syscall_table(,%eax,4)
 	addl $4*3,%esp
-	ret
 
 exit_syscall:
-	/*pushl %eax*/
-	cli
-	popw  %gs
-	popw  %fs
-	popw  %es
-	popw  %ds
-	popl  %ebp
-	popl  %esp
-	sti
+	/**
+	 * Restore machine state
+	 */
+	popw %ss
+	popw %gs
+	popw %fs
+	popw %es
+	popw %ds
+	popl %esp
+	popl %edi
+	popl %esi
+	popl %ebp
+	popl %ebx
+	popl %edx
+	popl %ecx
+
 	iret
 
