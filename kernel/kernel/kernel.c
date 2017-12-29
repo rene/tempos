@@ -82,7 +82,7 @@ void thread1(void *arg)
 {
 	int *t = (int*)arg;
 	kprintf("Hello World! %x\n", t);
-	mdelay(1000);
+	mdelay(4000);
 	kernel_thread_exit(0);
 }
 
@@ -232,6 +232,8 @@ void kernel_main_thread(void *arg)
 	/* thread_done = 1; */
 	for(;;) {
 		/* measure system load */
+		mdelay(5000);
+		kprintf("Kernel thread: idle\n");
 	}
 
 	/* tests */

@@ -39,7 +39,7 @@ extern pagedir_t *kerneldir;
  * \see arch/x86/task.S
  */
 extern void task_switch_to(arch_tss_t *task);
-extern void initial_task(task_t *task);
+extern __attribute__((regparm(0))) void initial_task(task_t *task);
 
 arch_tss_t *arch_tss_cur_task;
 

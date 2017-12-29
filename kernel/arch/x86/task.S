@@ -98,31 +98,28 @@ task_switch_to:
 	cli
 
 	pushl %eax
-	movl arch_tss_cur_task, %eax
-	movl 10(%eax), %eax
-
 	pushl %ebx
 	movl 12(%esp), %eax
 
 	/* Check if task it's kernel or user process */
 	movw (%eax), %bx
-	cmpw  $USER_DS_RPL, %bx
-	popl %ebx
-	popl %eax
+	cmpw $USER_DS_RPL, %bx
+
+	movl 20(%eax), %ebx
 
 	jne kernel_proc
 	pushl $USER_DS_RPL /* SS  */
-	pushl %esp         /* ESP */
+	pushl %ebx         /* ESP */
 	pushl $USER_CS_RPL /* CS  */
 	jmp cs_cont
 kernel_proc:
 	pushl $KERNEL_DS   /* SS  */
-	pushl %esp         /* ESP */
+	pushl %ebx         /* ESP */
 	pushl $KERNEL_CS   /* CS  */
 cs_cont:
 
-	pushl %eax 		/* save EAX in the stack */
-	
+	popl %ebx
+
 	/* Move return address to top of stack */
 	subl $0x04, %esp
 	movl 20(%esp), %eax
@@ -164,7 +161,6 @@ cs_cont:
 	 */
 	movl arch_tss_cur_task, %eax
 	movl %esp, 10(%eax)
-#	movl %esp, 50(%esp)
 
 	/**
 	 * Check if iret will pop SS and ESP (intra-privilege)
