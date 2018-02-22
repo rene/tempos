@@ -28,6 +28,8 @@ export obj-y-CFLAGS obj-x86asm-CFLAGS
 
 .PHONY: kernel install test clean
 
+QEMU=qemu-system-i386
+
 ##
 # Architecture specific
 #
@@ -53,6 +55,7 @@ $(MAKEGEN): \
 		lib/Build.mk				\
 		drivers/char/Build.mk		\
 		drivers/block/Build.mk		\
+		drivers/tty/serial/Build.mk	\
 		fs/Build.mk					\
 		fs/ext2/Build.mk			\
 		kernel/Build.mk				\
@@ -80,7 +83,7 @@ install:
 # test
 #
 test:
-	@[ -f hdisk.img.gz ] || @qemu-system-i386 -M pc -cdrom $(bimage) -boot d &&  ( TEMPOSHD=`mktemp`; gunzip hdisk.img.gz -c > $$TEMPOSHD; qemu-system-i386 -M pc -cdrom $(bimage) -hda $$TEMPOSHD -boot d --no-reboot; rm $$TEMPOSHD )
+	@[ -f hdisk.img.gz ] || @$(QEMU) -M pc -cdrom $(bimage) -boot d &&  ( TEMPOSHD=`mktemp`; gunzip hdisk.img.gz -c > $$TEMPOSHD; $(QEMU) -M pc -cdrom $(bimage) -hda $$TEMPOSHD -boot d --no-reboot; rm $$TEMPOSHD )
 
 
 ##

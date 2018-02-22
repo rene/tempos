@@ -65,6 +65,9 @@ color white/blue light-green/black
 
 title   TempOS
 kernel  /boot/tempos.elf root=3:1 init=/sbin/init
+
+title	TemOS over serial
+kernel  /boot/tempos.elf root=3:1 init=/sbin/init kgdbwait=1
 EOF
 	check_result
 
@@ -110,6 +113,9 @@ set menu_color_highlight="light-green/black"
 #
 menuentry "TempOS" {
 	multiboot /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init
+}
+menuentry "TempOS over serial" {
+        multiboot /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init kgdbwait=1
 }
 EOF
 	check_result
