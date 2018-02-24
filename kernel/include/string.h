@@ -38,7 +38,7 @@
 
 	char *strcpy(char *dest, const char *src);
 
-	//size_t strcspn(const char *s, const char *reject);
+	size_t strcspn(const char *s, const char *reject);
 
 	//char *strdup(const char *s);
 
@@ -58,11 +58,13 @@
 
 	//char *strsep(char **stringp, const char *delim);
 
-	//size_t strspn(const char *s, const char *accept);
+	size_t strspn(const char *s, const char *accept);
 
 	char *strstr(const char *haystack, const char *needle);
 
-	//char *strtok(char *s, const char *delim);
+	char *strtok(char *s, const char *delim);
+
+	char *strtok_r(char *s, const char *delim, char **save_ptr);
 
 	//size_t strxfrm(char *dest, const char *src, size_t n);
 

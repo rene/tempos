@@ -54,6 +54,22 @@ char *strcpy(char *dest, const char *src)
 	return dest;
 }
 
+size_t strcspn(const char *s, const char *reject)
+{
+	int i, j;
+
+	for (i = 0; s && s[i]; i++) {
+		for (j = 0; reject && reject[j]; j++) {
+			if (s[i] == reject[j])
+				break;
+		}
+
+		if (reject && reject[j])
+			break;
+	}
+
+	return (size_t)(i);
+}
 
 size_t strlen(const char *s)
 {
@@ -62,7 +78,6 @@ size_t strlen(const char *s)
 		tmp++;
 	return (size_t)(tmp - s);
 }
-
 
 char *strncat(char *dest, const char *src, size_t n)
 {
@@ -94,6 +109,25 @@ char *strncpy(char *dest, const char *src, size_t n)
 	return dest;
 }
 
+size_t strspn(const char *s, const char *accept)
+{
+	const char *str, *p;
+
+	if (! accept)
+		return 0;
+
+	for (str = s; str && *str; str++) {
+		for (p = accept; *p; p++) {
+			if (*str == *p)
+				break;
+		}
+
+		if (!*p)
+			break;
+	}
+
+	return (size_t)(str - s);
+}
 
 char *strstr(const char *haystack, const char *needle)
 {
@@ -117,6 +151,41 @@ char *strstr(const char *haystack, const char *needle)
 		return NULL;
 }
 
+char *strtok(char *s, const char *delim)
+{
+	 static char *olds;
+	 return strtok_r(s, delim, &olds);
+}
+
+char *strtok_r(char *s, const char *delim, char **save_ptr)
+{
+	char *end;
+
+	if (s == NULL)
+		s = *save_ptr;
+
+	if (*s == '\0')	{
+		*save_ptr = s;
+		return NULL;
+	}
+
+	s += strspn(s, delim);
+	if (*s == '\0')	{
+		*save_ptr = s;
+		return NULL;
+	}
+
+	end = s + strcspn(s, delim);
+	if (*end == '\0') {
+		*save_ptr = end;
+		return s;
+	}
+
+	*end = '\0';
+	*save_ptr = end + 1;
+
+	return s;
+}
 
 void *memcpy(void *dest, const void *src, size_t n)
 {
@@ -129,7 +198,6 @@ void *memcpy(void *dest, const void *src, size_t n)
 
 	return dest;
 }
-
 
 void *memset(void *s, int c, size_t n)
 {
