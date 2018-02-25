@@ -65,13 +65,12 @@
 	};
 
 	struct serial_driver {
-	/* Needs improvement. */
-	/* 	void* mem_base; */
-	/* 	size_t mem_size; */
-	/* 	struct list_element node; */
-	/* 	struct device_char char_dev; */
-
-	        int (*init)(struct serial_interface *, int);
+		/* TODO: Needs improvement. */
+		/* 	void* mem_base; */
+		/* 	size_t mem_size; */
+		/* 	struct list_element node; */
+		/* 	struct device_char char_dev; */
+		int (*init)(struct serial_interface *, int);
 		void (*write)(const struct serial_interface *, char);
 		uchar8_t (*read)(const struct serial_interface*);
 	};

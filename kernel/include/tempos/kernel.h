@@ -53,6 +53,9 @@
 	/** Command line max size */
 	#define CMDLINE_MAX			1024
 
+	/** Default serial console baud rate */
+	#define SERIAL_CONSOLE_BAUD 115200
+
 	/** Max memory regions */
 	#define MBOOT_MMAP_MAXREG	  40
 
@@ -114,5 +117,9 @@
 	    shall be implemented on each architecture port code. */
 	void halt_cpu(void);
 
+
+	extern char console_over_serial;
+
+	extern struct serial_interface tty_serial;
 #endif /* KERNEL_H */
 

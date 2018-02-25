@@ -31,6 +31,7 @@
 #include <tempos/wait.h>
 #include <drv/i8042.h>
 #include <drv/ata_generic.h>
+#include <drv/serial.h>
 #include <fs/vfs.h>
 #include <fs/device.h>
 #include <string.h>
@@ -47,6 +48,12 @@ void kernel_main_thread(void *arg);
 
 /** idle thread */
 void idle_thread(void *arg);
+
+/** Console serial flag */
+char console_over_serial = 0;
+
+/** Console serial strucutre */
+struct serial_interface tty_serial;
 
 /** indicates when idle_thread should exit */
 static int thread_done = 0;
@@ -116,6 +123,19 @@ void kernel_main_thread(void *arg)
 	/* Show and parse command line */
 	kprintf(KERN_INFO "Kernel command line: %s\n", kinfo.cmdline);
 	parse_cmdline((char*)kinfo.cmdline);
+
+	/* Check for serial console */
+	rstr = cmdline_get_value("console");
+	if (rstr != NULL) {
+		if (strcmp(rstr, "ttyS0") == 0) {
+			if (serial_init(&tty_serial, SERIAL_CONSOLE_BAUD)) {
+				panic("Failed to init serial driver!");
+			} else {
+				console_over_serial = 1;
+				kprintf("Serial console initialized on ttyS0!\n");
+			}
+		}
+	}
 
 	/* Mount root file system */
 	rstr = cmdline_get_value("root");

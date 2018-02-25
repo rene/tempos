@@ -66,8 +66,8 @@ color white/blue light-green/black
 title   TempOS
 kernel  /boot/tempos.elf root=3:1 init=/sbin/init
 
-title	TemOS over serial
-kernel  /boot/tempos.elf root=3:1 init=/sbin/init kgdbwait=1
+title	TempOS over serial
+kernel  /boot/tempos.elf root=3:1 init=/sbin/init console=ttyS0 kgdbwait=1
 EOF
 	check_result
 

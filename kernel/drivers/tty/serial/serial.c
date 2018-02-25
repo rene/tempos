@@ -80,5 +80,5 @@ int serial_init(struct serial_interface *interface, int baud)
 	serial_out(interface, SERIAL_LCR,
 		SERIAL_LCR_8BIT | SERIAL_LCR_1STOP | SERIAL_LCR_NO_PARITY);
 
-	return 1;
+	return 0;
 }

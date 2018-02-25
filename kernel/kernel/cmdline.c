@@ -32,10 +32,10 @@
 cmdline_arg_t cmdline_args[CMDLINE_MAX_ARGS];
 
 /** copy of the whole command line string */
-char cmdline_str[CMDLINE_MAX];
+static char cmdline_str[CMDLINE_MAX];
 
 /** Number of valid arguments parsed */
-int cmdline_argc = 0;
+static int cmdline_argc = 0;
 
 /**
  * Parse command line
@@ -54,13 +54,13 @@ int parse_cmdline(char *cmdline)
 	p     = 0;
 	i     = 0;
 	key   = &cmdline_str[0];
-	value = key;
 	
 	/* Remove initial spaces */
 	while(cmdline_str[i] == ' ') {
 		i++;
 		key++;
 	}
+	value = key;
 
 	while(i < len) {
 		/* check for key */
@@ -69,21 +69,24 @@ int parse_cmdline(char *cmdline)
 			cmdline_args[p].key = key;
 			i++;
 			value = &cmdline_str[i];
+			while(cmdline_str[i] != ' ' && cmdline_str[i] != '\0') {
+				i++;
+			}
+
+			cmdline_str[i] = '\0';
 			cmdline_args[p].value = value;
 			continue;
 		}
 
-		if (cmdline_str[i] == ' ') {
-			cmdline_str[i] = '\0';
-			cmdline_args[p].value = value;
-			p++;
-			i++;
-			key = &cmdline_str[i];
+		if (cmdline_str[i] == ' ' || cmdline_str[i] == '\0') {
+			cmdline_str[i++] = '\0';
 			while(cmdline_str[i] == ' ') {
 				i++;
-				key++;
 			}
-			value = key;
+			cmdline_args[p].value = value;
+
+			key = &cmdline_str[i];
+			p++;
 		}
 
 		i++;

@@ -24,6 +24,8 @@
 
 #include <tempos/kernel.h>
 #include <stdlib.h>
+#include <string.h>
+#include <drv/serial.h>
 
 #define MAXDIG 20
 
@@ -311,6 +313,7 @@ int kprintf(const char *format, ...)
 	char str[MAX_KPRINTF_SIZE];
 	va_list args;
 	int res, offset;
+	size_t i;
 
 	if(format[0] == '!')
 		offset = 3;
@@ -322,7 +325,21 @@ int kprintf(const char *format, ...)
 	va_end(args);
 
 	/* Write string according to the type of message */
-	kprint(str);
+	if (console_over_serial == 1) {
+		for (i=0; i<strlen(str); i++) {
+			switch (str[i]) {
+				case '\n':
+					serial_write(&tty_serial, '\r');
+					serial_write(&tty_serial, '\n');
+					break;
+
+				default:
+					serial_write(&tty_serial, str[i]);
+			}
+		}
+	} else {
+		kprint(str);
+	}
 
 	return(res);
 }

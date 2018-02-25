@@ -28,7 +28,7 @@ export obj-y-CFLAGS obj-x86asm-CFLAGS
 
 .PHONY: kernel install test clean
 
-QEMU=qemu-system-i386
+QEMU=$(shell which qemu-system-i386)
 
 ##
 # Architecture specific
