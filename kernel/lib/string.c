@@ -61,13 +61,13 @@ size_t strcspn(const char *s, const char *reject)
 {
 	int i, j;
 
-	for (i = 0; s && s[i]; i++) {
-		for (j = 0; reject && reject[j]; j++) {
+	for (i = 0; s[i]; i++) {
+		for (j = 0; reject[j]; j++) {
 			if (s[i] == reject[j])
 				break;
 		}
 
-		if (reject && reject[j])
+		if (reject[j])
 			break;
 	}
 
@@ -116,10 +116,7 @@ size_t strspn(const char *s, const char *accept)
 {
 	const char *str, *p;
 
-	if (! accept)
-		return 0;
-
-	for (str = s; str && *str; str++) {
+	for (str = s; *str; str++) {
 		for (p = accept; *p; p++) {
 			if (*str == *p)
 				break;

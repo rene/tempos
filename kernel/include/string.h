@@ -30,19 +30,19 @@
 
 	char *strcat(char *dest, const char *src);
 
-	//char *strchr(const char *s, int c);
+	/* char *strchr(const char *s, int c); */
 
 	int strcmp(const char *s1, const char *s2);
 
-	//int strcoll(const char *s1, const char *s2);
+	/* int strcoll(const char *s1, const char *s2); */
 
 	char *strcpy(char *dest, const char *src);
 
 	size_t strcspn(const char *s, const char *reject);
 
-	//char *strdup(const char *s);
+	/* char *strdup(const char *s); */
 
-	//char *strfry(char *string);
+	/* char *strfry(char *string); */
 
 	size_t strlen(const char *s);
 
@@ -52,11 +52,11 @@
 
 	char *strncpy(char *dest, const char *src, size_t n);
 
-	//char *strpbrk(const char *s, const char *accept);
+	/* char *strpbrk(const char *s, const char *accept); */
 
-	//char *strrchr(const char *s, int c);
+	/* char *strrchr(const char *s, int c); */
 
-	//char *strsep(char **stringp, const char *delim);
+	/* char *strsep(char **stringp, const char *delim); */
 
 	size_t strspn(const char *s, const char *accept);
 
@@ -66,7 +66,7 @@
 
 	char *strtok_r(char *s, const char *delim, char **save_ptr);
 
-	//size_t strxfrm(char *dest, const char *src, size_t n);
+	/* size_t strxfrm(char *dest, const char *src, size_t n); */
 
 	void *memcpy(void *dest, const void *src, size_t n);
 
