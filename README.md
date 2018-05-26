@@ -22,6 +22,7 @@ Sources: git clone git@github.com:rene/tempos.git
 		- Re-allocable kernel to 3GB on virtual space
 		- A simple memory manager
 		- A simple keyboard driver
+		- A simple serial driver
 		- IRQ system with shared IRQs support
 		- Alarm timers
 		- A poor video (text mode) driver
