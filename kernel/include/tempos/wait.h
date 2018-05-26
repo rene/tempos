@@ -51,6 +51,9 @@
 	/** Wait for i-node becomes unlocked */
 	#define WAIT_INODE_BECOMES_UNLOCKED 3
 
+	/** Keyboard, wait for a key */
+	#define WAIT_KEYBOARD_KEY 40
+
 	/* Prototypes */
 
 	void init_wait_queues(void);

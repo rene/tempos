@@ -2,8 +2,7 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: read.c
- * Desc: Syscall read
+ * File: ctype.h
  *
  * This file is part of TempOS.
  *
@@ -22,29 +21,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <tempos/syscall.h>
-#include <tempos/kernel.h>
-#include <drv/i8042.h>
+#ifndef CTYPE_H
 
-_pushargs ssize_t sys_read(int fd, void *buf, size_t count)
-{
-	ssize_t bytes = 0;
-	uchar8_t *buffer = (uchar8_t*)buf;
+	#define CTYPE_H
 
-	if (fd == 0) {
-		/* Read from keyboard or serial */
-		if (console_over_serial == 1) {
-			buffer[0] = serial_read(&tty_serial);
-		} else {
-			buffer[0] = kbc_read_from_buffer();
-		}
-		bytes     = 1;
-		kprintf(KERN_DEBUG "%c", buffer[0]);
-	}
+	int isalnum(int c);
+	int isalpha(int c);
+	int isascii(int c);
+	int isblank(int c);
+	int iscntrl(int c);
+	int isdigit(int c);
+	int isgraph(int c);
+	int islower(int c);
+	int isprint(int c);
+	int ispunct(int c);
+	int isspace(int c);
+	int isupper(int c);
+	int isxdigit(int c);
 
-	//kprintf(KERN_DEBUG "read: %d -- %s -- %d\n", fd, buf, count);
-
-	return(bytes);
-}
-
+#endif /* CTYPE_H */
 

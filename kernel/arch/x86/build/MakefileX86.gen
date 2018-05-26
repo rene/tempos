@@ -1,0 +1,1146 @@
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += arch/x86/boot/karch.o arch/x86/boot/video.o
+
+obj-x86asm += arch/x86/boot/boot.o
+
+
+all: $(obj-y) $(obj-x86asm) 
+
+
+arch/x86/boot/karch.o: arch/x86/boot/karch.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/multiboot.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/idt.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i8259A.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ arch/x86/boot/video.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/boot/video.o: arch/x86/boot/video.c arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/boot/boot.o: arch/x86/boot/boot.S \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/multiboot.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-x86asm-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += arch/x86/exceptions.o arch/x86/gdt.o arch/x86/idt.o arch/x86/io.o arch/x86/dump_cpu.o
+
+obj-x86asm += arch/x86/isr.o arch/x86/task.o
+
+
+all: $(obj-y) $(obj-x86asm) 
+
+
+arch/x86/exceptions.o: arch/x86/exceptions.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/exceptions.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/gdt.o: arch/x86/gdt.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/gdt.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/idt.o: arch/x86/idt.c \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/idt.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/exceptions.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/io.o: arch/x86/io.c \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/dump_cpu.o: arch/x86/dump_cpu.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/isr.o: arch/x86/isr.S \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-x86asm-CFLAGS)
+
+arch/x86/task.o: arch/x86/task.S \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-x86asm-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += arch/x86/kernel/i8259A.o arch/x86/kernel/i82C54.o arch/x86/kernel/irq.o arch/x86/kernel/task.o arch/x86/kernel/atomic.o
+
+obj-x86asm += arch/x86/kernel/sys_enter.o
+
+
+all: $(obj-y) $(obj-x86asm) 
+
+
+arch/x86/kernel/i8259A.o: arch/x86/kernel/i8259A.c \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i8259A.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/kernel/i82C54.o: arch/x86/kernel/i82C54.c \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/kernel/irq.o: arch/x86/kernel/irq.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i8259A.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/kernel/task.o: arch/x86/kernel/task.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/kernel/atomic.o: arch/x86/kernel/atomic.c \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/atomic.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+arch/x86/kernel/sys_enter.o: arch/x86/kernel/sys_enter.S \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-x86asm-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += arch/x86/mm/mm.o
+
+
+all: $(obj-y) 
+
+
+arch/x86/mm/mm.o: arch/x86/mm/mm.c \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/gdt.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += lib/ctype.o lib/linkedl.o lib/clinkedl.o lib/printf.o lib/stdlib.o lib/string.o lib/semaphore.o
+
+
+all: $(obj-y) 
+
+
+lib/ctype.o: lib/ctype.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+lib/linkedl.o: lib/linkedl.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+lib/clinkedl.o: lib/clinkedl.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+lib/printf.o: lib/printf.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/drv/serial.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+lib/stdlib.o: lib/stdlib.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+lib/string.o: lib/string.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+lib/semaphore.o: lib/semaphore.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/atomic.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/atomic.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += drivers/char/i8042.o
+
+
+all: $(obj-y) 
+
+
+drivers/char/i8042.o: drivers/char/i8042.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/jiffies.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/drv/i8042.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += drivers/block/ata_generic.o
+
+
+all: $(obj-y) 
+
+
+drivers/block/ata_generic.o: drivers/block/ata_generic.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/jiffies.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/delay.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/wait.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/partition.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/drv/ata_generic.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/drv/i8042.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += drivers/tty/serial/serial.o 
+
+
+all: $(obj-y) 
+
+
+drivers/tty/serial/serial.o: drivers/tty/serial/serial.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/jiffies.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/delay.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/wait.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/partition.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/drv/serial.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += fs/binfmt_elf32.o fs/bhash.o fs/vfs.o fs/namei.o fs/mount.o fs/devices.o fs/partition.o
+
+
+all: $(obj-y) 
+
+
+fs/binfmt_elf32.o: fs/binfmt_elf32.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/elf32.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+fs/bhash.o: fs/bhash.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/wait.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+fs/vfs.o: fs/vfs.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/wait.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/ext2/ext2.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+fs/namei.o: fs/namei.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+fs/mount.o: fs/mount.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/wait.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+fs/devices.o: fs/devices.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+fs/partition.o: fs/partition.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/partition.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-$(CONFIG_FS_EXT2) += fs/ext2/ext2.o
+
+
+all: 
+
+
+fs/ext2/ext2.o: fs/ext2/ext2.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/ext2/ext2.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-$(CONFIG_FS_EXT2)-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += kernel/sched.o kernel/execve.o kernel/exit.o kernel/fork.o kernel/kernel.o kernel/read.o \
+		 kernel/syscall.o kernel/write.o kernel/timer.o kernel/delay.o kernel/thread.o kernel/wait.o \
+		 kernel/cmdline.o
+
+
+all: $(obj-y) 
+
+
+kernel/sched.o: kernel/sched.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/jiffies.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/execve.o: kernel/execve.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/exit.o: kernel/exit.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/fork.o: kernel/fork.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/kernel.o: kernel/kernel.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/jiffies.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/delay.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/wait.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/drv/i8042.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/drv/ata_generic.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/drv/serial.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/read.o: kernel/read.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/syscall.o: kernel/syscall.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/write.o: kernel/write.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/timer.o: kernel/timer.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/jiffies.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/irq.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/delay.o: kernel/delay.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/delay.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/timer.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/i82C54.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/jiffies.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/thread.o: kernel/thread.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/wait.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/wait.o: kernel/wait.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/wait.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/sched.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/types.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/vfs.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/sys/stat.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/bhash.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/linkedl.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/device.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/fs/dev_numbers.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/semaphore.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/task.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/tss.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/x86.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/syscall.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/arch/io.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/io.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/cmdline.o: kernel/cmdline.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/string.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+
+##
+# This Makefile was automatic generated. Please, do not edit.
+#
+
+
+
+obj-y += kernel/mm/init_mm.o kernel/mm/kmalloc.o
+
+
+all: $(obj-y) 
+
+
+kernel/mm/init_mm.o: kernel/mm/init_mm.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+kernel/mm/kmalloc.o: kernel/mm/kmalloc.c \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/mm.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/kernel.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/ctype.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/unistd.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/config.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/stdlib.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/tempos/error.h \
+ /home/rene/workspace/wkrene/tempos/kernel/include/../arch/x86/boot/video.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/karch.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/page.h \
+ /home/rene/workspace/wkrene/tempos/kernel/arch/include/x86/mm.h
+	@echo ' + COMPILING ' $<
+	$(CC) -c $< -o $@ $(obj-y-CFLAGS)
+
+
+# Export ALL variables. Do not remove.
+export
+

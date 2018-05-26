@@ -2,8 +2,8 @@
  * Copyright (C) 2009 Renê de Souza Pinto
  * Tempos - Tempos is an Educational and multi purpose Operating System
  *
- * File: read.c
- * Desc: Syscall read
+ * File: stdlib.c
+ * Desc: Implements C functions from stdlib.h
  *
  * This file is part of TempOS.
  *
@@ -22,29 +22,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <tempos/syscall.h>
-#include <tempos/kernel.h>
-#include <drv/i8042.h>
+#include "stdlib.h"
+#include "ctype.h"
 
-_pushargs ssize_t sys_read(int fd, void *buf, size_t count)
+int atoi(const char *nptr)
 {
-	ssize_t bytes = 0;
-	uchar8_t *buffer = (uchar8_t*)buf;
+	char *nstr = (char *)nptr;
+	char isneg = 0;
+	int sum    = 0;
+	int mult   = 1;
 
-	if (fd == 0) {
-		/* Read from keyboard or serial */
-		if (console_over_serial == 1) {
-			buffer[0] = serial_read(&tty_serial);
-		} else {
-			buffer[0] = kbc_read_from_buffer();
-		}
-		bytes     = 1;
-		kprintf(KERN_DEBUG "%c", buffer[0]);
+	if(*nstr == '-') {
+		isneg = 1;
+		nstr++;
 	}
 
-	//kprintf(KERN_DEBUG "read: %d -- %s -- %d\n", fd, buf, count);
+	while(*nstr++) {
+		if(*nstr && !isdigit(*nstr))
+			return(0);
+	}
 
-	return(bytes);
+	nstr--;
+	while(nstr-- != (nptr + isneg)) {
+		sum  += (*nstr - '0') * mult;
+		mult *= 10;
+	}
+
+	if(isneg)
+		return(sum * -1);
+	else
+		return(sum);
 }
-
 

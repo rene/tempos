@@ -167,10 +167,22 @@ void kernel_main_thread(void *arg)
 
 	/* Load init */
 	vfs_inode *arq = vfs_namei(init);
-	vfs_bmap_t bk = vfs_bmap(arq, 0);
-	char *block = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
+	vfs_bmap_t bk;
 
-	_exec_init(block);
+	size_t fblocks = (arq->i_size/arq->sb->s_log_block_size); 
+	if ((arq->i_size % arq->sb->s_log_block_size) != 0) fblocks++;
+	
+	char *blocks = kmalloc(fblocks*arq->sb->s_log_block_size, GFP_NORMAL_Z);
+	char *blk;
+	size_t pos = 0;
+	for (i = 0; i < fblocks; i++) {
+		bk  = vfs_bmap(arq, pos);
+		blk = arq->sb->sb_op->get_fs_block(arq->sb, bk.blk_number);
+		memcpy(&blocks[pos], blk, arq->sb->s_log_block_size);
+		pos += arq->sb->s_log_block_size;
+	}
+	
+	_exec_init(blocks);
 
 	/* TEST: Read root directory */
 	/*kprintf("DEBUG:\n");

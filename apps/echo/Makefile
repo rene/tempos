@@ -1,25 +1,23 @@
 ##
-# Makefile for init.
+# Makefile for calc.
 #
 CC=gcc
-CFLAGS=-m32 -mpush-args -fno-pie -nostdlib 
+CFLAGS=-m32 -Os -mpush-args -fno-pie -fomit-frame-pointer -fno-builtin -nostartfiles -nostdlib -nodefaultlibs
 AS=as
 LD=ld
 OUTPUT=init
 
-OBJECTS=crt0.o write.o init.o
+OBJECTS=crt0.o syscalls.o printf.o stdlib.o init.o
 
 all: $(OBJECTS)
 	$(LD) $(OBJECTS) -melf_i386 -Ttext=C0000C --oformat=binary -o $(OUTPUT)
+	#$(LD) $(OBJECTS) -melf_i386 -o $(OUTPUT)
 
-init.o: init.c
+%.o: %.c
 	$(CC) $(CFLAGS) -c $<
 
-crt0.o: crt0.s
+%.o: %.s
 	$(AS) --32 $< -o $@
-
-write.o: write.s
-	$(AS) --32 $< -o $@ 
 
 clean:
 	@rm $(OBJECTS) || true

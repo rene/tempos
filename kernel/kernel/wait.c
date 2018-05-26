@@ -62,12 +62,12 @@ void sleep_on(int sleep_addr)
 
 	llist_add(&wait_queues[sleep_addr], current_task);
 
+	sti();
+
 	schedule();
 
 	/* Process resumes execution from here when it wakes up */
-	/*llist_remove(&wait_queues[sleep_addr], current_task);*/
-	
-	sti();
+	llist_remove(&wait_queues[sleep_addr], current_task);
 
 	return;
 }

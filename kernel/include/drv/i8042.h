@@ -71,6 +71,8 @@
 
 	void kbc_sendcomm(uchar8_t command);
 
+	uchar8_t kbc_read_from_buffer(void);
+
 	uchar8_t kbc_read(void);
 
 	void wait_read_8042(void);

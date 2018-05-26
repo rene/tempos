@@ -25,15 +25,20 @@
 #include <tempos/kernel.h>
 #include <tempos/timer.h>
 #include <tempos/jiffies.h>
+#include <tempos/wait.h>
 #include <drv/i8042.h>
 #include <arch/irq.h>
 #include <arch/io.h>
+#include <arch/atomic.h>
 
-
+#define KEYBOARD_BUFFER_SIZE 1024
 #define TIMEOUT		(jiffies + (HZ / 40)) /* timeout in 40ms */
 
+static uchar8_t keyboard_buffer[KEYBOARD_BUFFER_SIZE];
+static int cbuffer_write_pos = 0;
+static int cbuffer_read_pos = 0;
+int cbuffer_avail = 0;
 
-//static void keyboard_handler(void);
 static void keyboard_handler(int i, pt_regs *regs);
 
 /**
@@ -90,6 +95,10 @@ void init_8042(void)
 {
 	kprintf(KERN_INFO "Initializing i8042 keyboard controller...\n");
 
+	/* Initialize circular buffer */
+	cbuffer_write_pos = 0;
+	cbuffer_read_pos   = 0;
+
 	/* Routines to initialize i8042 */
 
 	/* Enable keyboard */
@@ -104,6 +113,29 @@ void init_8042(void)
 	inb(KBD_OUT_BUF);
 }
 
+
+/**
+ * Read a key from buffer
+ */
+uchar8_t kbc_read_from_buffer(void)
+{
+	uchar8_t key;
+	
+	if (cbuffer_avail == 0) {
+		sleep_on(WAIT_KEYBOARD_KEY);
+	}
+	key = keyboard_buffer[cbuffer_read_pos];
+	
+	if (cbuffer_read_pos >= KEYBOARD_BUFFER_SIZE) {
+		cbuffer_read_pos = 0;
+	} else {
+		cbuffer_read_pos++;
+		atomic_decl(&cbuffer_avail);
+	}
+	return key;
+}
+
+
 /**
  * Interrupt handler
  */
@@ -111,13 +143,17 @@ static void keyboard_handler(int i, pt_regs *regs)
 {
 	uchar8_t scancode = read_scancode();
 	
+	/* Add to buffer */
 	if ( !(scancode & 0x80) ) {
-		kprintf("%c", scancodes2ascii[scancode]);
+		if (cbuffer_write_pos >= KEYBOARD_BUFFER_SIZE) {
+			cbuffer_write_pos = 0;
+		}
+		keyboard_buffer[cbuffer_write_pos++] = scancodes2ascii[scancode];
+		atomic_incl(&cbuffer_avail);
+
+		/* Wake up sleeping process waiting for keyboard */
+		wakeup(WAIT_KEYBOARD_KEY);
 	}
-
-	//kprintf("IRQ %d REGS: 0x%x 0x%x 0x%x K: %lx \n", i, regs->cs, regs->ds, regs->eflags, key );
-
-	//wakeup(1);
 }
 
 
