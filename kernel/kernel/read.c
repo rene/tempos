@@ -25,6 +25,7 @@
 #include <tempos/syscall.h>
 #include <tempos/kernel.h>
 #include <drv/i8042.h>
+#include <drv/serial.h>
 
 _pushargs ssize_t sys_read(int fd, void *buf, size_t count)
 {

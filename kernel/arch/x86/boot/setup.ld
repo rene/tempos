@@ -45,7 +45,7 @@ SECTIONS {
 	_KERNEL_START = . ; /* 3GB */
 
 	.text _KERNEL_START : AT(_KERNEL_PA_START) {
-		*(.text)
+		*(.text*)
 	}
 
 	.rodata ALIGN(0x1000) : AT(ADDR(.rodata) - _KERNEL_START + _KERNEL_PA_START) {
