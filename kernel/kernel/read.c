@@ -39,7 +39,7 @@ _pushargs ssize_t sys_read(int fd, void *buf, size_t count)
 		} else {
 			buffer[0] = kbc_read_from_buffer();
 		}
-		bytes     = 1;
+		bytes = 1;
 		kprintf(KERN_DEBUG "%c", buffer[0]);
 	}
 

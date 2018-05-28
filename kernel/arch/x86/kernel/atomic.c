@@ -25,12 +25,12 @@
 
 inline void atomic_incl(int32_t *i)
 {
-	asm("incl (%0)" : "=r"(i));
+	asm("incl (%0)" : "=a"(i) : "0"(i));
 }
 
 inline void atomic_decl(int32_t *i)
 {
-	asm("decl (%0)" : "=r"(i));
+	asm("decl (%0)" : "=a"(i) : "0"(i));
 }
 
 void atomic_spin_down(uint32_t *i)

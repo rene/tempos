@@ -97,7 +97,7 @@ void init_8042(void)
 
 	/* Initialize circular buffer */
 	cbuffer_write_pos = 0;
-	cbuffer_read_pos   = 0;
+	cbuffer_read_pos  = 0;
 
 	/* Routines to initialize i8042 */
 
