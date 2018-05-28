@@ -298,15 +298,14 @@ static buff_header_t *getblk(int major, int device, uint64_t blocknum)
 
 	driver = block_dev_drivers[major]; 
 
-        if (driver == NULL) {
-                return NULL;
-        }
+	if (driver == NULL) {
+		return NULL;
+	}
 
 	while(1) {
 	
 		if ( (buff = search_blk(driver->buffer_queue, device, blocknum)) != NULL ) {
 			/* Block is in hash queue */
-			
 			if (buff->status == BUFF_ST_BUSY) {
 				sleep_on(WAIT_THIS_BLOCK_BUFFER_GET_FREE);
 				continue;
@@ -364,8 +363,8 @@ void brelse(int major, int device, buff_header_t *buff)
 
         /* Checking driver pointer after wakeup function. */
 	if (driver == NULL) {
-                return;
-        }
+		return;
+	}
 
 	cli();
 

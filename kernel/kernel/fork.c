@@ -89,13 +89,6 @@ void _exec_init(char *init_data, size_t size)
 	newth->kstack = (char*)((void*)new_stack + PROCESS_STACK_SIZE);
 
 	newth->arch_tss.regs.eip = (uint32_t)0xC0000C; /* Start point */
-/*	newth->arch_tss.regs.ds  = KERNEL_DS;
-	newth->arch_tss.regs.fs  = KERNEL_DS;
-	newth->arch_tss.regs.gs  = KERNEL_DS;
-	newth->arch_tss.regs.ss  = KERNEL_DS;
-	newth->arch_tss.regs.es  = KERNEL_DS;
-	newth->arch_tss.regs.cs  = KERNEL_CS;
-*/
 	newth->arch_tss.regs.ds  = USER_DS_RPL;
 	newth->arch_tss.regs.fs  = USER_DS_RPL;
 	newth->arch_tss.regs.gs  = USER_DS_RPL;

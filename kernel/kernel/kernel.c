@@ -138,6 +138,7 @@ void kernel_main_thread(void *arg)
 	}
 
 	/* Mount root file system */
+	memset(&rootdev, 0, sizeof(rootdev));
 	rstr = cmdline_get_value("root");
 	strcpy(rdev_str, rstr);
 	rdev_len = strlen(rstr);

@@ -11,10 +11,10 @@ CWD := arch/x86/build
 
 
 # Architecture compiler and link flags
-ARCH_CF  := -m32
+ARCH_CF  := -m32 -march=i486
 ARCH_LF  := -melf_i386
 INCDIRS  := -I$(PWD)/include -I$(PWD)/arch/include
-CFLAGS   := $(INCDIRS) -fno-builtin -Wall -nostdlib -nostartfiles -nodefaultlibs $(ARCH_CF)
+CFLAGS   := $(INCDIRS) -fno-builtin -Wall -nostdlib -nodefaultlibs $(ARCH_CF)
 
 MAKEGEN  := $(CWD)/MakefileX86.gen
 

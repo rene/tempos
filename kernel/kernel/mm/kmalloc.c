@@ -57,7 +57,7 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	uint32_t apages, index;
 	uint32_t size_region;
 	uint32_t newpage;
-	uint32_t *mem_block;
+	uchar8_t *mem_block;
 	uint32_t *table;
 	mregion *mem_area;
 	zone_t mzone;
@@ -140,6 +140,7 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 			i++;
 		} else {
 			index++;
+			i = 0;
 			table = pgdir->tables[index];
 		}
 	}
@@ -154,16 +155,16 @@ void *_vmalloc_(mem_map *memm, uint32_t size, uint16_t flags)
 	mem_area->initial_addr = pstart;
 	mem_area->size         = npages;
 
-	mem_block = (void*)((void*)mem_block + sizeof(mregion));
+	mem_block = (uchar8_t*)((uchar8_t*)mem_block + sizeof(mregion));
 
 	if( (flags & GFP_ZEROP) ) {
-		for(i=0; i<((size - sizeof(mregion)) / sizeof(void*)); i++) {
+		for(i=0; i<((size - sizeof(mregion)) / sizeof(char)); i++) {
 			mem_block[i] = 0;
 		}
 	}
 
 	/* We have done =:) */
-	return(mem_block);
+	return((void*)mem_block);
 
 error:
 	/* Free pages allocated */
@@ -178,6 +179,7 @@ error:
 		} else {
 			index--;
 			table = pgdir->tables[index];
+			i = TABLE_SIZE - 1;
 		}
 	}
 	return(0);
