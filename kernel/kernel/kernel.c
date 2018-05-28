@@ -169,7 +169,13 @@ void kernel_main_thread(void *arg)
 	vfs_inode *arq = vfs_namei(init);
 	vfs_bmap_t bk;
 
-	size_t fblocks = (arq->i_size/arq->sb->s_log_block_size); 
+
+	if (arq == NULL) {
+		kprintf(KERN_DEBUG "%s: not found!\n", init);
+		panic("init file not found!\n");
+	}
+
+	size_t fblocks = (arq->i_size / arq->sb->s_log_block_size);
 	if ((arq->i_size % arq->sb->s_log_block_size) != 0) fblocks++;
 	
 	char *blocks = kmalloc(fblocks*arq->sb->s_log_block_size, GFP_NORMAL_Z);
@@ -182,7 +188,7 @@ void kernel_main_thread(void *arg)
 		pos += arq->sb->s_log_block_size;
 	}
 	
-	_exec_init(blocks);
+	_exec_init(blocks, arq->i_size);
 
 	/* TEST: Read root directory */
 	/*kprintf("DEBUG:\n");

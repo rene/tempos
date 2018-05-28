@@ -128,7 +128,7 @@
 
 	pid_t _fork(task_t *thread);
 
-	void _exec_init(char *init_data);
+	void _exec_init(char *init_data, size_t size);
 
 	/* These are Architecture specific */
 	void arch_init_scheduler(void (*start_routine)(void*));

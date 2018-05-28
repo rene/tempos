@@ -279,7 +279,7 @@ int ext2_get_inode(vfs_inode *inode)
 char *ext2_get_fs_block(vfs_superblock *sb, uint32_t blocknum)
 {
 	/* Maximum blocks = (for 4KB)*/
-	buff_header_t *blks[4096/SECTOR_SIZE];
+	buff_header_t *blk;
 	ext2_fsdriver_t *fs;
 	int i, nb;
 	uint64_t baddr;
@@ -295,9 +295,9 @@ char *ext2_get_fs_block(vfs_superblock *sb, uint32_t blocknum)
 
 	nb = get_block_size(*fs->sb) / SECTOR_SIZE;
 	for (i = 0; i < nb; i++, baddr++) {
-		blks[i] = bread(sb->device.major, sb->device.minor, baddr);
-		memcpy(&block[(i * SECTOR_SIZE)], blks[i]->data, SECTOR_SIZE);
-		brelse(sb->device.major, sb->device.minor, blks[i]);
+		blk = bread(sb->device.major, sb->device.minor, baddr);
+		memcpy(&block[(i * SECTOR_SIZE)], blk->data, SECTOR_SIZE);
+		brelse(sb->device.major, sb->device.minor, blk);
 	}
 	
 	return block;

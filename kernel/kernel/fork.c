@@ -48,18 +48,7 @@ _pushargs void sys_fork(void)
 /**
  * This is just for test
  */
-static uint32_t get_phy_addr(void *ptr)
-{
-	extern pagedir_t *kerneldir;
-	mregion *mem_area = (mregion *)((void*)ptr - sizeof(mregion));
-	uint32_t index    = mem_area->initial_addr >> TABLE_SHIFT;
-	uint32_t ffpage   = mem_area->initial_addr - (TABLE_SIZE * index);
-	uint32_t *table;
-
-	table = kerneldir->tables[index];
-	return (table[ffpage] & 0xFFFFF000);
-}
-void _exec_init(char *init_data)
+void _exec_init(char *init_data, size_t size)
 {
 	task_t *newth = NULL;
 	char *new_stack = NULL;
@@ -89,7 +78,7 @@ void _exec_init(char *init_data)
 		kfree(new_stack);
 		return;
 	}
-	
+
 	/* Set process structure */
 	newth->state       = TASK_READY_TO_RUN;
 	newth->priority    = DEFAULT_PRIORITY;
@@ -122,7 +111,7 @@ void _exec_init(char *init_data)
 	ptable_addr = alloc_page(GFP_NORMAL_Z);
 	dtable_addr = alloc_page(GFP_NORMAL_Z);
 
-	/* Map dtable at 0x1000000 */
+	/* Map dtable at 0x1000000 to fill data */
 	kerneldir->tables[4][0] = MAKE_ENTRY(dtable_addr, (PAGE_WRITABLE | PAGE_PRESENT | PAGE_USER));
 	dtable = (uint32_t*)0x1000000;
 	for (i = 0; i < 1024; i++) {
@@ -131,18 +120,30 @@ void _exec_init(char *init_data)
 	}
 	dtable[3] = MAKE_ENTRY(ptable_addr, (PAGE_WRITABLE | PAGE_PRESENT | PAGE_USER));
 
-	/* Now, map ptable at 0xC00000 just for fill data */
+	/* Now, map ptable at 0xC00000 (12MB) which is the process start point */
 	kerneldir->tables[3][0] = MAKE_ENTRY(ptable_addr, (PAGE_WRITABLE | PAGE_PRESENT | PAGE_USER));
 	ptable = (uint32_t*)0xC00000;
-	ptable[0] = MAKE_ENTRY(get_phy_addr(init_data), (PAGE_WRITABLE | PAGE_PRESENT | PAGE_USER));
 
-	pg_pdir->tables_phy_addr = dtable; //(uint32_t*)dtable_addr;
+	/* Get location where init_data are mapped on the kernel */
+	mregion *mem_area = (mregion *)((void*)init_data - sizeof(mregion));
+	uint32_t index    = mem_area->initial_addr >> TABLE_SHIFT;
+	uint32_t ffpage   = mem_area->initial_addr - (TABLE_SIZE * index);
+	uint32_t *pktable = kerneldir->tables[index];
+
+	uint32_t npages = (size / PAGE_SIZE);
+	if ( (size % PAGE_SIZE) != 0) npages++;
+
+	for (i = 0; i < npages; i++) {
+		ptable[i] = pktable[ffpage++] | PAGE_USER;
+		if (ffpage >= TABLE_SIZE) {
+			ffpage  = 0;
+			pktable = kerneldir->tables[++index];
+		}
+	}
+
+	pg_pdir->tables_phy_addr = dtable;
 	pg_pdir->dir_phy_addr = dtable_addr;
 
-	/* 12MB : start point */
-	//kerneldir->tables[3][0] = MAKE_ENTRY(get_phy_addr(init_data), (PAGE_PRESENT));
-	//pg_pdir->dir_phy_addr = kerneldir->dir_phy_addr;
-	
 	newth->arch_tss.cr3 = pg_pdir->dir_phy_addr;
 
 	/* Configure thread's stack */
