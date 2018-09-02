@@ -5,7 +5,7 @@
 # TBS - Build configuration file
 #
 
-obj-y += exceptions.o gdt.o idt.o io.o dump_cpu.o
+obj-y += exceptions.o gdt.o idt.o io.o dump_cpu.o cpuid.o
 
 obj-x86asm += isr.o task.o
 
