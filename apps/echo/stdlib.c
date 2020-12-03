@@ -27,30 +27,26 @@
 
 int atoi(const char *nptr)
 {
-	char *nstr = (char *)nptr;
-	char isneg = 0;
-	int sum    = 0;
-	int mult   = 1;
+	int sum = 0; 
 
-	if(*nstr == '-') {
-		isneg = 1;
-		nstr++;
+    int sign = 0; 
+
+    int i = 0; 
+
+    if (nptr[0] == '-') { 
+        sign = 1; 
+        i++; 
+    } 
+	
+	while(nptr[i] != '\0'){
+		if(!(nptr[i]>='0' && nptr[i]<='9'))
+			return __INT32_MAX__;
+        sum = (sum * 10) + (nptr[i] - '0'); 
+		++i;
 	}
 
-	while(*nstr++) {
-		if(*nstr && !isdigit(*nstr))
-			return(0);
-	}
-
-	nstr--;
-	while(nstr-- != (nptr + isneg)) {
-		sum  += (*nstr - '0') * mult;
-		mult *= 10;
-	}
-
-	if(isneg)
-		return(sum * -1);
-	else
-		return(sum);
+	if(sign==1)
+    	return (-1) * sum;
+	return sum;
 }
 
