@@ -83,28 +83,28 @@ EOF
 # Make image using grub 2
 use_grub2() {
 
-	mktemp=$(which mktemp)
-	if [ -n $mktemp ]; then
-		errorlog=$($mktemp)
-	else
-		errorlog="/tmp/$$"
-	fi
+    mktemp=$(which mktemp)
+    if [ -n $mktemp ]; then
+        errorlog=$($mktemp)
+    else
+        errorlog="/tmp/$$"
+    fi
 
-	echo -n " + Creating CD-ROM root directory..."
-	TMPDIR=$($mktemp -d)
-	if [ $? != 0 ]; then
-		TMPDIR=/tmp/$$-dir
-		mkdir $TMPDIR 2>>$errorlog
-	fi
-	check_result
+    echo -n " + Creating CD-ROM root directory..."
+    TMPDIR=$($mktemp -d)
+    if [ $? != 0 ]; then
+        TMPDIR=/tmp/$$-dir
+        mkdir $TMPDIR 2>>$errorlog
+    fi
+    check_result
 
-	echo -n " + Copying TempOS kernel image..."
-	mkdir -p $TMPDIR/boot/grub
-	cp $TEMPOSFILE $TMPDIR/boot 2>>$errorlog
-	check_result
+    echo -n " + Copying TempOS kernel image..."
+    mkdir -p $TMPDIR/boot/grub
+    cp $TEMPOSFILE $TMPDIR/boot 2>>$errorlog
+    check_result
 
-	echo -n " + Creating GRUB configuration file..."
-	cat > $TMPDIR/boot/grub/grub.cfg << EOF
+    echo -n " + Creating GRUB configuration file..."
+    cat > $TMPDIR/boot/grub/grub.cfg << EOF
 set menu_color_normal="white/blue"
 set menu_color_highlight="light-green/black"
 
@@ -112,20 +112,22 @@ set menu_color_highlight="light-green/black"
 # TempOS
 #
 menuentry "TempOS" {
-	multiboot /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init
+    multiboot2 /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init
+    boot
 }
 menuentry "TempOS over serial" {
-        multiboot /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init kgdbwait=1
+        multiboot2 /boot/$(basename $TEMPOSFILE) root=3:1 init=/sbin/init kgdbwait=1
+    boot
 }
 EOF
-	check_result
+    check_result
 
-	echo -n " + Creating bootable GRUB ISO image..."
-	$GRUBMKR -o $IMGFILE $TMPDIR > $errorlog 2>&1
-	check_result
+    echo -n " + Creating bootable GRUB ISO image..."
+    $GRUBMKR -o $IMGFILE $TMPDIR > $errorlog 2>&1
+    check_result
 
-	rm -rf $TMPDIR 2> /dev/null
-	rm -f $errorlog 2> /dev/null
+    rm -rf $TMPDIR 2> /dev/null
+    rm -f $errorlog 2> /dev/null
 }
 
 # main
