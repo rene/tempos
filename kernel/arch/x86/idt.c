@@ -33,6 +33,8 @@ extern void _sys_enter(void);
 /** IDT table */
 idt_t idt_table[IDT_TABLE_SIZE];
 
+/** IDTR */
+idtr_t IDTR;
 
 /**
 \verbatim

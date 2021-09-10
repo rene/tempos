@@ -96,11 +96,13 @@
 	struct _idt_idtr {
 		uint16_t table_limit;
 		void* idt_ptr;
-	} __attribute__ ((packed)) IDTR;
+	} __attribute__ ((packed));
 
 	typedef struct _idt_entry      idt_t;
 	typedef struct _idt_tpint_desc idt_tpintdesc_t;
+	typedef struct _idt_idtr       idtr_t;
 
+	extern idtr_t IDTR;
 
 	void setup_IDT(void);
 
