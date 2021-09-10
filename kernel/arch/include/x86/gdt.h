@@ -137,12 +137,14 @@
 	struct _gdt_gdtr {
 		uint16_t table_limit;
 		void* gdt_ptr; /* 32 bits */
-	} __attribute__ ((packed)) GDTR;
+	} __attribute__ ((packed));
 
 	typedef struct _gdt_entry   gdt_t;
 	typedef struct _gdt_cd_seg  gdt_cdseg_t;
 	typedef struct _gdt_tss_seg gdt_tsseg_t;
+	typedef struct _gdt_gdtr    gdtr_t;
 
+	extern gdtr_t GDTR;
 
 	void setup_GDT(void);
 	extern void load_gdt(void);

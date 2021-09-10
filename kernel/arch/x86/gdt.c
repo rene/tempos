@@ -31,6 +31,9 @@
 /** GDT table */
 gdt_t gdt_table[GDT_TABLE_SIZE];
 
+/** GDTR */
+gdtr_t GDTR;
+
 /** Global Task Struct */
 tss_t task_tss;
 
